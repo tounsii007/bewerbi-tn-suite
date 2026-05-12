@@ -380,3 +380,20 @@ Setup-Action-Caches.
   `NEXT_PUBLIC_INDEXABLE=false` schaltet auf vollständigen Disallow für Staging.
 - `app/manifest.ts` — PWA-Manifest mit theme_color synchron zum Brand-Primary.
 
+## Iteration 13 — Mobile Forms-Bibliothek
+
+**Form-Shell**
+
+- `Form` + `FormField` — Layout/Label/Hint/Error/Required-Wrapper, optional
+  `density="compact"`. Dünne Schicht über react-hook-form: visuelle Chrome
+  ohne `useForm` zu ersetzen.
+
+**Eingaben**
+
+- `Switch` — iOS-Style Toggle mit animierter Track-Color via
+  `interpolateColor` und Knob-Translate-Spring.
+- `Checkbox` — Material-Style mit Scale-Spring beim Check, Sizes `sm | md`,
+  optional Label.
+- `RadioGroup<T>` — Variants `compact` (inline) und `card` (mit Description
+  + Divider), korrekte ARIA-Rolle `radiogroup/radio`.
+
