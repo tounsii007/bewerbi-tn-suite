@@ -218,3 +218,31 @@ Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Sui
 - `useDebouncedCallback` — debounced Side-Effect mit Cleanup.
 - `useKeyboardVisible` — Footer-Buttons über die Tastatur heben.
 
+## Iteration 8 — Flutter-Modernisierung
+
+**Motion + Transitions**
+
+- `AppMotion` (Tokens) — `fast/normal/slow` durations + Curves
+  `outQuad/outExpo/spring`. Spiegelt die Web-Easings.
+- `AppPageTransitions.theme` — `PageTransitionsTheme`-Factory mit Fade+Slide
+  (6px lift), platform-agnostisch.
+
+**Widgets**
+
+- `AppPressable` — Scale + Opacity-Feedback per `AnimatedScale/Opacity`,
+  konfigurierbares `scaleTo/opacityTo`, `flat`-Override.
+- `AppSegmentedControl<T>` — animierter Pill via `AnimatedPositioned`,
+  optional Icon pro Option, dark-aware.
+- `AppSectionHeader` — Eyebrow + Title + Description + Trailing,
+  konsistente Spacing/Typography.
+- `AppListTile` — Standard-Row mit Leading/Trailing/Chevron,
+  optional Divider, `destructive` für Logout/Delete.
+- `AppBottomSheet.show()` — Wrapper um `showModalBottomSheet` mit Grabber,
+  rounded Top-Corners, optionalem Titel + Close-Button.
+- `AppGradientMesh` — Hero-Hintergrund mit 3 Radial-Blobs (Primary/Accent/Success),
+  dark-aware Opacity-Reduktion.
+- `AppChip` — selektierbar oder read-only, mit `onRemove`-X-Button,
+  Tones neutral/primary/success/warning/accent.
+- `AppAlert` — Inline-Notice mit Auto-Icon pro Variant
+  (info/success/warning/error/neutral), optional Title + Action, `compact`.
+
