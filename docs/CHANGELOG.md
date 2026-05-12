@@ -197,3 +197,24 @@ Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Sui
 - `SegmentedControl` — animierter Pill, springt zwischen Optionen statt zu cross-faden.
 - `SectionHeader` — Eyebrow/Title/Description/Trailing, analog zur Web-Variante.
 
+## Iteration 7 — Mobile-Features
+
+**Komponenten**
+
+- `FeedbackPressable` — RN-`Pressable` mit Scale+Opacity-Spring; via `flat`
+  Prop deaktivierbar (z.B. innerhalb einer Stagger-Liste).
+- `RefreshableScroll` — `ScrollView` mit gebrandetem `RefreshControl`,
+  managed `refreshing`-Flag.
+- `Chip` — read-only Badge oder selektierbarer Filter-Chip; mit `onRemove`
+  als X-Button. Tones neutral/primary/success/warning/accent.
+- `ListItem` — Standard-Row mit Leading/Title/Subtitle/Trailing-Chevron,
+  optional Divider, `destructive` für Logout-/Delete-Rows.
+
+**Hooks**
+
+- `useDisclosure` — open/close/toggle für Sheets/Modals.
+- `useAsync` — Loading/Error/Data mit Stale-Update-Schutz und Reset.
+- `useToggle` — stabile Toggle-Funktion.
+- `useDebouncedCallback` — debounced Side-Effect mit Cleanup.
+- `useKeyboardVisible` — Footer-Buttons über die Tastatur heben.
+
