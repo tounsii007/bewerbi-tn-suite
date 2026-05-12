@@ -64,10 +64,22 @@ public class JwtSecurityConfig {
     @Bean
     public UrlBasedCorsConfigurationSource corsSource() {
         var cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(allowedOrigins);
+        // Use AllowedOriginPatterns so wildcards (https://*.bewerbi.tn) work even with credentials.
+        cfg.setAllowedOriginPatterns(allowedOrigins);
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        cfg.setAllowedHeaders(List.of("*"));
-        cfg.setExposedHeaders(List.of("Content-Language"));
+        // Explicit list — wildcard headers are a CORS-spec foot-gun with credentials.
+        cfg.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Accept-Language",
+                "X-Locale",
+                "X-Correlation-Id",
+                "X-Requested-With"));
+        cfg.setExposedHeaders(List.of(
+                "Content-Language",
+                "X-Correlation-Id",
+                "Retry-After"));
         cfg.setAllowCredentials(true);
         cfg.setMaxAge(3600L);
         var src = new UrlBasedCorsConfigurationSource();

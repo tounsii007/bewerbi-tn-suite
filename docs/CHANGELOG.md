@@ -48,3 +48,54 @@ Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Sui
   Correlation-Id-Generierung und MDC-Cleanup ab.
 - `spring-boot-starter-test` als Test-Dep in `common-api/pom.xml` ergänzt.
 
+## Iteration 3 — Backend-Security
+
+**Defense-in-Depth Headers**
+
+- `SecurityHeadersFilter` (Servlet) und `SecurityHeadersWebFilter` (Reactive, Gateway):
+  setzen HSTS, X-Content-Type-Options, X-Frame-Options=DENY, Referrer-Policy,
+  Permissions-Policy, COOP/CORP für jede Antwort. CSP konfigurierbar über
+  `bewerbi.security.headers.csp`.
+
+**JWT-Härtung**
+
+- `JwtSecretValidator`: fail-fast bei leerem, zu kurzem oder Default-Secret im
+  `prod`-Profil. Dev/Test loggt nur Warnungen.
+- CORS auf explizite Header- und Origin-Pattern-Liste umgestellt; Wildcard-Header
+  mit Credentials sind spec-konform problematisch.
+
+**Brute-Force-Schutz**
+
+- `LoginAttemptTracker`: Redis-basierter Counter pro Email. 10 Failures / 10 Min
+  → 15 Min Lockout. Konfigurierbar via `bewerbi.security.login.*`. Bean nur
+  registriert, wenn Redis im Classpath.
+
+**Audit-Logging**
+
+- `AuditEvent` (record) + `AuditLogger`: schreibt strukturierte Events auf den
+  dedizierten Logger `tn.bewerbi.audit`. Operations-Pipelines können
+  diesen separat (länger) aufbewahren. MDC-Keys `audit.type/actor/target/outcome`.
+
+**Actuator-Härtung**
+
+- Default-Filter-Chain trennt Probes (`/actuator/health{,/liveness,/readiness}`,
+  `/info`, `/buildinfo`) von sensiblen Endpunkten (`/prometheus`, `/metrics`,
+  `/loggers`, `/env`, `/beans`, `/configprops`) — letztere nur für `ROLE_ADMIN`.
+
+**Auto-Konfiguration**
+
+- `CommonSecurityAutoConfiguration` via `AutoConfiguration.imports` — keine
+  `@Import`s mehr nötig in den Services.
+
+**Gateway**
+
+- `SecurityHeadersWebFilter` analog zum Servlet-Filter.
+- `RequestLoggingWebFilter`: gateway.access-Logger mit Methode/Pfad/Status/
+  Latenz/IP/Correlation-Id pro Request. Korrelations-Id wird downstream
+  propagiert und im Response-Header echo't.
+
+**Tests**
+
+- `JwtSecretValidatorTest` deckt fail-fast in prod, dev-Warnings und Akzeptanz
+  langer Secrets ab.
+

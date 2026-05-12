@@ -28,8 +28,27 @@ public class SecurityFilterChainRegistrar {
                 .cors(cors -> cors.configurationSource(corsSource))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        // Probes — must work for the load balancer without auth.
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/health/liveness",
+                                "/actuator/health/readiness",
+                                "/actuator/info",
+                                "/actuator/buildinfo")
+                        .permitAll()
+                        // Metrics & introspection — only reachable from the cluster network.
+                        // Block external traffic at the ingress/gateway level.
+                        .requestMatchers(
+                                "/actuator/prometheus",
+                                "/actuator/metrics/**",
+                                "/actuator/loggers/**",
+                                "/actuator/env/**",
+                                "/actuator/beans",
+                                "/actuator/configprops/**")
+                        .hasRole("ADMIN")
+                        // API docs are public in dev; gate them in prod via profile-specific override.
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                        .permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(o -> o.jwt(j -> j.jwtAuthenticationConverter(jwtAuthConverter)));
         return http.build();
