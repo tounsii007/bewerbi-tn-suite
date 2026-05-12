@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #f8fafc;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Arabic: switch to Cairo, which has proper Arabic glyphs and matches
+   the weight/rhythm of Inter for the Latin fallback. */
+html[lang="ar"],
+html[lang="ar"] body,
+html[lang="ar"] * {
+  font-family: 'Cairo', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Directional helpers: everything authored left-to-right mirrors cleanly
+   when <html dir="rtl"> is set by setLanguage(). */
+html[dir="rtl"] body {
+  direction: rtl;
+}
+
+/* Phone container on desktop */
+@media (min-width: 500px) {
+  #root > div {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+  }
+}
+
+@media (min-width: 500px) {
+  html {
+    background-color: #e2e8f0;
+  }
+}
+
+/* Thin scrollbar */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }

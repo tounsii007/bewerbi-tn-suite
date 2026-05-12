@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/projects/bewerbi-tn/**)",
+      "Read(//c/projects/**)",
+      "Bash(flutter analyze *)",
+      "Bash(where flutter *)",
+      "Bash(where dart *)",
+      "Bash(npx tsc *)",
+      "Bash(cmd.exe /c \"npx tsc --noEmit\")",
+      "Bash(cmd.exe /c \"cd /d C:\\\\projects\\\\bewerbi-tn && npx tsc --noEmit 2>&1\")",
+      "Bash(cmd.exe /c \"cd /d C:\\\\projects\\\\bewerbi-tn && npx tsc --noEmit > tsc-output.txt 2>&1 && type tsc-output.txt\")",
+      "Bash(cmd.exe /c \"cd /d C:\\\\projects\\\\bewerbi-tn & npx tsc --noEmit > tsc-output.txt 2>&1 & type tsc-output.txt\")",
+      "Bash(\"C:/projects/bewerbi-tn/node_modules/.bin/tsc.cmd\" --noEmit --project \"C:/projects/bewerbi-tn/tsconfig.json\")",
+      "Bash(where.exe node *)",
+      "Read(//c/Program Files/nodejs//**)",
+      "Bash(export PATH=\"/c/Program Files/nodejs:$PATH\")",
+      "Bash(node \"C:/projects/bewerbi-tn/node_modules/typescript/bin/tsc\" --noEmit)",
+      "Bash(find \"C:/projects/bewerbi_tn_flutter\" -name \"pubspec.lock\" -exec grep -l lucide {} \\\\;)",
+      "Bash(node \"C:/projects/bewerbi-tn/node_modules/typescript/bin/tsc\" --noEmit --project \"C:/projects/bewerbi-tn/tsconfig.json\")",
+      "Bash(find . -name \"build.gradle.kts\" -type f -delete)"
+    ]
+  }
+}

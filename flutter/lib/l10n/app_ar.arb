@@ -1,0 +1,517 @@
+{
+  "@@locale": "ar",
+  "appName": "bewerbi.tn",
+  "appSlogan": "جسرك نحو ألمانيا",
+
+  "commonLoading": "جاري التحميل...",
+  "commonSave": "حفظ",
+  "commonCancel": "إلغاء",
+  "commonDelete": "حذف",
+  "commonEdit": "تعديل",
+  "commonBack": "رجوع",
+  "commonNext": "التالي",
+  "commonSearch": "بحث",
+  "commonFilter": "تصفية",
+  "commonApply": "تقديم",
+  "commonSubmit": "إرسال",
+  "commonClose": "إغلاق",
+  "commonYes": "نعم",
+  "commonNo": "لا",
+  "commonError": "خطأ",
+  "commonSuccess": "نجاح",
+  "commonRetry": "إعادة المحاولة",
+  "commonNoResults": "لا توجد نتائج",
+  "commonSeeAll": "عرض الكل",
+  "commonRequired": "حقل مطلوب",
+  "commonOptional": "اختياري",
+  "commonAdd": "إضافة",
+  "commonRemove": "إزالة",
+  "commonRestore": "استعادة",
+  "commonShare": "مشاركة",
+  "commonSend": "إرسال",
+  "commonNow": "الآن",
+  "commonEnabled": "مفعّل",
+  "commonDisabled": "معطّل",
+  "commonUnknown": "غير معروف",
+
+  "authLogin": "تسجيل الدخول",
+  "authRegister": "إنشاء حساب",
+  "authLogout": "تسجيل الخروج",
+  "authEmail": "البريد الإلكتروني",
+  "authPassword": "كلمة المرور",
+  "authConfirmPassword": "تأكيد كلمة المرور",
+  "authForgotPassword": "نسيت كلمة المرور؟",
+  "authResetPassword": "إعادة تعيين كلمة المرور",
+  "authFirstName": "الاسم الأول",
+  "authLastName": "اسم العائلة",
+  "authIAmA": "أنا...",
+  "authApplicant": "متقدم",
+  "authEmployer": "صاحب عمل",
+  "authNoAccount": "ليس لديك حساب؟",
+  "authHasAccount": "لديك حساب بالفعل؟",
+  "authWelcome": "مرحباً",
+  "authSubtitle": "جسرك نحو ألمانيا",
+  "authOrLoginWith": "أو",
+  "authGoogleLogin": "تسجيل الدخول بحساب Google",
+  "authFacebookLogin": "تسجيل الدخول بحساب Facebook",
+  "authDemoMode": "الوضع التجريبي",
+  "authAdmin": "مدير",
+  "authPasswordMinLength": "8 أحرف على الأقل",
+  "authPasswordsNoMatch": "كلمتا المرور غير متطابقتين.",
+  "authResetSent": "تم إرسال البريد الإلكتروني!",
+  "authResetInstructions": "لقد أرسلنا رابط إعادة تعيين كلمة المرور.",
+  "authResetSendLink": "إرسال الرابط",
+  "authResetEmailPlaceholder": "البريد الإلكتروني",
+  "authResetDescription": "أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.",
+  "authBackToLogin": "العودة إلى تسجيل الدخول",
+  "authCreateAccount": "أنشئ حسابك على bewerbi.tn",
+  "authRegisterSuccess": "تم التسجيل بنجاح! يرجى تسجيل الدخول.",
+  "authFillAllFields": "يرجى ملء جميع الحقول.",
+  "authPasswordMinLengthError": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.",
+  "authEnterEmail": "يرجى إدخال بريدك الإلكتروني.",
+  "authGoogleDemoMode": "تسجيل دخول Google (وضع تجريبي)",
+  "authFacebookDemoMode": "تسجيل دخول Facebook (وضع تجريبي)",
+
+  "homeGreeting": "مرحباً، {name}!",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGreetingMorning": "صباح الخير",
+  "homeGreetingAfternoon": "مساء الخير",
+  "homeGreetingEvening": "مساء الخير",
+  "homeApplications": "الطلبات",
+  "homeFavorites": "المفضلة",
+  "homeOpenPositions": "وظائف شاغرة",
+  "homeProfileComplete": "الملف الشخصي مكتمل {percent}%",
+  "@homeProfileComplete": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "homeProfileCompleteness": "اكتمال الملف الشخصي",
+  "homeComplete": "مكتمل",
+  "homeCategories": "الفئات",
+  "homeRecommended": "موصى به لك",
+  "homeLatest": "أحدث العروض",
+  "homeMatch": "تطابق",
+  "homeNoOffers": "لا توجد عروض متاحة",
+  "homeUser": "مستخدم",
+
+  "jobsTitle": "الوظائف",
+  "jobsSearch": "البحث عن وظائف...",
+  "jobsResults": "{count} نتيجة",
+  "@jobsResults": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "jobsClearAll": "مسح الكل",
+  "jobsCategory": "الفئة",
+  "jobsType": "النوع",
+  "jobsLocation": "الموقع",
+  "jobsSalary": "الراتب",
+  "jobsGermanLevel": "مستوى اللغة الألمانية",
+  "jobsGermanLevelMin": "المعرفة باللغة الألمانية (الحد الأدنى)",
+  "jobsMinSalary": "الحد الأدنى للراتب",
+  "jobsRequirements": "المتطلبات",
+  "jobsDescription": "الوصف",
+  "jobsApplyNow": "تقدم الآن",
+  "jobsApplied": "تم التقديم مسبقاً",
+  "jobsContactEmployer": "التواصل مع صاحب العمل",
+  "jobsShareCopied": "تم نسخ الرابط! شاركه الآن.",
+  "jobsIt": "تكنولوجيا المعلومات والبرمجيات",
+  "jobsItShort": "تكنولوجيا المعلومات",
+  "jobsPflege": "التمريض والرعاية الصحية",
+  "jobsPflegeShort": "التمريض",
+  "jobsTransport": "النقل والخدمات اللوجستية",
+  "jobsTransportShort": "النقل",
+  "jobsSonstige": "أخرى",
+  "jobsJob": "وظيفة",
+  "jobsAusbildung": "تدريب مهني",
+  "jobsStudium": "دراسة",
+  "jobsSprachkurs": "دورة لغوية",
+  "jobsPostedBy": "نشرت بواسطة",
+  "jobsToday": "اليوم",
+  "jobsYesterday": "أمس",
+  "jobsDaysAgo": "منذ {days} أيام",
+  "@jobsDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "jobsLoadMore": "تحميل المزيد",
+  "jobsNotFound": "لم يتم العثور على الوظيفة",
+  "jobsNoResults": "لم يتم العثور على نتائج",
+  "jobsNoResultsHint": "جرّب كلمات بحث أو فلاتر مختلفة",
+  "jobsCategoryLabel": "الفئة",
+  "jobsTypeLabel": "النوع",
+  "jobsLocationLabel": "الموقع",
+  "jobsSalaryNegotiable": "الراتب قابل للتفاوض",
+  "jobsLocationPlaceholder": "برلين، ميونخ...",
+
+  "applyTitle": "إرسال الطلب",
+  "applyCoverLetter": "خطاب التقديم",
+  "applyCoverLetterHint": "السيدات والسادة الأعزاء،\n\nأتقدم بطلبي باهتمام كبير...",
+  "applyUploadCv": "السيرة الذاتية",
+  "applyUploadHint": "تحميل ملف PDF أو Word",
+  "applyCustomQuestions": "أسئلة إضافية من صاحب العمل",
+  "applyQuestionCount": "لدى صاحب العمل {count} سؤال إضافي",
+  "@applyQuestionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "applyQuestionCountPlural": "لدى صاحب العمل {count} أسئلة إضافية",
+  "@applyQuestionCountPlural": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "applyYourAnswer": "إجابتك...",
+  "applySubmit": "إرسال الطلب",
+  "applySuccess": "تم إرسال الطلب بنجاح!",
+  "applyAlreadyApplied": "لقد تقدمت بالفعل لهذه الوظيفة.",
+  "applyCvSelected": "تم اختيار السيرة الذاتية \"{name}\" (تجريبي)",
+  "@applyCvSelected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+
+  "applicationsTitle": "طلباتي",
+  "applicationsCount": "{count} طلب",
+  "@applicationsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "applicationsCountPlural": "{count} طلبات",
+  "@applicationsCountPlural": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "applicationsPending": "قيد الانتظار",
+  "applicationsReviewed": "قيد المراجعة",
+  "applicationsAccepted": "مقبول",
+  "applicationsRejected": "مرفوض",
+  "applicationsAppliedOn": "تم التقديم في {date}",
+  "@applicationsAppliedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "applicationsNoApplications": "لا توجد طلبات بعد",
+  "applicationsEmptySubtitle": "اكتشف العروض الوظيفية وتقدم لها!",
+  "applicationsUnknownJob": "وظيفة غير معروفة",
+
+  "favoritesTitle": "المفضلة",
+  "favoritesCount": "{count} وظائف محفوظة",
+  "@favoritesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "favoritesEmpty": "لا توجد مفضلات بعد",
+  "favoritesEmptySubtitle": "احفظ الوظائف لتراها هنا",
+
+  "profileTitle": "ملفي الشخصي",
+  "profileEdit": "تعديل الملف الشخصي",
+  "profileEducation": "التعليم والدراسة",
+  "profileExperience": "الخبرة المهنية",
+  "profileLanguages": "المهارات اللغوية",
+  "profileDocuments": "المستندات",
+  "profileEntries": "{count} إدخالات",
+  "@profileEntries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileEntry": "إدخال واحد",
+  "profileBio": "نبذة عني",
+  "profileSaveChanges": "حفظ التغييرات",
+  "profileDiscardChanges": "تجاهل",
+  "profileDiscardConfirm": "تجاهل التغييرات؟",
+  "profileDiscardMessage": "ستفقد تغييراتك.",
+  "profileSaved": "تم حفظ الملف الشخصي بنجاح",
+  "profilePhone": "رقم الهاتف",
+  "profileCity": "المدينة",
+  "profileCountry": "البلد",
+  "profileUser": "مستخدم",
+
+  "educationTitle": "التعليم والدراسة",
+  "educationAdd": "إضافة تعليم",
+  "educationDegree": "الشهادة",
+  "educationInstitution": "المؤسسة",
+  "educationFieldOfStudy": "التخصص",
+  "educationStartDate": "تاريخ البدء",
+  "educationEndDate": "تاريخ الانتهاء",
+  "educationCurrent": "مسجل حالياً",
+  "educationEmpty": "لا توجد إدخالات تعليمية",
+  "educationEmptySubtitle": "أضف شهاداتك التعليمية",
+
+  "experienceTitle": "الخبرة المهنية",
+  "experienceAdd": "إضافة خبرة",
+  "experiencePosition": "المنصب",
+  "experienceCompany": "الشركة",
+  "experienceLocation": "الموقع",
+  "experienceDescription": "الوصف",
+  "experienceCurrent": "أعمل هنا حالياً",
+  "experienceEmpty": "لا توجد خبرة مهنية",
+  "experienceEmptySubtitle": "أضف خبراتك المهنية",
+
+  "languagesTitle": "المهارات اللغوية",
+  "languagesAdd": "إضافة لغة",
+  "languagesLanguage": "اللغة",
+  "languagesLevel": "المستوى",
+  "languagesEmpty": "لا توجد مهارات لغوية",
+  "languagesEmptySubtitle": "أضف مهاراتك اللغوية",
+
+  "documentsTitle": "المستندات",
+  "documentsAdd": "إضافة مستند",
+  "documentsName": "اسم المستند",
+  "documentsType": "نوع المستند",
+  "documentsCv": "السيرة الذاتية",
+  "documentsDiploma": "شهادة جامعية",
+  "documentsCertificate": "شهادة",
+  "documentsTranscript": "كشف الدرجات",
+  "documentsOther": "أخرى",
+  "documentsDeleted": "محذوف",
+  "documentsRestoreConfirm": "استعادة",
+  "documentsPermanentDelete": "حذف نهائي",
+  "documentsPermanentDeleteConfirm": "حذف نهائي؟",
+  "documentsPermanentDeleteMessage": "سيتم حذفه نهائياً.",
+  "documentsDeletedSection": "المستندات المحذوفة",
+  "documentsEmpty": "لا توجد مستندات بعد",
+  "documentsEmptySubtitle": "اضغط على + لإضافة مستند",
+  "documentsAdded": "تمت إضافة المستند (وضع تجريبي)",
+  "documentsNamePlaceholder": "مثال: سيرة_ذاتية_2024.pdf",
+
+  "chatTitle": "الرسائل",
+  "chatEmpty": "لا توجد رسائل",
+  "chatEmptySubtitle": "ستظهر محادثاتك هنا عندما تتواصل مع أصحاب العمل.",
+  "chatInputHint": "اكتب رسالة...",
+  "chatSend": "إرسال",
+  "chatMinutesAgo": "منذ {count} دقيقة",
+  "@chatMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatHoursAgo": "منذ {count} ساعة",
+  "@chatHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatYesterday": "أمس",
+  "chatDaysAgo": "منذ {count} أيام",
+  "@chatDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatNoMessages": "لا توجد رسائل بعد.\nاكتب الرسالة الأولى!",
+  "chatNewInfo": "تنشأ الرسائل الجديدة تلقائياً عند التقديم",
+
+  "notificationsTitle": "الإشعارات",
+  "notificationsActiveAlerts": "تنبيهات الوظائف النشطة",
+  "notificationsNoAlerts": "لا توجد تنبيهات.",
+  "notificationsCreateAlert": "إنشاء تنبيه جديد",
+  "notificationsSearchQuery": "مصطلح البحث (مثال: مطور برامج)",
+  "notificationsCategoryOptional": "الفئة (اختياري)",
+  "notificationsLocationOptional": "الموقع (اختياري)",
+  "notificationsCreateButton": "إنشاء تنبيه",
+  "notificationsAlertCreated": "تم إنشاء تنبيه: \"{query}\"",
+  "@notificationsAlertCreated": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsRecentTitle": "الإشعارات الأخيرة",
+  "notificationsViewEmail": "عرض البريد الإلكتروني",
+  "notificationsEmailPreview": "معاينة البريد الإلكتروني",
+  "notificationsNewOffers": "عروض وظيفية جديدة لك!",
+  "notificationsManage": "إدارة الإشعارات",
+  "notificationsViewDetails": "عرض التفاصيل",
+
+  "settingsTitle": "الإعدادات",
+  "settingsLanguage": "اللغة",
+  "settingsDarkMode": "الوضع الداكن",
+  "settingsNotifications": "الإشعارات",
+  "settingsAccount": "إدارة الحساب",
+  "settingsSupport": "المساعدة والدعم",
+  "settingsPrivacy": "الخصوصية",
+  "settingsTerms": "شروط الاستخدام",
+  "settingsAbout": "حول bewerbi.tn",
+  "settingsVersion": "v1.0.0",
+  "settingsAccountSection": "الحساب",
+  "settingsAppSection": "التطبيق",
+  "settingsLegalSection": "القانوني",
+  "settingsFooter": "bewerbi.tn v1.0.0 | صنع بحب في تونس",
+
+  "accountTitle": "إدارة الحساب",
+  "accountChangeEmail": "تغيير البريد الإلكتروني",
+  "accountCurrentEmail": "البريد الإلكتروني الحالي",
+  "accountNewEmail": "البريد الإلكتروني الجديد",
+  "accountNewEmailPlaceholder": "email@example.com",
+  "accountChange": "تغيير",
+  "accountChangePassword": "تغيير كلمة المرور",
+  "accountCurrentPassword": "كلمة المرور الحالية",
+  "accountNewPassword": "كلمة المرور الجديدة",
+  "accountConfirmNewPassword": "تأكيد كلمة المرور",
+  "accountNewPasswordPlaceholder": "8 أحرف على الأقل",
+  "accountConfirmPasswordPlaceholder": "إعادة كلمة المرور",
+  "accountEmailVerification": "التحقق من البريد الإلكتروني",
+  "accountVerified": "تم التحقق",
+  "accountNotVerified": "لم يتم التحقق",
+  "accountSendVerification": "إرسال بريد التأكيد",
+  "accountDataExport": "تصدير البيانات",
+  "accountDataExportDescription": "قم بتنزيل نسخة من جميع بياناتك المحفوظة.",
+  "accountExportButton": "تنزيل بياناتي",
+  "accountDeleteAccount": "حذف الحساب",
+  "accountDeleteWarning": "عند حذف حسابك، سيتم حذف جميع بياناتك نهائياً.",
+  "accountDeleteButton": "حذف الحساب نهائياً",
+  "accountDeleteConfirm": "هل أنت متأكد؟",
+  "accountDeleteInstruction": "اكتب \"حذف\" للتأكيد:",
+  "accountDeletePlaceholder": "حذف",
+  "accountDeleteIrreversible": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف جميع بياناتك نهائياً.",
+  "accountDeleted": "تم حذف الحساب",
+  "accountEmailConfirmSent": "تم إرسال بريد التأكيد إلى {email} (تجريبي)",
+  "@accountEmailConfirmSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountPasswordChanged": "تم تغيير كلمة المرور بنجاح",
+  "accountVerificationSent": "تم إرسال بريد التأكيد (تجريبي)",
+  "accountExportPreparing": "جاري تجهيز تصدير البيانات... (تجريبي)",
+  "accountInvalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+  "accountEnterCurrentPassword": "يرجى إدخال كلمة المرور الحالية",
+  "accountPasswordTooShort": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
+  "accountPasswordsMismatch": "كلمتا المرور غير متطابقتين",
+
+  "employerDashboard": "لوحة التحكم",
+  "employerActiveJobs": "الوظائف النشطة",
+  "employerTotalApplications": "الطلبات",
+  "employerNewThisWeek": "جديد هذا الأسبوع",
+  "employerRecentApplications": "آخر الطلبات",
+  "employerCreateListing": "إنشاء وظيفة جديدة",
+  "employerMyListings": "إعلاناتي الوظيفية",
+  "employerEditListing": "تعديل الوظيفة",
+  "employerPublish": "نشر",
+  "employerSaveChanges": "حفظ",
+  "employerCloseListing": "إغلاق الوظيفة",
+  "employerActivateListing": "تفعيل الوظيفة",
+  "employerApplicants": "الطلبات",
+  "employerAccept": "قبول",
+  "employerReject": "رفض",
+  "employerTopCandidate": "مرشح متميز",
+  "employerGoodMatch": "تطابق جيد",
+  "employerSuitable": "مناسب",
+  "employerReview": "مراجعة",
+  "employerCandidateScoring": "المرشحون مرتبون حسب درجة التطابق",
+  "employerCompanyProfile": "الملف التعريفي للشركة",
+  "employerNoApplications": "لا توجد طلبات بعد",
+  "employerNoListings": "لا توجد إعلانات وظيفية",
+  "employerNoListingsSubtitle": "أنشئ إعلانك الوظيفي الأول.",
+  "employerListingPublished": "تم نشر الوظيفة بنجاح!",
+  "employerFillRequired": "يرجى ملء جميع الحقول المطلوبة.",
+  "employerListingTitle": "العنوان",
+  "employerListingTitlePlaceholder": "مثال: مطور Full-Stack (ذكور/إناث)",
+  "employerListingCategory": "الفئة",
+  "employerListingType": "النوع",
+  "employerListingLocation": "الموقع",
+  "employerListingLocationPlaceholder": "مثال: برلين، ميونخ",
+  "employerListingSalary": "نطاق الراتب (اختياري)",
+  "employerListingSalaryPlaceholder": "مثال: 45,000 - 60,000 يورو",
+  "employerListingGermanLevel": "مستوى اللغة الألمانية",
+  "employerListingDescription": "الوصف",
+  "employerListingDescriptionPlaceholder": "صف الوظيفة...",
+  "employerListingRequirements": "المتطلبات",
+  "employerListingRequirementsPlaceholder": "ما هي المتطلبات التي يجب توفرها؟",
+
+  "adminUsers": "إدارة المستخدمين",
+  "adminListings": "إدارة الوظائف",
+  "adminReports": "الإحصائيات",
+  "adminAll": "الكل",
+  "adminApplicants": "المتقدمون",
+  "adminEmployers": "أصحاب العمل",
+  "adminAdmins": "المديرون",
+  "adminActive": "نشط",
+  "adminClosed": "مغلق",
+  "adminTotalUsers": "إجمالي المستخدمين",
+  "adminActiveJobs": "الوظائف النشطة",
+  "adminTotalApplications": "الطلبات",
+  "adminAcceptedApps": "مقبول",
+  "adminRejectedApps": "مرفوض",
+  "adminReviewedApps": "قيد المراجعة",
+
+  "onboardingSkip": "تخطي",
+  "onboardingNext": "التالي",
+  "onboardingGetStarted": "لنبدأ",
+  "onboardingTitle1": "جسرك نحو ألمانيا",
+  "onboardingSubtitle1": "ابحث عن وظائف وتدريبات ودورات لغوية في ألمانيا – مخصصة للكفاءات التونسية.",
+  "onboardingTitle2": "أنشئ ملفك الشخصي",
+  "onboardingSubtitle2": "ارفع سيرتك الذاتية، أضف خبراتك ودع أصحاب العمل يجدونك.",
+  "onboardingTitle3": "تقدم بنقرة واحدة",
+  "onboardingSubtitle3": "أرسل طلبك مباشرة إلى أصحاب العمل الألمان وتابع الحالة في الوقت الفعلي.",
+
+  "legalPrivacy": "سياسة الخصوصية",
+  "legalTerms": "شروط الاستخدام",
+  "legalImpressum": "بيانات الناشر",
+  "legalSupport": "المساعدة والدعم",
+  "legalFaq": "الأسئلة الشائعة",
+  "legalContact": "اتصل بنا",
+  "legalFeedback": "إرسال ملاحظات",
+  "legalFeedbackHint": "ملاحظاتك تساعدنا في تحسين التطبيق...",
+  "legalFeedbackSent": "شكراً لملاحظاتك!",
+
+  "errorGeneral": "حدث خطأ ما",
+  "errorNetwork": "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
+  "errorRetry": "إعادة المحاولة",
+
+  "navHome": "الرئيسية",
+  "navSearch": "بحث",
+  "navApplications": "الطلبات",
+  "navFavorites": "المفضلة",
+  "navProfile": "الملف الشخصي",
+  "navSettings": "الإعدادات",
+  "navMessages": "الرسائل"
+}

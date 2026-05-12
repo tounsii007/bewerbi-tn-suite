@@ -1,0 +1,517 @@
+{
+  "@@locale": "de",
+  "appName": "bewerbi.tn",
+  "appSlogan": "Deine Brücke nach Deutschland",
+
+  "commonLoading": "Laden...",
+  "commonSave": "Speichern",
+  "commonCancel": "Abbrechen",
+  "commonDelete": "Löschen",
+  "commonEdit": "Bearbeiten",
+  "commonBack": "Zurück",
+  "commonNext": "Weiter",
+  "commonSearch": "Suchen",
+  "commonFilter": "Filtern",
+  "commonApply": "Bewerben",
+  "commonSubmit": "Absenden",
+  "commonClose": "Schließen",
+  "commonYes": "Ja",
+  "commonNo": "Nein",
+  "commonError": "Fehler",
+  "commonSuccess": "Erfolg",
+  "commonRetry": "Erneut versuchen",
+  "commonNoResults": "Keine Ergebnisse",
+  "commonSeeAll": "Alle anzeigen",
+  "commonRequired": "Pflichtfeld",
+  "commonOptional": "Optional",
+  "commonAdd": "Hinzufügen",
+  "commonRemove": "Entfernen",
+  "commonRestore": "Wiederherstellen",
+  "commonShare": "Teilen",
+  "commonSend": "Senden",
+  "commonNow": "Jetzt",
+  "commonEnabled": "Aktiviert",
+  "commonDisabled": "Deaktiviert",
+  "commonUnknown": "Unbekannt",
+
+  "authLogin": "Anmelden",
+  "authRegister": "Registrieren",
+  "authLogout": "Abmelden",
+  "authEmail": "E-Mail-Adresse",
+  "authPassword": "Passwort",
+  "authConfirmPassword": "Passwort bestätigen",
+  "authForgotPassword": "Passwort vergessen?",
+  "authResetPassword": "Passwort zurücksetzen",
+  "authFirstName": "Vorname",
+  "authLastName": "Nachname",
+  "authIAmA": "Ich bin ein...",
+  "authApplicant": "Bewerber",
+  "authEmployer": "Arbeitgeber",
+  "authNoAccount": "Noch kein Konto?",
+  "authHasAccount": "Bereits ein Konto?",
+  "authWelcome": "Willkommen",
+  "authSubtitle": "Deine Brücke nach Deutschland",
+  "authOrLoginWith": "oder",
+  "authGoogleLogin": "Mit Google anmelden",
+  "authFacebookLogin": "Mit Facebook anmelden",
+  "authDemoMode": "DEMO-MODUS",
+  "authAdmin": "Admin",
+  "authPasswordMinLength": "Mindestens 8 Zeichen",
+  "authPasswordsNoMatch": "Die Passwörter stimmen nicht überein.",
+  "authResetSent": "E-Mail gesendet!",
+  "authResetInstructions": "Wir haben einen Link zum Zurücksetzen Ihres Passworts gesendet.",
+  "authResetSendLink": "Link senden",
+  "authResetEmailPlaceholder": "E-Mail-Adresse",
+  "authResetDescription": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.",
+  "authBackToLogin": "Zurück zur Anmeldung",
+  "authCreateAccount": "Erstellen Sie Ihr bewerbi.tn Konto",
+  "authRegisterSuccess": "Registrierung erfolgreich! Bitte melden Sie sich an.",
+  "authFillAllFields": "Bitte füllen Sie alle Felder aus.",
+  "authPasswordMinLengthError": "Das Passwort muss mindestens 6 Zeichen lang sein.",
+  "authEnterEmail": "Bitte geben Sie Ihre E-Mail-Adresse ein.",
+  "authGoogleDemoMode": "Google Login (Demo-Modus)",
+  "authFacebookDemoMode": "Facebook Login (Demo-Modus)",
+
+  "homeGreeting": "Hallo, {name}!",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGreetingMorning": "Guten Morgen",
+  "homeGreetingAfternoon": "Guten Tag",
+  "homeGreetingEvening": "Guten Abend",
+  "homeApplications": "Bewerbungen",
+  "homeFavorites": "Favoriten",
+  "homeOpenPositions": "Offene Stellen",
+  "homeProfileComplete": "Profil {percent}% vollständig",
+  "@homeProfileComplete": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "homeProfileCompleteness": "Profil-Vollständigkeit",
+  "homeComplete": "vollständig",
+  "homeCategories": "Kategorien",
+  "homeRecommended": "Empfohlen für dich",
+  "homeLatest": "Neueste Angebote",
+  "homeMatch": "Match",
+  "homeNoOffers": "Keine Angebote verfügbar",
+  "homeUser": "Benutzer",
+
+  "jobsTitle": "Stellen",
+  "jobsSearch": "Stellen suchen...",
+  "jobsResults": "{count} Ergebnisse",
+  "@jobsResults": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "jobsClearAll": "Alle löschen",
+  "jobsCategory": "Kategorie",
+  "jobsType": "Art",
+  "jobsLocation": "Standort",
+  "jobsSalary": "Gehalt",
+  "jobsGermanLevel": "Deutsch-Niveau",
+  "jobsGermanLevelMin": "DEUTSCHKENNTNISSE (MINDESTENS)",
+  "jobsMinSalary": "MINDESTGEHALT",
+  "jobsRequirements": "Anforderungen",
+  "jobsDescription": "Beschreibung",
+  "jobsApplyNow": "Jetzt bewerben",
+  "jobsApplied": "Bereits beworben",
+  "jobsContactEmployer": "Arbeitgeber kontaktieren",
+  "jobsShareCopied": "Link kopiert! Jetzt teilen.",
+  "jobsIt": "IT & Software",
+  "jobsItShort": "IT",
+  "jobsPflege": "Pflege & Gesundheit",
+  "jobsPflegeShort": "Pflege",
+  "jobsTransport": "Transport & Logistik",
+  "jobsTransportShort": "Transport",
+  "jobsSonstige": "Sonstige",
+  "jobsJob": "Stelle",
+  "jobsAusbildung": "Ausbildung",
+  "jobsStudium": "Studium",
+  "jobsSprachkurs": "Sprachkurs",
+  "jobsPostedBy": "Veröffentlicht von",
+  "jobsToday": "Heute",
+  "jobsYesterday": "Gestern",
+  "jobsDaysAgo": "vor {days} Tagen",
+  "@jobsDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "jobsLoadMore": "Mehr laden",
+  "jobsNotFound": "Stelle nicht gefunden",
+  "jobsNoResults": "Keine Ergebnisse gefunden",
+  "jobsNoResultsHint": "Versuchen Sie andere Suchbegriffe oder Filter",
+  "jobsCategoryLabel": "KATEGORIE",
+  "jobsTypeLabel": "ART",
+  "jobsLocationLabel": "STANDORT",
+  "jobsSalaryNegotiable": "Gehalt nach Vereinbarung",
+  "jobsLocationPlaceholder": "Berlin, München...",
+
+  "applyTitle": "Bewerbung senden",
+  "applyCoverLetter": "Anschreiben",
+  "applyCoverLetterHint": "Sehr geehrte Damen und Herren,\n\nmit großem Interesse bewerbe ich mich...",
+  "applyUploadCv": "Lebenslauf",
+  "applyUploadHint": "PDF oder Word-Datei hochladen",
+  "applyCustomQuestions": "Zusatzfragen vom Arbeitgeber",
+  "applyQuestionCount": "Der Arbeitgeber hat {count} Zusatzfrage",
+  "@applyQuestionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "applyQuestionCountPlural": "Der Arbeitgeber hat {count} Zusatzfragen",
+  "@applyQuestionCountPlural": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "applyYourAnswer": "Ihre Antwort...",
+  "applySubmit": "Bewerbung absenden",
+  "applySuccess": "Bewerbung erfolgreich gesendet!",
+  "applyAlreadyApplied": "Du hast dich bereits auf diese Stelle beworben.",
+  "applyCvSelected": "CV \"{name}\" ausgewählt (Demo)",
+  "@applyCvSelected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+
+  "applicationsTitle": "Meine Bewerbungen",
+  "applicationsCount": "{count} Bewerbung",
+  "@applicationsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "applicationsCountPlural": "{count} Bewerbungen",
+  "@applicationsCountPlural": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "applicationsPending": "Ausstehend",
+  "applicationsReviewed": "In Prüfung",
+  "applicationsAccepted": "Angenommen",
+  "applicationsRejected": "Abgelehnt",
+  "applicationsAppliedOn": "Beworben am {date}",
+  "@applicationsAppliedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "applicationsNoApplications": "Noch keine Bewerbungen",
+  "applicationsEmptySubtitle": "Entdecken Sie Stellenangebote und bewerben Sie sich!",
+  "applicationsUnknownJob": "Unbekannte Stelle",
+
+  "favoritesTitle": "Favoriten",
+  "favoritesCount": "{count} Stellen gemerkt",
+  "@favoritesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "favoritesEmpty": "Noch keine Favoriten",
+  "favoritesEmptySubtitle": "Merke dir Stellen um sie hier zu sehen",
+
+  "profileTitle": "Mein Profil",
+  "profileEdit": "Profil bearbeiten",
+  "profileEducation": "Bildung & Studium",
+  "profileExperience": "Berufserfahrung",
+  "profileLanguages": "Sprachkenntnisse",
+  "profileDocuments": "Dokumente",
+  "profileEntries": "{count} Einträge",
+  "@profileEntries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileEntry": "1 Eintrag",
+  "profileBio": "Über mich",
+  "profileSaveChanges": "Änderungen speichern",
+  "profileDiscardChanges": "Verwerfen",
+  "profileDiscardConfirm": "Änderungen verwerfen?",
+  "profileDiscardMessage": "Deine Änderungen gehen verloren.",
+  "profileSaved": "Profil erfolgreich gespeichert",
+  "profilePhone": "Telefonnummer",
+  "profileCity": "Stadt",
+  "profileCountry": "Land",
+  "profileUser": "Benutzer",
+
+  "educationTitle": "Bildung & Studium",
+  "educationAdd": "Bildung hinzufügen",
+  "educationDegree": "Abschluss",
+  "educationInstitution": "Institution",
+  "educationFieldOfStudy": "Fachrichtung",
+  "educationStartDate": "Startdatum",
+  "educationEndDate": "Enddatum",
+  "educationCurrent": "Aktuell hier eingeschrieben",
+  "educationEmpty": "Keine Bildungseinträge",
+  "educationEmptySubtitle": "Füge deine Bildungsabschlüsse hinzu",
+
+  "experienceTitle": "Berufserfahrung",
+  "experienceAdd": "Erfahrung hinzufügen",
+  "experiencePosition": "Position",
+  "experienceCompany": "Unternehmen",
+  "experienceLocation": "Standort",
+  "experienceDescription": "Beschreibung",
+  "experienceCurrent": "Aktuell hier beschäftigt",
+  "experienceEmpty": "Keine Berufserfahrung",
+  "experienceEmptySubtitle": "Füge deine Berufserfahrungen hinzu",
+
+  "languagesTitle": "Sprachkenntnisse",
+  "languagesAdd": "Sprache hinzufügen",
+  "languagesLanguage": "Sprache",
+  "languagesLevel": "Niveau",
+  "languagesEmpty": "Keine Sprachkenntnisse",
+  "languagesEmptySubtitle": "Füge deine Sprachkenntnisse hinzu",
+
+  "documentsTitle": "Dokumente",
+  "documentsAdd": "Dokument hinzufügen",
+  "documentsName": "Dokumentname",
+  "documentsType": "Dokumenttyp",
+  "documentsCv": "CV",
+  "documentsDiploma": "Diplom",
+  "documentsCertificate": "Zertifikat",
+  "documentsTranscript": "Zeugnis",
+  "documentsOther": "Sonstiges",
+  "documentsDeleted": "GELÖSCHT",
+  "documentsRestoreConfirm": "Wiederherstellen",
+  "documentsPermanentDelete": "Endgültig löschen",
+  "documentsPermanentDeleteConfirm": "Endgültig löschen?",
+  "documentsPermanentDeleteMessage": "wird unwiderruflich gelöscht.",
+  "documentsDeletedSection": "Gelöschte Dokumente",
+  "documentsEmpty": "Noch keine Dokumente",
+  "documentsEmptySubtitle": "Tippe auf +, um ein Dokument hinzuzufügen",
+  "documentsAdded": "Dokument hinzugefügt (Demo-Modus)",
+  "documentsNamePlaceholder": "z.B. Lebenslauf_2024.pdf",
+
+  "chatTitle": "Nachrichten",
+  "chatEmpty": "Keine Nachrichten",
+  "chatEmptySubtitle": "Ihre Unterhaltungen werden hier angezeigt, sobald Sie mit Arbeitgebern kommunizieren.",
+  "chatInputHint": "Nachricht schreiben...",
+  "chatSend": "Senden",
+  "chatMinutesAgo": "vor {count} Min",
+  "@chatMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatHoursAgo": "vor {count} Std",
+  "@chatHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatYesterday": "Gestern",
+  "chatDaysAgo": "vor {count} Tagen",
+  "@chatDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatNoMessages": "Noch keine Nachrichten.\nSchreiben Sie die erste Nachricht!",
+  "chatNewInfo": "Neue Nachrichten entstehen automatisch bei Bewerbungen",
+
+  "notificationsTitle": "Benachrichtigungen",
+  "notificationsActiveAlerts": "Aktive Job-Alerts",
+  "notificationsNoAlerts": "Keine Alerts vorhanden.",
+  "notificationsCreateAlert": "Neuen Alert erstellen",
+  "notificationsSearchQuery": "Suchbegriff (z.B. Softwareentwickler)",
+  "notificationsCategoryOptional": "Kategorie (optional)",
+  "notificationsLocationOptional": "Standort (optional)",
+  "notificationsCreateButton": "Alert erstellen",
+  "notificationsAlertCreated": "Alert erstellt: \"{query}\"",
+  "@notificationsAlertCreated": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsRecentTitle": "Letzte Benachrichtigungen",
+  "notificationsViewEmail": "E-Mail ansehen",
+  "notificationsEmailPreview": "E-Mail Vorschau",
+  "notificationsNewOffers": "Neue Stellenangebote für dich!",
+  "notificationsManage": "Benachrichtigungen verwalten",
+  "notificationsViewDetails": "Details ansehen",
+
+  "settingsTitle": "Einstellungen",
+  "settingsLanguage": "Sprache",
+  "settingsDarkMode": "Dunkelmodus",
+  "settingsNotifications": "Benachrichtigungen",
+  "settingsAccount": "Konto verwalten",
+  "settingsSupport": "Hilfe & Support",
+  "settingsPrivacy": "Datenschutz",
+  "settingsTerms": "Nutzungsbedingungen",
+  "settingsAbout": "Über bewerbi.tn",
+  "settingsVersion": "v1.0.0",
+  "settingsAccountSection": "KONTO",
+  "settingsAppSection": "APP",
+  "settingsLegalSection": "RECHTLICHES",
+  "settingsFooter": "bewerbi.tn v1.0.0 | Made with love in Tunisia",
+
+  "accountTitle": "Konto verwalten",
+  "accountChangeEmail": "E-Mail ändern",
+  "accountCurrentEmail": "Aktuelle E-Mail",
+  "accountNewEmail": "Neue E-Mail",
+  "accountNewEmailPlaceholder": "neue.email@beispiel.de",
+  "accountChange": "Ändern",
+  "accountChangePassword": "Passwort ändern",
+  "accountCurrentPassword": "Aktuelles Passwort",
+  "accountNewPassword": "Neues Passwort",
+  "accountConfirmNewPassword": "Passwort bestätigen",
+  "accountNewPasswordPlaceholder": "Mindestens 8 Zeichen",
+  "accountConfirmPasswordPlaceholder": "Passwort wiederholen",
+  "accountEmailVerification": "E-Mail-Verifizierung",
+  "accountVerified": "Verifiziert",
+  "accountNotVerified": "Nicht verifiziert",
+  "accountSendVerification": "Bestätigungsmail senden",
+  "accountDataExport": "Datenexport",
+  "accountDataExportDescription": "Lade eine Kopie aller deiner gespeicherten Daten herunter.",
+  "accountExportButton": "Meine Daten herunterladen",
+  "accountDeleteAccount": "Konto löschen",
+  "accountDeleteWarning": "Wenn du dein Konto löschst, werden alle deine Daten unwiderruflich gelöscht.",
+  "accountDeleteButton": "Konto endgültig löschen",
+  "accountDeleteConfirm": "Bist du sicher?",
+  "accountDeleteInstruction": "Gib \"LÖSCHEN\" ein, um zu bestätigen:",
+  "accountDeletePlaceholder": "LÖSCHEN",
+  "accountDeleteIrreversible": "Diese Aktion kann nicht rückgängig gemacht werden. Alle deine Daten werden unwiderruflich gelöscht.",
+  "accountDeleted": "Konto wurde gelöscht",
+  "accountEmailConfirmSent": "Bestätigungsmail an {email} gesendet (Demo)",
+  "@accountEmailConfirmSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountPasswordChanged": "Passwort erfolgreich geändert",
+  "accountVerificationSent": "Bestätigungsmail gesendet (Demo)",
+  "accountExportPreparing": "Datenexport wird vorbereitet... (Demo)",
+  "accountInvalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein",
+  "accountEnterCurrentPassword": "Bitte gib dein aktuelles Passwort ein",
+  "accountPasswordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein",
+  "accountPasswordsMismatch": "Die Passwörter stimmen nicht überein",
+
+  "employerDashboard": "Dashboard",
+  "employerActiveJobs": "Aktive Stellen",
+  "employerTotalApplications": "Bewerbungen",
+  "employerNewThisWeek": "Neue diese Woche",
+  "employerRecentApplications": "Letzte Bewerbungen",
+  "employerCreateListing": "Neue Stelle erstellen",
+  "employerMyListings": "Meine Stellenanzeigen",
+  "employerEditListing": "Stelle bearbeiten",
+  "employerPublish": "Veröffentlichen",
+  "employerSaveChanges": "Speichern",
+  "employerCloseListing": "Stelle schließen",
+  "employerActivateListing": "Stelle aktivieren",
+  "employerApplicants": "Bewerbungen",
+  "employerAccept": "Annehmen",
+  "employerReject": "Ablehnen",
+  "employerTopCandidate": "Top-Kandidat",
+  "employerGoodMatch": "Guter Match",
+  "employerSuitable": "Passend",
+  "employerReview": "Prüfen",
+  "employerCandidateScoring": "Kandidaten nach Match-Score sortiert",
+  "employerCompanyProfile": "Firmenprofil",
+  "employerNoApplications": "Noch keine Bewerbungen",
+  "employerNoListings": "Keine Stellenanzeigen",
+  "employerNoListingsSubtitle": "Erstellen Sie Ihre erste Stellenanzeige.",
+  "employerListingPublished": "Stelle erfolgreich veröffentlicht!",
+  "employerFillRequired": "Bitte füllen Sie alle Pflichtfelder aus.",
+  "employerListingTitle": "Titel",
+  "employerListingTitlePlaceholder": "z.B. Full-Stack Entwickler (m/w/d)",
+  "employerListingCategory": "Kategorie",
+  "employerListingType": "Typ",
+  "employerListingLocation": "Standort",
+  "employerListingLocationPlaceholder": "z.B. Berlin, München",
+  "employerListingSalary": "Gehaltsspanne (optional)",
+  "employerListingSalaryPlaceholder": "z.B. 45.000 - 60.000 €",
+  "employerListingGermanLevel": "Deutschkenntnisse",
+  "employerListingDescription": "Beschreibung",
+  "employerListingDescriptionPlaceholder": "Beschreiben Sie die Stelle...",
+  "employerListingRequirements": "Anforderungen",
+  "employerListingRequirementsPlaceholder": "Welche Anforderungen müssen erfüllt werden?",
+
+  "adminUsers": "Benutzerverwaltung",
+  "adminListings": "Stellenverwaltung",
+  "adminReports": "Statistiken",
+  "adminAll": "Alle",
+  "adminApplicants": "Bewerber",
+  "adminEmployers": "Arbeitgeber",
+  "adminAdmins": "Admins",
+  "adminActive": "Aktiv",
+  "adminClosed": "Geschlossen",
+  "adminTotalUsers": "Gesamt-Benutzer",
+  "adminActiveJobs": "Aktive Stellen",
+  "adminTotalApplications": "Bewerbungen",
+  "adminAcceptedApps": "Angenommen",
+  "adminRejectedApps": "Abgelehnt",
+  "adminReviewedApps": "In Prüfung",
+
+  "onboardingSkip": "Überspringen",
+  "onboardingNext": "Weiter",
+  "onboardingGetStarted": "Los geht's",
+  "onboardingTitle1": "Deine Brücke nach Deutschland",
+  "onboardingSubtitle1": "Finde Jobs, Ausbildungen und Sprachkurse in Deutschland – speziell für tunesische Fachkräfte.",
+  "onboardingTitle2": "Erstelle dein Profil",
+  "onboardingSubtitle2": "Lebenslauf hochladen, Erfahrungen eintragen und von Arbeitgebern gefunden werden.",
+  "onboardingTitle3": "Bewirb dich mit einem Klick",
+  "onboardingSubtitle3": "Sende deine Bewerbung direkt an deutsche Arbeitgeber und verfolge den Status in Echtzeit.",
+
+  "legalPrivacy": "Datenschutzerklärung",
+  "legalTerms": "Nutzungsbedingungen",
+  "legalImpressum": "Impressum",
+  "legalSupport": "Hilfe & Support",
+  "legalFaq": "Häufig gestellte Fragen",
+  "legalContact": "Kontakt",
+  "legalFeedback": "Feedback senden",
+  "legalFeedbackHint": "Dein Feedback hilft uns, die App zu verbessern...",
+  "legalFeedbackSent": "Danke für dein Feedback!",
+
+  "errorGeneral": "Etwas ist schiefgelaufen",
+  "errorNetwork": "Bitte überprüfe deine Internetverbindung und versuche es erneut.",
+  "errorRetry": "Erneut versuchen",
+
+  "navHome": "Home",
+  "navSearch": "Suche",
+  "navApplications": "Bewerbungen",
+  "navFavorites": "Favoriten",
+  "navProfile": "Profil",
+  "navSettings": "Einstellungen",
+  "navMessages": "Nachrichten"
+}
