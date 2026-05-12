@@ -414,3 +414,28 @@ Setup-Action-Caches.
   suggestions off, optional 4-Bar Strength-Indicator
   (length + case-mix + digit + symbol).
 
+## Iteration 15 — i18n-Seeds, Storybook, MSW
+
+**i18n-Seeds**
+
+- `shared/i18n/{de,fr,ar}.json` — Mindestübersetzungen für common/auth/error.
+  Runtime-Quelle bleibt der i18n-Service; diese Files sind für
+  Storybook/Snapshot-Tests und Offline-Fallback.
+- `shared/i18n/README.md` mit Format-Beschreibung und Refresh-curl.
+
+**Storybook (Web)**
+
+- `.storybook/main.ts` mit `@storybook/nextjs` framework + a11y/interactions Addons.
+- `.storybook/preview.tsx`: Theme- und Locale-Toolbar (de/fr/ar mit RTL-Flip),
+  Backgrounds (light/dark/mesh), a11y `color-contrast` Rule.
+- Beispiel-Stories für `Button` (alle Varianten + Sizes-Showcase) und
+  `EmptyState` (mit/ohne Action, compact).
+
+**MSW (Mock-Service-Worker)**
+
+- `src/mocks/handlers.ts` — typisierte HTTP-Mocks für `auth/login`, `jobs`,
+  `profile/me`, `i18n/messages`. Login mit Passwort `wrong` löst echten
+  `ApiError`-Envelope mit 401 + `messageKey` aus.
+- `src/mocks/browser.ts` + `src/mocks/server.ts` — `setupWorker`/`setupServer`
+  für Storybook bzw. vitest/jest.
+

@@ -1,0 +1,40 @@
+{
+  "$description": "French seed translations (mirror of de.json).",
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "submit": "Envoyer",
+    "loading": "Chargement…",
+    "error": "Erreur",
+    "retry": "Réessayer",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "done": "Terminé"
+  },
+  "auth": {
+    "login": "Se connecter",
+    "register": "Créer un compte",
+    "logout": "Se déconnecter",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "fullName": "Nom complet",
+    "forgotPassword": "Mot de passe oublié ?",
+    "noAccount": "Pas encore de compte ?",
+    "haveAccount": "Déjà un compte ?"
+  },
+  "error": {
+    "internal":          "Une erreur est survenue. Veuillez réessayer.",
+    "auth.invalidCredentials": "E-mail ou mot de passe incorrect.",
+    "auth.required":     "Veuillez vous connecter pour continuer.",
+    "auth.expiredToken": "Votre session a expiré — veuillez vous reconnecter.",
+    "rate.limited":      "Trop de tentatives. Veuillez patienter un instant.",
+    "data.integrity":    "Conflit avec les données existantes — veuillez vérifier.",
+    "data.stale":        "Les données ont été modifiées entre-temps — veuillez recharger.",
+    "validation.failed": "Veuillez vérifier vos saisies.",
+    "forbidden":         "Vous n'avez pas l'autorisation pour cette action.",
+    "service.unavailable": "Service temporairement indisponible. Veuillez réessayer plus tard."
+  }
+}

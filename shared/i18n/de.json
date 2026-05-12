@@ -1,0 +1,40 @@
+{
+  "$description": "Minimal seed translations — the i18n-service holds the canonical copy at runtime, this file is for offline/CI-only consumers (Storybook, snapshot tests).",
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "submit": "Absenden",
+    "loading": "Wird geladen…",
+    "error": "Fehler",
+    "retry": "Erneut versuchen",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "done": "Fertig"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "logout": "Abmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "fullName": "Vollständiger Name",
+    "forgotPassword": "Passwort vergessen?",
+    "noAccount": "Noch kein Konto?",
+    "haveAccount": "Schon ein Konto?"
+  },
+  "error": {
+    "internal":          "Etwas ist schiefgegangen. Bitte versuche es erneut.",
+    "auth.invalidCredentials": "E-Mail oder Passwort falsch.",
+    "auth.required":     "Bitte melde dich an, um fortzufahren.",
+    "auth.expiredToken": "Deine Sitzung ist abgelaufen — bitte erneut anmelden.",
+    "rate.limited":      "Zu viele Versuche. Bitte einen Moment warten.",
+    "data.integrity":    "Konflikt mit bestehenden Daten — bitte prüfen.",
+    "data.stale":        "Daten haben sich zwischenzeitlich geändert — bitte neu laden.",
+    "validation.failed": "Bitte prüfe deine Eingaben.",
+    "forbidden":         "Du hast keine Berechtigung für diese Aktion.",
+    "service.unavailable": "Service vorübergehend nicht verfügbar. Bitte später erneut versuchen."
+  }
+}

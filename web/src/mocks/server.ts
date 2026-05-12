@@ -1,0 +1,11 @@
+import { setupServer } from "msw/node";
+import { handlers } from "./handlers";
+
+/**
+ * Node MSW server — used by vitest/jest. Wire up in test setup:
+ *
+ *   beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+ *   afterEach(() => server.resetHandlers());
+ *   afterAll(() => server.close());
+ */
+export const server = setupServer(...handlers);

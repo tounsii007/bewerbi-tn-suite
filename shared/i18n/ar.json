@@ -1,0 +1,40 @@
+{
+  "$description": "Arabic seed translations (mirror of de.json). RTL.",
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "submit": "إرسال",
+    "loading": "جارٍ التحميل…",
+    "error": "خطأ",
+    "retry": "إعادة المحاولة",
+    "close": "إغلاق",
+    "back": "رجوع",
+    "next": "التالي",
+    "done": "تم"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "logout": "تسجيل الخروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "fullName": "الاسم الكامل",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "noAccount": "لا تملك حسابًا بعد؟",
+    "haveAccount": "لديك حساب بالفعل؟"
+  },
+  "error": {
+    "internal":          "حدث خطأ. الرجاء المحاولة مرة أخرى.",
+    "auth.invalidCredentials": "البريد أو كلمة المرور غير صحيحة.",
+    "auth.required":     "الرجاء تسجيل الدخول للمتابعة.",
+    "auth.expiredToken": "انتهت جلستك — الرجاء تسجيل الدخول من جديد.",
+    "rate.limited":      "محاولات كثيرة. الرجاء الانتظار لحظة.",
+    "data.integrity":    "تعارض مع بيانات موجودة — الرجاء المراجعة.",
+    "data.stale":        "تم تعديل البيانات بين الحين — الرجاء إعادة التحميل.",
+    "validation.failed": "الرجاء التحقق من إدخالاتك.",
+    "forbidden":         "لا تملك صلاحية لهذا الإجراء.",
+    "service.unavailable": "الخدمة غير متوفرة مؤقتًا. الرجاء المحاولة لاحقًا."
+  }
+}
