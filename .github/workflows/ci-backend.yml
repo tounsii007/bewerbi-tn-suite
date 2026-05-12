@@ -1,0 +1,128 @@
+name: ci-backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "shared/schemas/**"
+      - ".github/workflows/ci-backend.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "shared/schemas/**"
+      - ".github/workflows/ci-backend.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ci-backend-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MAVEN_OPTS: "-Xmx2g -XX:+UseG1GC"
+  # Surefire forks each test JVM; cap parallelism to keep the runner stable.
+  SUREFIRE_FORK_COUNT: "1"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: bewerbi
+          POSTGRES_PASSWORD: bewerbi
+          POSTGRES_DB: bewerbi_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U bewerbi"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      - name: Show toolchain
+        run: |
+          java -version
+          ./backend/mvnw --version
+
+      - name: Build (no tests)
+        working-directory: backend
+        run: ./mvnw -B install -DskipTests
+
+      - name: Unit + integration tests
+        working-directory: backend
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/bewerbi_test
+          SPRING_DATASOURCE_USERNAME: bewerbi
+          SPRING_DATASOURCE_PASSWORD: bewerbi
+          SPRING_DATA_REDIS_HOST: localhost
+          SPRING_DATA_REDIS_PORT: "6379"
+        run: ./mvnw -B verify
+
+      - name: Surefire reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: |
+            backend/**/target/surefire-reports/
+            backend/**/target/failsafe-reports/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Verify Spring Boot validate
+        working-directory: backend
+        run: ./mvnw -B -DskipTests -Dmaven.test.skip validate
+
+  docker-images:
+    # Smoke-test that all service Dockerfiles still build.
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build (no push) gateway image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/infra/Dockerfile.service
+          push: false
+          build-args: |
+            SERVICE=gateway
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

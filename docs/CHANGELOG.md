@@ -286,3 +286,47 @@ Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Sui
 - `shared/README.md` mit Datenfluss-Diagramm, Generator-Usage,
   Schema-Konsumenten-Anleitung.
 
+## Iteration 10 — CI/CD & Repo-Hygiene
+
+**Workflows** (`.github/workflows/`)
+
+- `ci-backend.yml` — JDK 21 (Temurin) + Postgres + Redis als Services,
+  Maven `verify`, Surefire-Reports als Artifact, Docker-Smoke-Build der
+  Service-Images auf `main`. Paralleler `lint`-Job.
+- `ci-web.yml` — Node 22, `npm ci`, sync-tokens, lint, typecheck, build.
+- `ci-mobile.yml` — Node 22, `npm ci`, sync-tokens, `tsc --noEmit`.
+- `ci-flutter.yml` — Flutter 3.27 stable, `pub get`, analyze, format-check,
+  test (expanded reporter).
+- `tokens-check.yml` — regeneriert Tokens auf jedem PR und schlägt fehl,
+  wenn die generierten Files nicht mit den Source-JSONs übereinstimmen.
+
+Alle Workflows nutzen `concurrency.cancel-in-progress`, `paths`-Filter und
+Setup-Action-Caches.
+
+**Repo-Hygiene**
+
+- `.editorconfig` — LF überall, 2 Spaces für JS/TS/CSS/YAML, 4 für Java/Kotlin,
+  2 für Dart, Tab für Makefile, CRLF für `.bat/.cmd`.
+- `.gitattributes` — `eol=lf`-Normalisierung, Binär-Flags, `linguist-generated`
+  für die generierten Token-Files.
+- `.github/dependabot.yml` — wöchentliche Updates für npm (web/mobile), Maven,
+  GitHub Actions, Docker; Dependency-Groups (next/react/radix/expo/spring/…).
+- `.github/CODEOWNERS` — `/backend/shared/common-security/` und `/backend/gateway/`
+  Review-pflichtig durch `@bewerbi/security`.
+- PR-Template + Issue-Templates (Bug, Feature) als YAML-Forms.
+
+**Setup-/Dev-Scripts**
+
+- `scripts/setup-all.sh` — One-Shot Erstinstallation aller Subprojekte +
+  Infra-Start via `docker compose`.
+- `scripts/lint-all.sh` — gleiche Checks wie CI, lokal vor Push.
+- `scripts/dev.sh` — Gateway + Web + Mobile parallel, CTRL+C stoppt alles.
+- `scripts/clean.sh` — sichere Cleanup aller Build-Artefakte und node_modules.
+
+**Docs**
+
+- `docs/CONTRIBUTING.md` — Setup, Dev-Loop, Token-Workflow, Commit-Style,
+  ADR-Template.
+- `docs/SECURITY.md` — Auth, Authz, Rate-Limits, CORS, Headers, Logging,
+  Data-Protection. Schnellreferenz für Onboarding und Audits.
+

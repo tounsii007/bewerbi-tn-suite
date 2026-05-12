@@ -1,0 +1,31 @@
+# Normalize line endings on commit so Windows checkouts don't smear the diff.
+* text=auto eol=lf
+
+# Binaries (never normalize)
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.zip   binary
+*.gz    binary
+*.tgz   binary
+*.jar   binary
+*.so    binary
+*.dll   binary
+*.dylib binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+
+# Windows-only batch files
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Generated — don't mark as conflicts on regen
+shared/tokens/dist/**         linguist-generated=true
+web/src/lib/generated-tokens.ts        linguist-generated=true
+mobile/src/lib/generated-tokens.ts     linguist-generated=true
+flutter/lib/app/theme/app_generated_tokens.dart linguist-generated=true

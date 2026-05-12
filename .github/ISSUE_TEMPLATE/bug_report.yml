@@ -1,0 +1,42 @@
+name: Bug report
+description: Something broke. Help us reproduce it.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - backend
+        - web
+        - mobile
+        - flutter
+        - infra/CI
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened
+      description: What did you do, what did you expect, what actually happened?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Numbered list ideally. The shorter the repro, the faster the fix.
+    validations:
+      required: true
+  - type: input
+    id: build
+    attributes:
+      label: Build / version
+      description: Output of `/actuator/buildinfo` for backend, package version for clients.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / traceId
+      description: Paste the relevant slice. The `traceId` from `X-Correlation-Id` or `ApiError.traceId` is gold.
+      render: shell

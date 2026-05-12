@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest a new capability or improvement.
+title: "[feat] "
+labels: ["enhancement", "triage"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - backend
+        - web
+        - mobile
+        - flutter
+        - design-system / shared
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Who hurts because this is missing today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: One or two paragraphs. Sketches and screenshots welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

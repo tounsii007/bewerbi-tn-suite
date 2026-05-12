@@ -1,0 +1,40 @@
+name: tokens-check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "shared/tokens/**"
+      - "scripts/sync-tokens.mjs"
+  pull_request:
+    paths:
+      - "shared/tokens/**"
+      - "scripts/sync-tokens.mjs"
+      - "web/src/lib/generated-tokens.ts"
+      - "mobile/src/lib/generated-tokens.ts"
+      - "flutter/lib/app/theme/app_generated_tokens.dart"
+
+concurrency:
+  group: tokens-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ensure-generated-in-sync:
+    # Catches PRs that edit shared/tokens/*.json but forget to regenerate the
+    # platform files (or vice-versa).
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Regenerate tokens
+        run: node scripts/sync-tokens.mjs
+      - name: Git diff check
+        run: |
+          if ! git diff --exit-code; then
+            echo "::error::Token files are out of sync. Run `node scripts/sync-tokens.mjs` and commit the changes."
+            exit 1
+          fi

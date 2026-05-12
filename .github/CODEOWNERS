@@ -1,0 +1,13 @@
+# Default owners — fall back when a path-specific owner isn't matched.
+*       @bewerbi/core
+
+# Boundaries
+/backend/                     @bewerbi/backend
+/backend/shared/common-security/ @bewerbi/security
+/backend/gateway/             @bewerbi/security
+/web/                         @bewerbi/web
+/mobile/                      @bewerbi/mobile
+/flutter/                     @bewerbi/mobile
+/shared/                      @bewerbi/design-system
+/docs/                        @bewerbi/core
+/.github/                     @bewerbi/devops

@@ -1,0 +1,56 @@
+name: ci-flutter
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "flutter/**"
+      - "shared/**"
+      - ".github/workflows/ci-flutter.yml"
+  pull_request:
+    paths:
+      - "flutter/**"
+      - "shared/**"
+      - ".github/workflows/ci-flutter.yml"
+
+concurrency:
+  group: ci-flutter-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    defaults:
+      run:
+        working-directory: flutter
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.27.x"
+          channel: stable
+          cache: true
+
+      - name: Set up Node 22 (for sync-tokens)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Sync tokens (suite-level)
+        working-directory: .
+        run: node scripts/sync-tokens.mjs
+
+      - name: pub get
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-warnings
+
+      - name: Format check (warning only)
+        run: dart format --output=none --set-exit-if-changed . || true
+
+      - name: Test
+        run: flutter test --reporter=expanded

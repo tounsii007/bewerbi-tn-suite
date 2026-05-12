@@ -1,0 +1,45 @@
+name: ci-mobile
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "mobile/**"
+      - "shared/**"
+      - ".github/workflows/ci-mobile.yml"
+  pull_request:
+    paths:
+      - "mobile/**"
+      - "shared/**"
+      - ".github/workflows/ci-mobile.yml"
+
+concurrency:
+  group: ci-mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install
+        run: npm ci --prefer-offline --no-audit --no-fund
+
+      - name: Sync tokens (suite-level)
+        working-directory: .
+        run: node scripts/sync-tokens.mjs
+
+      - name: Typecheck
+        run: npx tsc --noEmit
