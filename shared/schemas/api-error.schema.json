@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bewerbi.tn/schemas/api-error.json",
+  "title": "ApiError",
+  "description": "Canonical error envelope returned by every bewerbi.tn service. Mirrors tn.bewerbi.common.api.ApiError. Clients may rely on code and messageKey.",
+  "type": "object",
+  "required": ["status", "code", "message", "messageKey", "timestamp"],
+  "properties": {
+    "status":    { "type": "integer", "minimum": 100, "maximum": 599 },
+    "code":      {
+      "type": "string",
+      "examples": ["NOT_FOUND", "VALIDATION_FAILED", "UNAUTHORIZED", "TOO_MANY_REQUESTS"]
+    },
+    "message":   { "type": "string", "description": "Human-readable English fallback" },
+    "messageKey":{ "type": "string", "description": "Dot-namespaced key resolved by i18n-service" },
+    "violations":{
+      "type": "array",
+      "items": { "$ref": "#/$defs/fieldViolation" },
+      "default": []
+    },
+    "path":     { "type": "string", "description": "Request URI path that produced the error" },
+    "traceId":  { "type": "string", "description": "W3C trace-context id; empty if tracing disabled" },
+    "timestamp":{ "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "fieldViolation": {
+      "type": "object",
+      "required": ["field", "message", "messageKey"],
+      "properties": {
+        "field":      { "type": "string", "examples": ["email", "profile.bio"] },
+        "message":    { "type": "string" },
+        "messageKey": { "type": "string" }
+      }
+    }
+  }
+}

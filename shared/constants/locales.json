@@ -1,0 +1,27 @@
+{
+  "$description": "Locales supported by bewerbi.tn. Keep in sync with i18n-service seed data.",
+  "default": "de",
+  "supported": [
+    {
+      "code": "de",
+      "name": "Deutsch",
+      "nativeName": "Deutsch",
+      "direction": "ltr",
+      "flag": "🇩🇪"
+    },
+    {
+      "code": "fr",
+      "name": "French",
+      "nativeName": "Français",
+      "direction": "ltr",
+      "flag": "🇫🇷"
+    },
+    {
+      "code": "ar",
+      "name": "Arabic",
+      "nativeName": "العربية",
+      "direction": "rtl",
+      "flag": "🇹🇳"
+    }
+  ]
+}

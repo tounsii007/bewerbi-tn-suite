@@ -1,0 +1,21 @@
+{
+  "$description": "Spacing scale in pixels. Multiples of 4 throughout.",
+  "0":     { "value": 0 },
+  "px":    { "value": 1 },
+  "0.5":   { "value": 2 },
+  "1":     { "value": 4 },
+  "1.5":   { "value": 6 },
+  "2":     { "value": 8 },
+  "3":     { "value": 12 },
+  "4":     { "value": 16 },
+  "5":     { "value": 20 },
+  "6":     { "value": 24 },
+  "8":     { "value": 32 },
+  "10":    { "value": 40 },
+  "12":    { "value": 48 },
+  "16":    { "value": 64 },
+  "20":    { "value": 80 },
+  "24":    { "value": 96 },
+  "card":  { "value": 20, "$description": "Default card padding" },
+  "section": { "value": 28, "$description": "Spacing between page sections" }
+}

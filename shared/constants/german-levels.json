@@ -1,0 +1,12 @@
+{
+  "$description": "CEFR German proficiency levels — used by jobs and profiles.",
+  "levels": ["A1", "A2", "B1", "B2", "C1", "C2"],
+  "byMinForRecognition": {
+    "$comment": "Minimum CEFR level required for German professional recognition by sector.",
+    "healthcare":   "B2",
+    "engineering":  "B1",
+    "education":    "C1",
+    "trades":       "B1",
+    "it":           "B1"
+  }
+}

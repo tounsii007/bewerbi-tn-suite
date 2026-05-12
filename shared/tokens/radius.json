@@ -1,0 +1,11 @@
+{
+  "$description": "Border-radius scale in pixels.",
+  "none":  { "value": 0 },
+  "sm":    { "value": 6 },
+  "md":    { "value": 10 },
+  "lg":    { "value": 14 },
+  "xl":    { "value": 18 },
+  "2xl":   { "value": 22 },
+  "3xl":   { "value": 28 },
+  "pill":  { "value": 9999 }
+}

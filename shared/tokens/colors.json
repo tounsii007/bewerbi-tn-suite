@@ -1,0 +1,56 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "$description": "Canonical color palette for bewerbi.tn. Source of truth for web/mobile/flutter — run scripts/sync-tokens.* to regenerate platform-specific files.",
+  "primary": {
+    "50":  { "value": "#eff6ff", "oklch": "oklch(0.972 0.0145 254)" },
+    "100": { "value": "#dbeafe", "oklch": "oklch(0.937 0.0322 254)" },
+    "200": { "value": "#bfdbfe", "oklch": "oklch(0.879 0.0594 254)" },
+    "300": { "value": "#93c5fd", "oklch": "oklch(0.807 0.0942 254)" },
+    "400": { "value": "#60a5fa", "oklch": "oklch(0.711 0.1383 254)" },
+    "500": { "value": "#2563EB", "oklch": "oklch(0.611 0.1733 254)" },
+    "600": { "value": "#2451cc", "oklch": "oklch(0.545 0.1758 254)" },
+    "700": { "value": "#1d4ed8", "oklch": "oklch(0.479 0.1737 254)" },
+    "800": { "value": "#1e40af", "oklch": "oklch(0.420 0.1582 254)" },
+    "900": { "value": "#1e3a8a", "oklch": "oklch(0.360 0.1342 254)" }
+  },
+  "accent": {
+    "50":  { "value": "#fef2f2" },
+    "100": { "value": "#fee2e2" },
+    "500": { "value": "#DC2626" },
+    "600": { "value": "#b91c1c" },
+    "700": { "value": "#991b1b" }
+  },
+  "success": {
+    "50":  { "value": "#ecfdf5" },
+    "100": { "value": "#dcfce7" },
+    "500": { "value": "#16a34a" },
+    "600": { "value": "#059669" },
+    "700": { "value": "#047857" }
+  },
+  "warning": {
+    "50":  { "value": "#fffbeb" },
+    "100": { "value": "#fef3c7" },
+    "500": { "value": "#f59e0b" },
+    "600": { "value": "#d97706" },
+    "700": { "value": "#92400e" }
+  },
+  "info": {
+    "100": { "value": "#cffafe" },
+    "500": { "value": "#06b6d4" },
+    "600": { "value": "#0891b2" }
+  },
+  "neutral": {
+    "surface":      { "value": "#ffffff" },
+    "surface-alt":  { "value": "#f8fafc" },
+    "surface-muted":{ "value": "#f1f5f9" },
+    "border":       { "value": "#e2e8f0" }
+  },
+  "dark": {
+    "bg":      { "value": "#0f172a" },
+    "bg-alt":  { "value": "#1a2538" },
+    "card":    { "value": "#1e293b" },
+    "border":  { "value": "#334155" },
+    "text":    { "value": "#e2e8f0" },
+    "muted":   { "value": "#94a3b8" }
+  }
+}

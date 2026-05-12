@@ -246,3 +246,43 @@ Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Sui
 - `AppAlert` — Inline-Notice mit Auto-Icon pro Variant
   (info/success/warning/error/neutral), optional Title + Action, `compact`.
 
+## Iteration 9 — Shared Resources & Single Source of Truth
+
+**Design-Tokens als JSON**
+
+- `shared/tokens/colors.json` (HEX + OKLCH-Annotation pro Stop),
+  `spacing.json`, `radius.json`, `motion.json`, `index.json`.
+- Format: Design Token Community Group (`$schema`, `$description`, `value`).
+
+**Generator**
+
+- `scripts/sync-tokens.mjs` (Node 20+, kein Build-Step nötig): liest die JSONs
+  und schreibt:
+  - `shared/tokens/dist/tokens.ts` (für jedes TS-Projekt verbrauchbar)
+  - `mobile/src/lib/generated-tokens.ts`
+  - `web/src/lib/generated-tokens.ts`
+  - `flutter/lib/app/theme/app_generated_tokens.dart`
+- Hand-geschriebene Theme-Files bleiben unverändert — sie ziehen Rohwerte aus
+  den Generated-Files; Utility-Klassen, MD3-ColorScheme und dark-mode-Annotationen
+  sind kuratiert.
+
+**JSON-Schemas**
+
+- `api-error.schema.json` — Vertrag des Error-Envelopes,
+  spiegelt `tn.bewerbi.common.api.ApiError`.
+- `user.schema.json`, `job.schema.json`, `auth.schema.json`
+  (login/register/refresh/tokenPair).
+- JSON-Schema Draft 2020-12; einsetzbar mit `ajv` (TS),
+  `quicktype` (Dart) und Spring's Validation in CI.
+
+**Konstanten**
+
+- `locales.json` — code/name/nativeName/direction/flag für `de/fr/ar`.
+- `german-levels.json` — CEFR-Levels + Minima pro Berufsgruppe.
+- `application-status.json` — Bewerbungs-Lifecycle (DRAFT…WITHDRAWN).
+
+**Docs**
+
+- `shared/README.md` mit Datenfluss-Diagramm, Generator-Usage,
+  Schema-Konsumenten-Anleitung.
+

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bewerbi.tn/schemas/auth.json",
+  "title": "Auth contracts",
+  "$defs": {
+    "loginRequest": {
+      "type": "object",
+      "required": ["email", "password"],
+      "properties": {
+        "email":    { "type": "string", "format": "email" },
+        "password": { "type": "string", "minLength": 1, "maxLength": 200 }
+      }
+    },
+    "registerRequest": {
+      "type": "object",
+      "required": ["email", "password", "locale", "acceptTerms"],
+      "properties": {
+        "email":       { "type": "string", "format": "email" },
+        "password":    { "type": "string", "minLength": 8, "maxLength": 200 },
+        "fullName":    { "type": "string", "maxLength": 200 },
+        "locale":      { "type": "string", "enum": ["de", "fr", "ar"] },
+        "acceptTerms": { "type": "boolean", "const": true }
+      }
+    },
+    "tokenPair": {
+      "type": "object",
+      "required": ["accessToken", "accessTokenExpiresAt", "refreshToken", "refreshTokenExpiresAt", "user"],
+      "properties": {
+        "accessToken":           { "type": "string" },
+        "accessTokenExpiresAt":  { "type": "string", "format": "date-time" },
+        "accessTokenExpiresIn":  { "type": "integer", "minimum": 0 },
+        "refreshToken":          { "type": "string" },
+        "refreshTokenExpiresAt": { "type": "string", "format": "date-time" },
+        "user": { "$ref": "https://bewerbi.tn/schemas/user.json" }
+      }
+    },
+    "refreshRequest": {
+      "type": "object",
+      "required": ["refreshToken"],
+      "properties": {
+        "refreshToken": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bewerbi.tn/schemas/job.json",
+  "title": "Job",
+  "type": "object",
+  "required": ["id", "title", "companyId", "city", "country", "publishedAt"],
+  "properties": {
+    "id":        { "type": "string", "format": "uuid" },
+    "title":     { "type": "string", "minLength": 1, "maxLength": 200 },
+    "companyId": { "type": "string", "format": "uuid" },
+    "companyName": { "type": "string" },
+    "description": { "type": "string" },
+    "city":      { "type": "string" },
+    "country":   { "type": "string", "minLength": 2, "maxLength": 2, "description": "ISO 3166-1 alpha-2 code" },
+    "remote":    { "type": "boolean", "default": false },
+    "employmentType": {
+      "type": "string",
+      "enum": ["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP", "TEMPORARY"]
+    },
+    "salaryMin": { "type": ["integer", "null"], "minimum": 0 },
+    "salaryMax": { "type": ["integer", "null"], "minimum": 0 },
+    "currency":  { "type": "string", "default": "EUR", "minLength": 3, "maxLength": 3 },
+    "germanLevel": {
+      "type": ["string", "null"],
+      "enum": ["A1", "A2", "B1", "B2", "C1", "C2", null]
+    },
+    "categoryKey": { "type": ["string", "null"], "description": "i18n key, e.g. profession.healthcare.nurse" },
+    "tags":      { "type": "array", "items": { "type": "string" } },
+    "publishedAt": { "type": "string", "format": "date-time" }
+  }
+}

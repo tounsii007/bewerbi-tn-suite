@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bewerbi.tn/schemas/user.json",
+  "title": "User",
+  "type": "object",
+  "required": ["id", "email", "roles", "locale", "createdAt"],
+  "properties": {
+    "id":       { "type": "string", "format": "uuid" },
+    "email":    { "type": "string", "format": "email" },
+    "fullName": { "type": ["string", "null"], "maxLength": 200 },
+    "roles":    {
+      "type": "array",
+      "items": { "type": "string", "enum": ["USER", "EMPLOYER", "ADMIN"] },
+      "minItems": 1
+    },
+    "locale":   { "type": "string", "enum": ["de", "fr", "ar"] },
+    "emailVerified": { "type": "boolean", "default": false },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}

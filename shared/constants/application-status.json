@@ -1,0 +1,13 @@
+{
+  "$description": "Application lifecycle states. Mirrors enum tn.bewerbi.applications.domain.ApplicationStatus.",
+  "states": [
+    { "code": "DRAFT",          "label": "application.status.draft" },
+    { "code": "SUBMITTED",      "label": "application.status.submitted" },
+    { "code": "IN_REVIEW",      "label": "application.status.inReview" },
+    { "code": "INTERVIEW",      "label": "application.status.interview" },
+    { "code": "OFFER",          "label": "application.status.offer" },
+    { "code": "ACCEPTED",       "label": "application.status.accepted" },
+    { "code": "REJECTED",       "label": "application.status.rejected" },
+    { "code": "WITHDRAWN",      "label": "application.status.withdrawn" }
+  ]
+}

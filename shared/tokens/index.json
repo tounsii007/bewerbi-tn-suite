@@ -1,0 +1,10 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "$description": "Aggregate token bundle. References the individual files for platform generators that prefer a single entry point.",
+  "files": [
+    "./colors.json",
+    "./spacing.json",
+    "./radius.json",
+    "./motion.json"
+  ]
+}
