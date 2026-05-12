@@ -397,3 +397,20 @@ Setup-Action-Caches.
 - `RadioGroup<T>` — Variants `compact` (inline) und `card` (mit Description
   + Divider), korrekte ARIA-Rolle `radiogroup/radio`.
 
+## Iteration 14 — Flutter Forms & Inputs
+
+**Form-Shell**
+
+- `AppFormField` — Label/Hint/Error/Required-Wrapper analog zur RN-Variante.
+  `compact` Prop für dichtere Layouts.
+
+**Eingaben**
+
+- `AppSwitchTile` — Settings-Row mit Title/Subtitle/Leading, tap-anywhere
+  toggelt; nutzt `Switch.adaptive` für iOS-Look unter iOS, Material unter Android.
+- `AppRadioGroup<T>` — Variants `compact | card`, korrekte
+  `Semantics(inMutuallyExclusiveGroup)`.
+- `AppPasswordField` — Masking-Toggle (Lucide eye/eyeOff), autocorrect+
+  suggestions off, optional 4-Bar Strength-Indicator
+  (length + case-mix + digit + symbol).
+
