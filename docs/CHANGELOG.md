@@ -527,3 +527,20 @@ Setup-Action-Caches.
   Decode am HTTP-Boundary, Feature-Code switcht auf `code`, übersetzt
   `messageKey`. Convenience-Getter `isTransient` (5xx) und `isRateLimited` (429).
 
+## Iteration 20 — Final Polish
+
+**README**
+
+- Großzügiges Top-Level `README.md` mit:
+  - CI-Badges für alle 5 Workflows
+  - Verzeichnis-Karte
+  - Highlights-Tabelle (Backend / Security / Web / Mobile / Flutter / Shared / CI / Observability)
+  - Plattform-/Stack-Tabelle
+  - 19-Iteration-Abriss
+  - "Wo finde ich…?" Lookup
+
+**docs/INDEX.md**
+
+- Alphabetische Übersicht aller Dokumente — Komplement zur Aufgaben-getriebenen
+  Tabelle im Root-README.
+
