@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Import;
     RequestContextFilter.Config.class,
     tn.bewerbi.common.api.observability.SlowRequestLogger.Config.class,
     tn.bewerbi.common.api.observability.HttpRequestMetricsFilter.Config.class,
+    tn.bewerbi.common.api.idempotency.IdempotencyFilter.Config.class,
 })
 public class CommonApiAutoConfiguration {
 }

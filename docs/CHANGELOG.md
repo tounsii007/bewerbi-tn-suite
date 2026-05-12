@@ -468,3 +468,28 @@ Setup-Action-Caches.
 - `usePageTracking()` — feuert `analytics.page(pathname)` auf jedem Routen-Change,
   skipped die erste Hydration zur Vermeidung des Double-Counts.
 
+## Iteration 17 — Backend Caching & Idempotency
+
+**Idempotency**
+
+- `IdempotencyFilter` — verarbeitet `Idempotency-Key` Header auf POST/PUT/PATCH.
+  Erste Antwort wird in Redis (default 24h) gecacht; folgende Requests mit
+  gleichem Key bekommen die gecachte Antwort plus `X-Idempotent-Replayed: true`.
+  Wichtig für mobile Netze, wo der Server eine Request verarbeitet, die
+  Antwort aber verloren geht.
+- 5xx wird nicht gecacht (transient); 2xx/4xx schon.
+- UUID-Validation des Keys vor Redis-Hit.
+- Nur registriert wenn `spring-data-redis` im Classpath.
+
+**L1 Message Cache**
+
+- `L1MessageCache` in `common-i18n`: kleiner in-process ConcurrentHashMap-Cache
+  mit Expiry. Sitzt vor der Redis-MessageClient-Schicht und spart bei
+  Hot-Path-Lookups eine Redis-Roundtrip. Eventual Consistency, default TTL 60s.
+- API: `get(key)`, `getOrLoad(key, supplier)`, `invalidate(key)`, `invalidateAll()`.
+- Bewusst kein Caffeine — eine ConcurrentHashMap reicht für die Größenordnung.
+
+**Auto-Config**
+
+- `IdempotencyFilter.Config` via `CommonApiAutoConfiguration`.
+
