@@ -507,3 +507,23 @@ Setup-Action-Caches.
   Correlation-Id-Lookups, häufige Symptome (Login-Failures, slow requests,
   Postgres full, Kafka-Lag), Skalierungsnotizen, Roll-back-Anleitung.
 
+## Iteration 19 — Flutter Toast, Skeleton, ApiError
+
+**AppToast**
+
+- `AppToast.show(context, message, variant, ...)` — branded `SnackBar`-Wrapper
+  mit Tone-Border-Left, Auto-Icon pro Variant (success/error/warning/info),
+  optional Action-Button. Hide-Current-Snackbar vor jedem neuen Toast.
+
+**AppSkeleton**
+
+- `AppSkeleton` mit `AnimationController` + `Curves.easeInOut` für sanfte
+  "atmende" Pulse-Animation (45-100% Opacity, 1.2s Cycle).
+- `AppSkeletonGroup` für n Text-Zeilen mit konfigurierbarer Last-Width-Fraction.
+
+**ApiError-Klasse**
+
+- `services/api_error.dart` — Dart-Spiegel von `shared/schemas/api-error.schema.json`.
+  Decode am HTTP-Boundary, Feature-Code switcht auf `code`, übersetzt
+  `messageKey`. Convenience-Getter `isTransient` (5xx) und `isRateLimited` (429).
+
