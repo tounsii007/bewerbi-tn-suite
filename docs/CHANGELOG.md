@@ -99,3 +99,38 @@ Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Sui
 - `JwtSecretValidatorTest` deckt fail-fast in prod, dev-Warnings und Akzeptanz
   langer Secrets ab.
 
+## Iteration 4 — Web-Modernisierung
+
+**Design-Tokens**
+
+- Komplett auf **OKLCH** umgestellt (Primary, Accent, Success, Warning, Info,
+  Neutral, Dark). Verbesserte perzeptive Helligkeit, sauberer Dark-Mode-Kontrast.
+- Tokens für **Radius** (sm…3xl, pill), **Shadow** (xs…2xl + inner + glow) und
+  **Motion** (spring/out-expo/out-quad easings, fast/normal/slow durations).
+- Typography-Stack inkl. `--font-display` und Inter Stylistic-Sets `cv02/03/04/11`.
+
+**Utility-Klassen**
+
+- `.glass` — frosted-glass Surface
+- `.gradient-mesh` — multi-Stop Radial-Mesh als Hero-Hintergrund
+- `.text-gradient` — animierte Headlines
+- `.press` / `.lift` — Micro-Interactions
+- Keyframes: `shimmer`, `fade-in-up`, `pulse-soft`, `loading-bar`
+- `@media (prefers-reduced-motion)` global respektiert
+
+**Komponenten**
+
+- `Button` — Varianten erweitert: `gradient`, `glass`, plus `loading`, `leadingIcon`,
+  `trailingIcon`, `block`-Prop. Active-Scale + Spinner-Slot.
+- `Card` — Varianten `default | elevated | flat | glass | ghost | outline | accent | gradient`,
+  optional `interactive` (lift on hover).
+- `Skeleton` — Shimmer (default) oder Pulse, plus `SkeletonGroup` für Textzeilen mit
+  natürlicher ragged-right-Optik.
+- `Spinner` — Stand-alone Komponente, vier Größen, drei Tones.
+- `LoadingBar` — Top-of-Page-Bar (YouTube/GitHub-Stil) mit 80ms-Delay gegen Flicker.
+- `Badge` — Variante `premium` mit Ring; optionaler Status-Dot.
+- `Input` / `Textarea` — Focus-Ring auf OKLCH-Glow; disabled-State; aria-invalid.
+- `Field` — Label+Hint+Error-Wrapper, Required-Sternchen.
+- `PageTransition` (framer-motion) — sanfte Fade-Slide-Transitions zwischen Routes.
+- `StaggerContainer` / `StaggerItem` — List-Reveal mit 40ms Stagger.
+
