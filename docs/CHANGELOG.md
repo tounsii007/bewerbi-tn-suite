@@ -359,3 +359,24 @@ Setup-Action-Caches.
 - `SlowRequestLogger.Config` + `HttpRequestMetricsFilter.Config` werden
   via `CommonApiAutoConfiguration` automatisch geladen.
 
+## Iteration 12 — Web Accessibility & SEO
+
+**Accessibility**
+
+- `SkipToContent` — erstes fokussierbares Element, springt zu `#main`. WCAG 2.4.1.
+- `VisuallyHidden` — `sr-only`-Wrapper für Icon-Buttons / Screenreader-Labels.
+- `LiveRegionProvider` + `useAnnounce()` — Polite/Assertive ARIA-Live-Regions
+  für State-Changes ("Suche aktualisiert: 12 Treffer") die ohne UI-Announcement
+  nicht sichtbar wären.
+
+**SEO**
+
+- `lib/seo.ts` — `SITE` Konstanten und `pageMetadata({...})` Factory:
+  Title-Template, Canonical, hreflang-Alternates für de/fr/ar,
+  OpenGraph + Twitter-Card, Robots-Direktive, Icons + Manifest-Link.
+- `organizationJsonLd()` + `jobPostingJsonLd(job)` — `schema.org`-Strukturdaten.
+- `app/sitemap.ts` — statische Section-Map mit changeFrequency/priority.
+- `app/robots.ts` — Default-Allow + Disallow für private Bereiche;
+  `NEXT_PUBLIC_INDEXABLE=false` schaltet auf vollständigen Disallow für Staging.
+- `app/manifest.ts` — PWA-Manifest mit theme_color synchron zum Brand-Primary.
+
