@@ -173,3 +173,27 @@ Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Sui
 - `useOnClickOutside` für ad-hoc Dropdowns.
 - `useLocalStorage` SSR-safe mit `hydrated`-Flag + `reset`.
 
+## Iteration 6 — Mobile (Expo) Modernisierung
+
+**Design-Tokens**
+
+- `src/lib/tokens.ts` — plain-JS Spacing/Radius/Motion/Palette zum Inline-Verbrauch
+  in RN-Styles und Reanimated-Worklets (Tailwind-Klassen können dort nicht gelesen
+  werden). Spring-Presets `press / enter / bounce` für die Micro-Interactions.
+
+**Button**
+
+- Varianten erweitert: `primary | secondary | outline | ghost | subtle | destructive | gradient`
+- Sizes inkl. `xl`, optional `trailingIcon`, animierte Opacity zusätzlich zum
+  Scale-Press, `accessibilityRole/State/Label` korrekt gesetzt.
+
+**Neue UI-Komponenten**
+
+- `Skeleton` + `SkeletonGroup` — Reanimated-Pulse, dark-aware, %-/px-Breiten.
+- `EmptyState` — Icon-Bubble, optional Action, `compact`-Variante.
+- `ErrorState` — Icon, Retry-Button, dark/light-aware Akzentfarben.
+- `BottomSheet` — slide-up Modal mit Grabber, Overlay-Tap-to-Dismiss,
+  Easing-Animation (`Easing.out(Easing.exp)`), optional `fullScreen`.
+- `SegmentedControl` — animierter Pill, springt zwischen Optionen statt zu cross-faden.
+- `SectionHeader` — Eyebrow/Title/Description/Trailing, analog zur Web-Variante.
+
