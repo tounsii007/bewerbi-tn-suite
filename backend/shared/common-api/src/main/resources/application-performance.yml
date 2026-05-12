@@ -1,0 +1,51 @@
+# Performance-tuning defaults imported by services via
+#   spring.config.import: "classpath:application-performance.yml"
+# Use sane production values; override per service as needed.
+spring:
+  datasource:
+    hikari:
+      # Tune per service load profile; the defaults below suit "moderate" services (jobs,
+      # identity). Heavy services (matching, documents) should bump maximum-pool-size.
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 5000     # ms — fail fast rather than block clients indefinitely
+      idle-timeout: 600000          # 10 min
+      max-lifetime: 1800000         # 30 min — recycle before any infra timeouts cut us off
+      leak-detection-threshold: 30000   # WARN if a connection is held >30s — usually a tx bug
+      pool-name: ${spring.application.name:bewerbi}-hikari
+  jpa:
+    properties:
+      hibernate:
+        # Open-Session-in-View is off — closing the session at the controller boundary forces
+        # lazy associations to be loaded inside a transaction (or via @EntityGraph).
+        enable_lazy_load_no_trans: false
+        jdbc:
+          batch_size: 50
+          batch_versioned_data: true
+        order_inserts: true
+        order_updates: true
+        # Statement-cache for prepared statements — huge win on read-heavy services.
+        query:
+          plan_cache_max_size: 4096
+    open-in-view: false
+  threads:
+    virtual:
+      # Spring Boot 3.4 + Java 21: every HTTP/scheduled/MVC task runs on a virtual thread.
+      enabled: true
+
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.request.duration: true
+        spring.data.repository.invocations: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+        http.request.duration: 0.5, 0.95, 0.99
+
+# Per-package log thresholds for noisy infrastructure.
+logging:
+  level:
+    org.hibernate.engine.internal.StatisticalLoggingSessionEventListener: WARN
+    com.zaxxer.hikari: INFO

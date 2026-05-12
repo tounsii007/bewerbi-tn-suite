@@ -330,3 +330,32 @@ Setup-Action-Caches.
 - `docs/SECURITY.md` — Auth, Authz, Rate-Limits, CORS, Headers, Logging,
   Data-Protection. Schnellreferenz für Onboarding und Audits.
 
+## Iteration 11 — Backend Performance & Observability
+
+**Metrics**
+
+- `HttpRequestMetricsFilter` — `http.request.duration` Timer mit
+  app/method/status/outcome-Tags, Percentile-Histogram aktiviert. Coexistiert
+  mit Spring Boots `http.server.requests` und bietet niedrigere Kardinalität
+  via SUCCESS/CLIENT_ERROR/SERVER_ERROR.
+
+**Slow-Path-Visibility**
+
+- `SlowRequestLogger` — WARN-Line auf `slow.request` Logger, sobald eine
+  Request länger als `bewerbi.observability.slowRequestMs` (default 1500ms)
+  dauert. Cheap noticeboard für „was war heute langsam".
+
+**Performance-Defaults** (`application-performance.yml`)
+
+- Hikari: pool-size 20, min-idle 5, connection-timeout 5s, idle-timeout 10m,
+  max-lifetime 30m, leak-detection 30s, named pool für Metrics.
+- JPA: `open-in-view=false`, batch_size 50, ordered inserts/updates,
+  plan_cache 4096.
+- Virtual Threads für HTTP-/Scheduled-Tasks aktiviert.
+- Distribution percentiles 0.5/0.95/0.99 für Hot-Path-Timer.
+
+**Auto-Konfiguration**
+
+- `SlowRequestLogger.Config` + `HttpRequestMetricsFilter.Config` werden
+  via `CommonApiAutoConfiguration` automatisch geladen.
+

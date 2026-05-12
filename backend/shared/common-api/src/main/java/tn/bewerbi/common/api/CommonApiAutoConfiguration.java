@@ -13,6 +13,11 @@ import org.springframework.context.annotation.Import;
  */
 @AutoConfiguration
 @ConditionalOnWebApplication
-@Import({GlobalExceptionHandler.class, RequestContextFilter.Config.class})
+@Import({
+    GlobalExceptionHandler.class,
+    RequestContextFilter.Config.class,
+    tn.bewerbi.common.api.observability.SlowRequestLogger.Config.class,
+    tn.bewerbi.common.api.observability.HttpRequestMetricsFilter.Config.class,
+})
 public class CommonApiAutoConfiguration {
 }
