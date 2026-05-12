@@ -134,3 +134,42 @@ Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Sui
 - `PageTransition` (framer-motion) — sanfte Fade-Slide-Transitions zwischen Routes.
 - `StaggerContainer` / `StaggerItem` — List-Reveal mit 40ms Stagger.
 
+## Iteration 5 — Web-Features
+
+**Toasts**
+
+- `Toaster` neu — Lucide-Icons, Severity-Border-Left, dark-mode-aware via
+  `useThemeStore`, close-Button, größere `gap`/`offset`. Re-export `toast`
+  von sonner, sodass Feature-Code nicht direkt von der Library importiert.
+
+**Empty/Error**
+
+- `EmptyState` mit Icon-Bubble, optional Action, `compact`-Variante.
+- `ErrorState` mit Retry-Button und `showDetails` (nur in Dev — Stack-Traces).
+- `ErrorBoundary` Class-Component → rendert `ErrorState` als Fallback,
+  `componentDidCatch` loggt für spätere Sentry-Integration.
+
+**Inline-Notice**
+
+- `Alert` mit Varianten info/success/warning/error/neutral, Auto-Icon,
+  optional Title und Action-Slot.
+
+**Navigation/Discovery**
+
+- `CommandPalette` (⌘K / Ctrl+K) — Volltext-Filter, Keyboard-Navigation
+  (Arrow/Enter/Esc), Gruppen-Headings, Items mit `href` ODER `onSelect`.
+  Lokal mountbar — Routen-Items werden per Prop reingereicht.
+
+**Layout-Helfer**
+
+- `SectionHeader` — Eyebrow + Title + Description + Actions, optional Gradient.
+- `Tooltip` (Radix-Wrapper) mit Shortcut-Slot.
+- `Kbd` — branded `<kbd>` Element.
+
+**Hooks**
+
+- `useMediaQuery` + `breakpoints`-Konstanten (Tailwind-aligned) + `useIsMobile`.
+- `useCopyToClipboard` mit self-resetting "copied"-Flag + Legacy-Fallback.
+- `useOnClickOutside` für ad-hoc Dropdowns.
+- `useLocalStorage` SSR-safe mit `hydrated`-Flag + `reset`.
+
