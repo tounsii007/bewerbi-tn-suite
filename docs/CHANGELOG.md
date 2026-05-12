@@ -439,3 +439,32 @@ Setup-Action-Caches.
 - `src/mocks/browser.ts` + `src/mocks/server.ts` — `setupWorker`/`setupServer`
   für Storybook bzw. vitest/jest.
 
+## Iteration 16 — Web Analytics, Web Vitals, Offline
+
+**Analytics**
+
+- `lib/analytics.ts` — Privacy-first Shim: events gehen an
+  `/api/v1/telemetry/events`, kein Third-Party-Script. Batch-Queue
+  (Limit 12, Flush alle 5s), `sendBeacon` bei `pagehide/visibilitychange`,
+  Fehler werden geschluckt (Analytics ist dekorativ, nicht load-bearing).
+- API: `track`, `page`, `identify`, `flush`.
+
+**Web Vitals**
+
+- `lib/web-vitals.ts` — `reportWebVital(metric)` für Nexts
+  `useReportWebVitals` Hook. Mappt LCP/FID/INP/CLS/FCP/TTFB auf
+  good/needs-improvement/poor und schickt via `analytics.track("web_vital")`.
+  In Dev zusätzlich Console-Mirror.
+
+**Page-Tracking**
+
+- `useOnlineStatus()` — reaktive online/offline-Flag basierend auf
+  `navigator.onLine` + Window-Events.
+- `OfflineBanner` — sliding warning-tone Banner wenn der Browser
+  Connectivity verliert.
+
+**Page-Tracking-Hook**
+
+- `usePageTracking()` — feuert `analytics.page(pathname)` auf jedem Routen-Change,
+  skipped die erste Hydration zur Vermeidung des Double-Counts.
+
