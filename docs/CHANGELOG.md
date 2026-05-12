@@ -493,3 +493,17 @@ Setup-Action-Caches.
 
 - `IdempotencyFilter.Config` via `CommonApiAutoConfiguration`.
 
+## Iteration 18 — Developer Docs
+
+**Neue Dokumente**
+
+- `docs/API.md` — REST-Vertrag (Auth-Header, Correlation-Id, Idempotency,
+  Pagination, Rate-Limits) + Tabelle aller `ApiError.code`-Werte mit
+  Bedeutung und HTTP-Status.
+- `docs/EXAMPLES.md` — Code-Snippets für die häufigsten Aufgaben
+  (Login auf allen 3 Clients, Idempotente POSTs, Empty/Error-States,
+  Forms mit Zod, BottomSheet, Web-Vitals-Reporter, Token-Regenerator).
+- `docs/RUNBOOK.md` — Operative Quickreference: Health-Probes,
+  Correlation-Id-Lookups, häufige Symptome (Login-Failures, slow requests,
+  Postgres full, Kafka-Lag), Skalierungsnotizen, Roll-back-Anleitung.
+
