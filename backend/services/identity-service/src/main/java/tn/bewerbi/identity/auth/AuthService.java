@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -396,8 +397,13 @@ public class AuthService {
     private AuthResponse issueTokens(User user) {
         var access = tokens.issueAccess(user);
         var refresh = tokens.issueRefresh(user.getId());
+        // Capture the User-Agent of the request that triggered the new
+        // session so the user can identify it later in the active-sessions
+        // screen. The lookup is best-effort — works inside a servlet
+        // request, no-op otherwise (e.g. async tests).
+        String ua = currentUserAgent();
         refreshStore.remember(user.getId(), refresh.token(),
-                Duration.ofSeconds(tokens.refreshTtlSeconds()));
+                Duration.ofSeconds(tokens.refreshTtlSeconds()), ua);
         return new AuthResponse(
                 access.token(),
                 access.expiresAt(),
@@ -406,6 +412,36 @@ public class AuthService {
                 refresh.expiresAt(),
                 new AuthResponse.UserDto(user.getId(), user.getEmail(), user.getRole(),
                         user.isEmailVerified(), user.getPreferredLocale()));
+    }
+
+    /** Returns the SHA-256-hashed refresh tokens of a user — used by the
+     *  session-listing endpoint. Plain tokens never leave Redis. */
+    public List<RefreshTokenStore.SessionInfo> listSessions(UUID userId) {
+        return refreshStore.list(userId);
+    }
+
+    /** Revoke a single session by its hash (as returned by {@link #listSessions}). */
+    public boolean revokeSession(UUID userId, String tokenHash) {
+        boolean removed = refreshStore.revokeByHash(userId, tokenHash);
+        if (removed && audit != null) {
+            audit.log(AuditEvent.success("AUTH_SESSION_REVOKED",
+                    userId.toString(), tokenHash.substring(0, Math.min(8, tokenHash.length()))));
+        }
+        return removed;
+    }
+
+    private static String currentUserAgent() {
+        try {
+            var attrs = org.springframework.web.context.request.RequestContextHolder
+                    .getRequestAttributes();
+            if (attrs instanceof org.springframework.web.context.request
+                    .ServletRequestAttributes sra) {
+                return sra.getRequest().getHeader("User-Agent");
+            }
+        } catch (Exception ignore) {
+            // Outside a request scope — fine, no UA to capture.
+        }
+        return null;
     }
 
     private static String randomToken() {

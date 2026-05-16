@@ -89,5 +89,28 @@ public class AuthController {
     // via the UserRegistered Kafka event published in register(), which
     // remains the single channel for the plain value.
 
+    /**
+     * List every active refresh-token "session" for the current user.
+     * Returned hashes are stable handles the client uses to call
+     * {@link #revokeSession(String)} — the plain token never crosses
+     * the wire from the server side.
+     */
+    @GetMapping("/me/sessions")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "List active refresh-token sessions of the current user")
+    public java.util.List<tn.bewerbi.identity.auth.RefreshTokenStore.SessionInfo> mySessions() {
+        return authService.listSessions(CurrentUser.id());
+    }
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/me/sessions/{tokenHash}")
+    @PreAuthorize("isAuthenticated()")
+    @org.springframework.web.bind.annotation.ResponseStatus(
+            org.springframework.http.HttpStatus.NO_CONTENT)
+    @Operation(summary = "Revoke a single session by its token hash")
+    public void revokeSession(@org.springframework.web.bind.annotation.PathVariable
+                              String tokenHash) {
+        authService.revokeSession(CurrentUser.id(), tokenHash);
+    }
+
     public record RefreshRequest(String refreshToken) {}
 }
