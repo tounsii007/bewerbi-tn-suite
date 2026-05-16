@@ -189,6 +189,11 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify({ token, newPassword }),
     }),
+  changePassword: (oldPassword: string, newPassword: string) =>
+    request<void>("/api/v1/auth/password/change", {
+      method: "POST",
+      body: JSON.stringify({ oldPassword, newPassword }),
+    }),
 };
 
 // ---------- Profile ----------
