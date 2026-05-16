@@ -68,7 +68,13 @@ public class AuthService {
         }
         var user = new User(req.email().toLowerCase(), passwords.encode(req.password()), req.role());
         user.setPreferredLocale(LocaleContext.currentTag());
-        user.setEmailVerification(randomToken(), Instant.now().plus(48, ChronoUnit.HOURS));
+
+        // Same hashing pattern as password-reset: send the plain token in the
+        // welcome email (via Kafka), persist only its SHA-256, so a DB dump
+        // does not let an attacker verify arbitrary accounts.
+        String plainVerification = randomToken();
+        user.setEmailVerification(sha256(plainVerification),
+                Instant.now().plus(48, ChronoUnit.HOURS));
         users.save(user);
 
         var profile = new Profile(user.getId());
@@ -77,6 +83,8 @@ public class AuthService {
         profile.setCountry("Tunesien");
         profiles.save(profile);
 
+        // Send the *plain* token in the event so notification-service can
+        // embed it in the link. The persisted copy (set above) is the hash.
         events.publish(Topics.USER_REGISTERED, user.getId().toString(),
                 new DomainEvents.UserRegistered(
                         user.getId(),
@@ -84,8 +92,13 @@ public class AuthService {
                         req.firstName(),
                         user.getRole().name(),
                         user.getPreferredLocale(),
-                        user.getEmailVerificationToken(),
+                        plainVerification,
                         Instant.now()));
+
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_REGISTER",
+                    user.getId().toString(), user.getEmail()));
+        }
 
         return issueTokens(user);
     }
@@ -305,13 +318,36 @@ public class AuthService {
     }
 
     public void verifyEmail(String token) {
-        var user = users.findByEmailVerificationToken(token)
-                .orElseThrow(() -> new BadCredentialsException("Invalid verification token"));
+        if (token == null || token.isBlank()) {
+            throw new BadCredentialsException("Invalid verification token");
+        }
+        // The DB column now holds the SHA-256 of the token (since Iter 39).
+        // Existing rows persisted in the legacy plaintext shape will fail the
+        // lookup; their users can re-register or trigger a re-issue. We
+        // audit the failure mode separately so SOC can spot a sudden spike
+        // of "invalid token" hits — likely a token-spraying attempt.
+        var user = users.findByEmailVerificationToken(sha256(token))
+                .orElse(null);
+        if (user == null) {
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_EMAIL_VERIFY",
+                        "unknown", "unknown", "invalid-token"));
+            }
+            throw new BadCredentialsException("Invalid verification token");
+        }
         if (user.getEmailVerificationExpiresAt() != null
                 && user.getEmailVerificationExpiresAt().isBefore(Instant.now())) {
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_EMAIL_VERIFY",
+                        user.getId().toString(), user.getEmail(), "expired"));
+            }
             throw new BadCredentialsException("Verification token expired");
         }
         user.markEmailVerified();
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_EMAIL_VERIFY",
+                    user.getId().toString(), user.getEmail()));
+        }
     }
 
     private AuthResponse issueTokens(User user) {

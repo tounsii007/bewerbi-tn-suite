@@ -3,12 +3,9 @@ package tn.bewerbi.identity.auth;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tn.bewerbi.common.api.CurrentUser;
-import tn.bewerbi.common.api.exception.ResourceNotFoundException;
-import tn.bewerbi.identity.domain.UserRepository;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -16,11 +13,9 @@ import tn.bewerbi.identity.domain.UserRepository;
 public class AuthController {
 
     private final AuthService authService;
-    private final UserRepository users;
 
-    public AuthController(AuthService authService, UserRepository users) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.users = users;
     }
 
     @PostMapping("/register")
@@ -78,20 +73,12 @@ public class AuthController {
         authService.resetPassword(req.token(), req.newPassword());
     }
 
-    /**
-     * Internal endpoint used by notification-service to obtain the freshly
-     * minted verification token when sending the welcome e-mail. Gated on the
-     * INTERNAL role so only signed-in services (never the public web client)
-     * can call it.
-     */
-    @GetMapping("/internal/users/{userId}/verification-token")
-    @PreAuthorize("hasRole('INTERNAL') or hasRole('ADMIN')")
-    public TokenResponse verificationTokenFor(@PathVariable UUID userId) {
-        var user = users.findById(userId)
-                .orElseThrow(() -> ResourceNotFoundException.of("User", userId));
-        return new TokenResponse(user.getEmailVerificationToken());
-    }
+    // The former /internal/users/{userId}/verification-token endpoint was
+    // removed in Iter 39: the DB now stores SHA-256 of the verification
+    // token, so a service-to-service call could only return the hash —
+    // useless. notification-service already receives the *plain* token
+    // via the UserRegistered Kafka event published in register(), which
+    // remains the single channel for the plain value.
 
     public record RefreshRequest(String refreshToken) {}
-    public record TokenResponse(String token) {}
 }
