@@ -73,6 +73,15 @@ public class AuthController {
         authService.resetPassword(req.token(), req.newPassword());
     }
 
+    @PostMapping("/password/change")
+    @PreAuthorize("isAuthenticated()")
+    @org.springframework.web.bind.annotation.ResponseStatus(
+            org.springframework.http.HttpStatus.NO_CONTENT)
+    @Operation(summary = "Change password while authenticated; signs out every device")
+    public void changePassword(@Valid @RequestBody AuthService.ChangePasswordRequest req) {
+        authService.changePassword(CurrentUser.id(), req.oldPassword(), req.newPassword());
+    }
+
     // The former /internal/users/{userId}/verification-token endpoint was
     // removed in Iter 39: the DB now stores SHA-256 of the verification
     // token, so a service-to-service call could only return the hash —

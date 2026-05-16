@@ -192,11 +192,54 @@ public class AuthService {
 
     public void logout(UUID userId, String refreshToken) {
         refreshStore.revoke(userId, refreshToken);
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_LOGOUT", userId.toString(),
+                    userId.toString()));
+        }
     }
 
     /** Sign the user out of *every* device — useful after password reset. */
     public void logoutAll(UUID userId) {
         refreshStore.revokeAll(userId);
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_LOGOUT_ALL", userId.toString(),
+                    userId.toString()));
+        }
+    }
+
+    /**
+     * Change the current user's password by submitting the old one. Distinct
+     * from /password/reset (which uses an emailed token): this path is for
+     * authenticated users in /settings.
+     *
+     * <p>Verifies the old password (with equal-time bcrypt against a dummy
+     * hash if the account vanished mid-request), enforces the same strength
+     * rubric as register, then rotates the bcrypt hash and revokes every
+     * refresh token — including the current one — so the user must
+     * re-authenticate on every device. The screen is responsible for
+     * routing back to /login.
+     */
+    public void changePassword(UUID userId, String oldPassword, String newPassword) {
+        var user = users.findById(userId).orElse(null);
+        boolean valid = user != null && passwords.matches(oldPassword, user.getPasswordHash());
+        if (user == null) {
+            passwords.matches(oldPassword, DUMMY_HASH);
+        }
+        if (!valid) {
+            if (audit != null && user != null) {
+                audit.log(AuditEvent.failure("AUTH_PASSWORD_CHANGED",
+                        user.getId().toString(), user.getEmail(),
+                        "invalid-old-password"));
+            }
+            throw new BadCredentialsException("Invalid credentials");
+        }
+        rejectWeakPassword(newPassword);
+        user.setPasswordHash(passwords.encode(newPassword));
+        refreshStore.revokeAll(user.getId());
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_PASSWORD_CHANGED",
+                    user.getId().toString(), user.getEmail()));
+        }
     }
 
     /**
@@ -387,6 +430,10 @@ public class AuthService {
 
     public record ResetPasswordRequest(
             @jakarta.validation.constraints.NotBlank String token,
+            @jakarta.validation.constraints.Size(min = 8, max = 72) String newPassword) {}
+
+    public record ChangePasswordRequest(
+            @jakarta.validation.constraints.NotBlank String oldPassword,
             @jakarta.validation.constraints.Size(min = 8, max = 72) String newPassword) {}
 
     public record AuthResponse(
