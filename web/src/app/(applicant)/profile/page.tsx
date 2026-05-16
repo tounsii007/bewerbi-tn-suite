@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProfileCompletenessCard } from "@/components/shared/profile-completeness-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useApiErrorToast } from "@/hooks/use-api-error-toast";
 
 const schema = z.object({
   firstName: z.string().optional(),
@@ -29,6 +30,7 @@ type FormValues = z.infer<typeof schema>;
 
 export default function ProfilePage() {
   const qc = useQueryClient();
+  const toastApiError = useApiErrorToast();
   const q = useQuery({ queryKey: ["profile", "me"], queryFn: () => profileApi.me() });
 
   const form = useForm<FormValues>({
@@ -50,7 +52,7 @@ export default function ProfilePage() {
       await qc.invalidateQueries({ queryKey: ["profile", "me"] });
       toast.success("Profil gespeichert");
     } catch (e) {
-      toast.error((e as Error).message);
+      toastApiError(e, "Profil konnte nicht gespeichert werden");
     }
   };
 

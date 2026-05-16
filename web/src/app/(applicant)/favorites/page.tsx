@@ -4,10 +4,11 @@ import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { favoritesApi, jobsApi } from "@/lib/api";
 import { JobCard } from "@/components/shared/job-card";
 import { Card } from "@/components/ui/card";
-import { toast } from "sonner";
+import { useApiErrorToast } from "@/hooks/use-api-error-toast";
 
 export default function FavoritesPage() {
   const qc = useQueryClient();
+  const toastApiError = useApiErrorToast();
   const favIds = useQuery({ queryKey: ["favorites"], queryFn: () => favoritesApi.list() });
   const jobs = useQueries({
     queries: (favIds.data ?? []).map((id) => ({
@@ -23,7 +24,7 @@ export default function FavoritesPage() {
       await favoritesApi.remove(jobId);
       await qc.invalidateQueries({ queryKey: ["favorites"] });
     } catch (e) {
-      toast.error((e as Error).message);
+      toastApiError(e, "Entfernen fehlgeschlagen");
     }
   };
 

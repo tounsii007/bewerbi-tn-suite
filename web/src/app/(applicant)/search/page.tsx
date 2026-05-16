@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { JobCard, JobCardSkeleton } from "@/components/shared/job-card";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useApiErrorToast } from "@/hooks/use-api-error-toast";
 import type { GermanLevel, JobCategory, JobType } from "@/lib/types";
 
 const CATEGORIES: { code: JobCategory; label: string }[] = [
@@ -36,6 +37,7 @@ const SALARY_BUCKETS = [0, 20_000, 30_000, 40_000, 50_000, 60_000, 75_000, 90_00
 
 export default function SearchPage() {
   const qc = useQueryClient();
+  const toastApiError = useApiErrorToast();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<JobCategory | undefined>();
   const [type, setType] = useState<JobType | undefined>();
@@ -97,7 +99,7 @@ export default function SearchPage() {
       });
       toast.success(`„${name}" gespeichert`);
     } catch (e) {
-      toast.error((e as Error).message);
+      toastApiError(e, "Aktion fehlgeschlagen");
     }
   };
 
@@ -108,7 +110,7 @@ export default function SearchPage() {
       else await favoritesApi.add(jobId);
       await qc.invalidateQueries({ queryKey: ["favorites"] });
     } catch (e) {
-      toast.error((e as Error).message);
+      toastApiError(e, "Aktion fehlgeschlagen");
     }
   };
 
