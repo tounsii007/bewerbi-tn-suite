@@ -1,17 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import { toast } from "sonner";
-import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LogOut, KeyRound } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { PasswordMeter } from "@/components/auth/password-meter";
 import { useAuthStore } from "@/stores/auth-store";
 import { authApi } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api-errors";
+import { useTranslate } from "@/i18n/use-translate";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const signOut = useAuthStore((s) => s.signOut);
   const user = useAuthStore((s) => s.user);
+  const t = useTranslate();
+  const [oldPwd, setOldPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [changing, setChanging] = useState(false);
 
   const logoutAllDevices = async () => {
     try {
@@ -19,7 +31,32 @@ export default function SettingsPage() {
       toast.success("Auf allen Geräten abgemeldet");
       await signOut();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(apiErrorMessage(t, e, "Abmelden fehlgeschlagen"));
+    }
+  };
+
+  const changePassword = async () => {
+    if (newPwd.length < 8) {
+      toast.error("Neues Passwort: mindestens 8 Zeichen.");
+      return;
+    }
+    if (newPwd !== confirmPwd) {
+      toast.error("Passwörter stimmen nicht überein.");
+      return;
+    }
+    setChanging(true);
+    try {
+      await authApi.changePassword(oldPwd, newPwd);
+      // Backend revokes every refresh token, including ours — sign out
+      // locally and route to login so the next call doesn't fire a
+      // pointless silent-refresh.
+      toast.success("Passwort aktualisiert. Bitte erneut anmelden.");
+      await signOut();
+      router.replace("/login");
+    } catch (e) {
+      toast.error(apiErrorMessage(t, e, "Passwortänderung fehlgeschlagen"));
+    } finally {
+      setChanging(false);
     }
   };
 
@@ -49,6 +86,59 @@ export default function SettingsPage() {
           </Button>
           <Button variant="destructive" onClick={() => void logoutAllDevices()}>
             Auf allen Geräten abmelden
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Passwort ändern</CardTitle>
+          <CardDescription>
+            Du wirst nach der Änderung auf allen Geräten abgemeldet.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <div>
+            <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">
+              Aktuelles Passwort
+            </label>
+            <Input
+              type="password"
+              autoComplete="current-password"
+              value={oldPwd}
+              onChange={(e) => setOldPwd(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">
+              Neues Passwort
+            </label>
+            <Input
+              type="password"
+              autoComplete="new-password"
+              value={newPwd}
+              onChange={(e) => setNewPwd(e.target.value)}
+            />
+            <PasswordMeter value={newPwd} />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">
+              Neues Passwort bestätigen
+            </label>
+            <Input
+              type="password"
+              autoComplete="new-password"
+              value={confirmPwd}
+              onChange={(e) => setConfirmPwd(e.target.value)}
+            />
+          </div>
+          <Button
+            onClick={() => void changePassword()}
+            disabled={changing || !oldPwd || !newPwd || !confirmPwd}
+            className="self-start"
+          >
+            <KeyRound className="size-4" />
+            {changing ? "Speichern…" : "Passwort ändern"}
           </Button>
         </CardContent>
       </Card>

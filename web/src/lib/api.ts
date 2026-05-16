@@ -53,6 +53,8 @@ export const authApi = {
       method: "POST",
       body: { token, newPassword },
     }),
+  changePassword: (oldPassword: string, newPassword: string) =>
+    api.post<void>("/api/v1/auth/password/change", { oldPassword, newPassword }),
 };
 
 // ─── Profile ───────────────────────────────────────────────────────────
