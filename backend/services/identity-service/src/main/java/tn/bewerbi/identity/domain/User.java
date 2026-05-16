@@ -15,6 +15,8 @@ public class User extends BaseEntity {
     @Column(name = "email_verification_expires_at") private Instant emailVerificationExpiresAt;
     @Column(name = "preferred_locale", nullable = false) private String preferredLocale = "de";
     @Column(name = "last_login_at") private Instant lastLoginAt;
+    @Column(name = "password_reset_token_hash") private String passwordResetTokenHash;
+    @Column(name = "password_reset_expires_at") private Instant passwordResetExpiresAt;
 
     protected User() {}
 
@@ -44,4 +46,15 @@ public class User extends BaseEntity {
     public void setPreferredLocale(String v) { this.preferredLocale = v; }
     public Instant getLastLoginAt() { return lastLoginAt; }
     public void touchLogin() { this.lastLoginAt = Instant.now(); }
+
+    public String getPasswordResetTokenHash() { return passwordResetTokenHash; }
+    public Instant getPasswordResetExpiresAt() { return passwordResetExpiresAt; }
+    public void setPasswordReset(String tokenHash, Instant expiresAt) {
+        this.passwordResetTokenHash = tokenHash;
+        this.passwordResetExpiresAt = expiresAt;
+    }
+    public void clearPasswordReset() {
+        this.passwordResetTokenHash = null;
+        this.passwordResetExpiresAt = null;
+    }
 }

@@ -58,6 +58,27 @@ public class AuthController {
     }
 
     /**
+     * Request a password reset. Always returns 204 — caller cannot tell
+     * whether the address is registered (anti-enumeration). Notification
+     * happens asynchronously over Kafka.
+     */
+    @PostMapping("/password/forgot")
+    @org.springframework.web.bind.annotation.ResponseStatus(
+            org.springframework.http.HttpStatus.NO_CONTENT)
+    @Operation(summary = "Request a password-reset email (always 204)")
+    public void forgotPassword(@Valid @RequestBody AuthService.ForgotPasswordRequest req) {
+        authService.requestPasswordReset(req.email());
+    }
+
+    @PostMapping("/password/reset")
+    @org.springframework.web.bind.annotation.ResponseStatus(
+            org.springframework.http.HttpStatus.NO_CONTENT)
+    @Operation(summary = "Consume a reset token and set a new password")
+    public void resetPassword(@Valid @RequestBody AuthService.ResetPasswordRequest req) {
+        authService.resetPassword(req.token(), req.newPassword());
+    }
+
+    /**
      * Internal endpoint used by notification-service to obtain the freshly
      * minted verification token when sending the welcome e-mail. Gated on the
      * INTERNAL role so only signed-in services (never the public web client)

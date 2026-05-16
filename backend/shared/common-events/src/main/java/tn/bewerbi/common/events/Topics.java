@@ -15,4 +15,8 @@ public final class Topics {
 
     /** Emitted by identity-service after a successful registration. */
     public static final String USER_REGISTERED = "bewerbi.users.registered";
+
+    /** Emitted by identity-service when a user requests a password reset.
+     * Notification-service consumes it to send the reset email. */
+    public static final String PASSWORD_RESET_REQUESTED = "bewerbi.users.password-reset.requested";
 }

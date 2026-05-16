@@ -27,4 +27,14 @@ public final class DomainEvents {
     public record JobPublished(
             UUID jobId, UUID companyId, String title, String category, String type,
             String location, Instant occurredAt) {}
+
+    /**
+     * Carries the *plain* one-time reset token so notification-service can
+     * embed it in the reset link. The plain value never leaves Kafka — the
+     * stored copy in {@code users.password_reset_token_hash} is SHA-256, so
+     * even a DB dump cannot reset accounts.
+     */
+    public record PasswordResetRequested(
+            UUID userId, String email, String firstName, String preferredLocale,
+            String resetToken, Instant expiresAt, Instant occurredAt) {}
 }

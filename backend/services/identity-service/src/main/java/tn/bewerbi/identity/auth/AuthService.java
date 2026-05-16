@@ -1,5 +1,8 @@
 package tn.bewerbi.identity.auth;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
@@ -152,6 +155,101 @@ public class AuthService {
         refreshStore.revokeAll(userId);
     }
 
+    /**
+     * Request a password reset. The response is intentionally outcome-agnostic
+     * (the controller returns 204 no matter what) so attackers cannot probe
+     * which addresses are registered.
+     *
+     * <p>Side-effects only occur when the account exists:
+     * <ul>
+     *   <li>A 32-byte token is generated; its SHA-256 hash is persisted with a
+     *       30-min TTL. The hash is single-use (cleared on reset).</li>
+     *   <li>A {@link DomainEvents.PasswordResetRequested} event carrying the
+     *       *plain* token is published so notification-service can mail it.</li>
+     * </ul>
+     */
+    public void requestPasswordReset(String email) {
+        String normalized = email == null ? "" : email.trim().toLowerCase();
+        if (normalized.isEmpty()) {
+            return;
+        }
+        var user = users.findByEmail(normalized).orElse(null);
+        if (user == null) {
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_PASSWORD_RESET_REQUESTED",
+                        normalized, normalized, "unknown-account"));
+            }
+            return;
+        }
+
+        // Don't re-issue if a fresh, unexpired token already exists — this
+        // prevents an attacker from flooding the inbox of a known address.
+        if (user.getPasswordResetExpiresAt() != null
+                && user.getPasswordResetExpiresAt().isAfter(Instant.now())) {
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_PASSWORD_RESET_REQUESTED",
+                        user.getId().toString(), normalized, "throttled"));
+            }
+            return;
+        }
+
+        String token = randomToken();
+        Instant expiresAt = Instant.now().plus(30, ChronoUnit.MINUTES);
+        user.setPasswordReset(sha256(token), expiresAt);
+
+        // Look up the profile's first name for personalised email — fall back
+        // gracefully if no profile row exists (registration always creates one,
+        // so this should never happen in production but tests may differ).
+        String firstName = profiles.findById(user.getId())
+                .map(Profile::getFirstName).orElse("");
+
+        events.publish(Topics.PASSWORD_RESET_REQUESTED, user.getId().toString(),
+                new DomainEvents.PasswordResetRequested(
+                        user.getId(), user.getEmail(), firstName,
+                        user.getPreferredLocale(), token, expiresAt, Instant.now()));
+
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_PASSWORD_RESET_REQUESTED",
+                    user.getId().toString(), normalized));
+        }
+    }
+
+    /**
+     * Consume a reset token and set the new password. Revokes every refresh
+     * token of the account so all existing sessions are signed out.
+     */
+    public void resetPassword(String token, String newPassword) {
+        if (token == null || token.isBlank()) {
+            throw new BadCredentialsException("Invalid reset token");
+        }
+        var user = users.findByPasswordResetTokenHash(sha256(token))
+                .orElseThrow(() -> new BadCredentialsException("Invalid reset token"));
+        if (user.getPasswordResetExpiresAt() == null
+                || user.getPasswordResetExpiresAt().isBefore(Instant.now())) {
+            throw new BadCredentialsException("Reset token expired");
+        }
+        user.setPasswordHash(passwords.encode(newPassword));
+        user.clearPasswordReset();
+        refreshStore.revokeAll(user.getId());
+        if (attempts != null) {
+            attempts.reset(user.getEmail());
+        }
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_PASSWORD_CHANGED",
+                    user.getId().toString(), user.getEmail()));
+        }
+    }
+
+    private static String sha256(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(input.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 unavailable", e);
+        }
+    }
+
     public void verifyEmail(String token) {
         var user = users.findByEmailVerificationToken(token)
                 .orElseThrow(() -> new BadCredentialsException("Invalid verification token"));
@@ -193,6 +291,13 @@ public class AuthService {
     public record LoginRequest(
             @jakarta.validation.constraints.Email String email,
             @jakarta.validation.constraints.NotBlank String password) {}
+
+    public record ForgotPasswordRequest(
+            @jakarta.validation.constraints.Email String email) {}
+
+    public record ResetPasswordRequest(
+            @jakarta.validation.constraints.NotBlank String token,
+            @jakarta.validation.constraints.Size(min = 8, max = 72) String newPassword) {}
 
     public record AuthResponse(
             String accessToken,

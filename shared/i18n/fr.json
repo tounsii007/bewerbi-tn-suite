@@ -23,7 +23,12 @@
     "fullName": "Nom complet",
     "forgotPassword": "Mot de passe oublié ?",
     "noAccount": "Pas encore de compte ?",
-    "haveAccount": "Déjà un compte ?"
+    "haveAccount": "Déjà un compte ?",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "resetRequested": "Si un compte est associé à cette adresse, un lien vient d'être envoyé.",
+    "resetSuccess": "Mot de passe mis à jour. Vous pouvez vous connecter."
   },
   "error": {
     "internal":          "Une erreur est survenue. Veuillez réessayer.",

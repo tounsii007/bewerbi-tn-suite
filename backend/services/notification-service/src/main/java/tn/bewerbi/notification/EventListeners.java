@@ -58,6 +58,27 @@ public class EventListeners {
         }
     }
 
+    @KafkaListener(topics = Topics.PASSWORD_RESET_REQUESTED)
+    public void onPasswordResetRequested(String payload) {
+        try {
+            var event = mapper.readValue(payload, DomainEvents.PasswordResetRequested.class);
+            log.info("PasswordResetRequested: user={} locale={}",
+                    event.userId(), event.preferredLocale());
+
+            String resetLink = "%s/reset-password?token=%s&lang=%s".formatted(
+                    frontendBaseUrl, event.resetToken(), event.preferredLocale());
+
+            emails.sendMessage(new NotificationApp.EmailRequest(
+                    event.email(),
+                    "email.password-reset.subject",
+                    "email.password-reset.body",
+                    event.preferredLocale(),
+                    new Object[]{event.firstName(), resetLink}));
+        } catch (Exception e) {
+            log.warn("Failed to process PasswordResetRequested: {}", e.getMessage());
+        }
+    }
+
     @KafkaListener(topics = Topics.APPLICATION_CREATED)
     public void onApplicationCreated(String payload) {
         try {

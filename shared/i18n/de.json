@@ -23,7 +23,12 @@
     "fullName": "Vollständiger Name",
     "forgotPassword": "Passwort vergessen?",
     "noAccount": "Noch kein Konto?",
-    "haveAccount": "Schon ein Konto?"
+    "haveAccount": "Schon ein Konto?",
+    "resetPassword": "Passwort zurücksetzen",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "resetRequested": "Wenn ein Konto mit dieser Adresse existiert, ist gerade ein Link unterwegs.",
+    "resetSuccess": "Passwort aktualisiert. Du kannst dich jetzt anmelden."
   },
   "error": {
     "internal":          "Etwas ist schiefgegangen. Bitte versuche es erneut.",
