@@ -55,6 +55,12 @@ export const authApi = {
     }),
   changePassword: (oldPassword: string, newPassword: string) =>
     api.post<void>("/api/v1/auth/password/change", { oldPassword, newPassword }),
+  sessions: () =>
+    api.get<{ tokenHash: string; createdAt: number; userAgent: string; expiresInSeconds: number }[]>(
+      "/api/v1/auth/me/sessions",
+    ),
+  revokeSession: (tokenHash: string) =>
+    api.del<void>(`/api/v1/auth/me/sessions/${encodeURIComponent(tokenHash)}`),
 };
 
 // ─── Profile ───────────────────────────────────────────────────────────

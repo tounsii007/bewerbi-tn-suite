@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { PasswordMeter } from "@/components/auth/password-meter";
+import { SessionsList } from "@/components/auth/sessions-list";
 import { useAuthStore } from "@/stores/auth-store";
 import { authApi } from "@/lib/api";
 import { apiErrorMessage } from "@/lib/api-errors";
@@ -87,6 +88,18 @@ export default function SettingsPage() {
           <Button variant="destructive" onClick={() => void logoutAllDevices()}>
             Auf allen Geräten abmelden
           </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Aktive Sitzungen</CardTitle>
+          <CardDescription>
+            Beende einzelne Sitzungen, ohne dich auf allen Geräten abzumelden.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SessionsList />
         </CardContent>
       </Card>
 
