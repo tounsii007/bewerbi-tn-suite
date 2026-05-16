@@ -6,8 +6,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { useAuthStore } from "@/stores/auth-store";
 import { useLocaleStore } from "@/stores/locale-store";
 import { useThemeStore } from "@/stores/theme-store";
+import { useIdleLogout } from "@/hooks/use-idle-logout";
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  useIdleLogout();
   const client = useMemo(
     () =>
       new QueryClient({
