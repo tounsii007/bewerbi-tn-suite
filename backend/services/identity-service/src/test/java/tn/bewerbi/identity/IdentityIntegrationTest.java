@@ -102,4 +102,63 @@ class IdentityIntegrationTest {
                 .andReturn();
         assertThat(result.getResponse().getStatus()).isIn(401, 400);
     }
+
+    /**
+     * Weak passwords must be rejected by the shared PasswordStrength
+     * rubric *before* the user row is created. Asserts the 422 +
+     * messageKey contract that the web/mobile/Flutter clients translate.
+     */
+    @Test
+    void register_with_weak_password_returns_422_with_messageKey() throws Exception {
+        String body = """
+                {
+                  "email": "weak@example.tn",
+                  "password": "password",
+                  "firstName": "Weak",
+                  "lastName": "Pwd",
+                  "role": "APPLICANT"
+                }
+                """;
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andReturn();
+        assertThat(result.getResponse().getStatus()).isEqualTo(422);
+        JsonNode json = mapper.readTree(result.getResponse().getContentAsString());
+        assertThat(json.path("messageKey").asText()).startsWith("error.auth.password.weak.");
+    }
+
+    /**
+     * /password/forgot must always 204, regardless of whether the
+     * address exists, so it cannot be used as an account-enumeration
+     * oracle.
+     */
+    @Test
+    void forgot_password_always_returns_204() throws Exception {
+        int unknown = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/password/forgot")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"email\": \"definitely-not-there@example.tn\" }"))
+                .andReturn().getResponse().getStatus();
+        assertThat(unknown).isEqualTo(204);
+
+        // Register + reuse the address — still 204 (the side-effect
+        // happens only on the known path, but the visible response is
+        // identical).
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                          "email": "knownuser@example.tn",
+                          "password": "StrongP@ss123",
+                          "firstName": "K",
+                          "lastName": "User",
+                          "role": "APPLICANT"
+                        }
+                        """));
+        int known = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/password/forgot")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"email\": \"knownuser@example.tn\" }"))
+                .andReturn().getResponse().getStatus();
+        assertThat(known).isEqualTo(204);
+    }
 }
