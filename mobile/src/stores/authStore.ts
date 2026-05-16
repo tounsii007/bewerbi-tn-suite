@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { secureStorage } from "../lib/secureStorage";
 import { supabase, IS_MOCK_MODE } from "../lib/supabase";
 import { mockProfiles } from "../lib/mockData";
 import {
@@ -199,15 +199,30 @@ export const useAuthStore = create<AuthState>()(
       };
     },
     {
-      name: "bewerbi.auth",
-      storage: createJSONStorage(() => AsyncStorage),
+      // Bumped name when the storage backend changed so the old AsyncStorage
+      // entry is orphaned (and effectively ignored) on the first run with
+      // SecureStore. Avoids hydrating possibly-stale or plain-text tokens
+      // from the previous backend.
+      name: "bewerbi.auth.v2",
+      storage: createJSONStorage(() => secureStorage),
       // Only persist tokens + user id; everything else is derived or stale.
       partialize: (state) => ({
         tokens: state.tokens,
         session: state.session,
       }),
-      // Re-hydrate the apiClient with the persisted tokens on app restart.
+      // Re-hydrate the apiClient with the persisted tokens on app restart,
+      // and best-effort delete any leftover plaintext copy from the legacy
+      // AsyncStorage backend (bewerbi.auth) so it can't be exfiltrated by
+      // a future backup of unencrypted preferences.
       onRehydrateStorage: () => (state) => {
+        void (async () => {
+          try {
+            const legacy = await import("@react-native-async-storage/async-storage");
+            await legacy.default.removeItem("bewerbi.auth");
+          } catch {
+            // Non-fatal: the legacy slot may already be gone.
+          }
+        })();
         if (state?.tokens) {
           apiSetTokens({
             accessToken: state.tokens.accessToken,
