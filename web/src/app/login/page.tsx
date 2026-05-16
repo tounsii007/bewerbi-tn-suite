@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuthStore } from "@/stores/auth-store";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { safeRedirectPath } from "@/lib/security";
 
 const schema = z.object({
   email: z.string().email("Gültige E-Mail erforderlich"),
@@ -35,7 +36,8 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       await signIn(values.email, values.password);
-      const redirect = search.get("redirect") ?? "/dashboard";
+      // Reject open-redirects to off-site URLs (?redirect=//evil.example).
+      const redirect = safeRedirectPath(search.get("redirect"), "/dashboard");
       router.replace(redirect);
     } catch (e) {
       const err = e as { message?: string };

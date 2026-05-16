@@ -13,20 +13,10 @@ const nextConfig: NextConfig = {
       { source: "/api/:path*", destination: `${gateway}/api/:path*` },
     ];
   },
+  // Static security headers. The Content-Security-Policy is *not* set here —
+  // middleware.ts emits a per-request nonced CSP that overrides any static
+  // value. Mixing both leads to two headers being sent.
   async headers() {
-    const self = "'self'";
-    const scriptSrc = [self, "'unsafe-inline'", "'unsafe-eval'"].join(" ");
-    const csp = [
-      `default-src ${self}`,
-      `script-src ${scriptSrc}`,
-      `style-src ${self} 'unsafe-inline' https://fonts.googleapis.com`,
-      `font-src ${self} https://fonts.gstatic.com`,
-      `img-src ${self} data: https:`,
-      `connect-src ${self}`,
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-    ].join("; ");
     return [
       {
         source: "/:path*",
@@ -35,7 +25,10 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-          { key: "Content-Security-Policy", value: csp },
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          { key: "Cross-Origin-Resource-Policy", value: "same-site" },
+          { key: "X-DNS-Prefetch-Control", value: "off" },
         ],
       },
     ];
