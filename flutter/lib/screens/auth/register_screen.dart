@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:bewerbi_tn_flutter/app/theme.dart';
 import 'package:bewerbi_tn_flutter/models/profile.dart';
+import 'package:bewerbi_tn_flutter/widgets/password_strength_bar.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -55,8 +56,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return;
     }
 
-    if (password.length < 6) {
-      _showError('Das Passwort muss mindestens 6 Zeichen lang sein.');
+    if (password.length < 8) {
+      _showError('Das Passwort muss mindestens 8 Zeichen lang sein.');
       return;
     }
 
@@ -174,6 +175,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               TextField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
+                onChanged: (_) => setState(() {}),
                 textInputAction: TextInputAction.next,
                 style: GoogleFonts.inter(color: isDark ? AppColors.white : AppColors.gray900, fontSize: 15),
                 decoration: InputDecoration(
@@ -194,6 +196,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 ),
               ),
+              PasswordStrengthBar(value: _passwordController.text),
               const SizedBox(height: 16),
 
               // Confirm Password

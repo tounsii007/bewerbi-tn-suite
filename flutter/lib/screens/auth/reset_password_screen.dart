@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:bewerbi_tn_flutter/app/theme.dart';
 import 'package:bewerbi_tn_flutter/services/api_client.dart';
+import 'package:bewerbi_tn_flutter/widgets/password_strength_bar.dart';
 
 /// Deep-link target for the password-reset email. The reset email built by
 /// notification-service points at `https://bewerbi.tn/reset-password?token=…`,
@@ -132,12 +133,14 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
         TextField(
           controller: _passwordCtrl,
           obscureText: true,
+          onChanged: (_) => setState(() {}),
           textInputAction: TextInputAction.next,
           decoration: const InputDecoration(
             hintText: 'Neues Passwort',
             prefixIcon: Icon(Icons.lock_outline, size: 20),
           ),
         ),
+        PasswordStrengthBar(value: _passwordCtrl.text),
         const SizedBox(height: 12),
         TextField(
           controller: _confirmCtrl,

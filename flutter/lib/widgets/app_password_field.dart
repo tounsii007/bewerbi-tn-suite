@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:bewerbi_tn_flutter/app/theme.dart';
+import 'package:bewerbi_tn_flutter/services/password_strength.dart';
 
 /// Text field tuned for password entry. Shows a toggle to reveal/hide, masks by default,
 /// disables autocorrect/suggestions, and emits a strength indicator when the field is in
@@ -33,11 +34,15 @@ class AppPasswordField extends StatefulWidget {
 
 class _AppPasswordFieldState extends State<AppPasswordField> {
   bool _obscure = true;
-  int _strength = 0;
+  PasswordStrengthResult _result = const PasswordStrengthResult(
+    score: 0,
+    label: 'very-weak',
+    suggestions: [],
+  );
 
   void _handleChange(String v) {
     if (widget.showStrength) {
-      setState(() => _strength = _scorePassword(v));
+      setState(() => _result = evaluatePassword(v));
     }
     widget.onChanged?.call(v);
   }
@@ -68,11 +73,11 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
             ),
           ),
         ),
-        if (widget.showStrength) ...[
+        if (widget.showStrength && widget.controller.text.isNotEmpty) ...[
           const SizedBox(height: 8),
           Row(
             children: List.generate(4, (i) {
-              final filled = i < _strength;
+              final filled = i < _result.score;
               return Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(right: i < 3 ? 4 : 0),
@@ -82,7 +87,7 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(2),
                       color: filled
-                          ? _strengthColor(_strength)
+                          ? _strengthColor(_result.score)
                           : (isDark ? AppColors.darkBorder : AppColors.gray200),
                     ),
                   ),
@@ -90,19 +95,63 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
               );
             }),
           ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _labelDe(_result.label),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? AppColors.gray400 : AppColors.gray500,
+                ),
+              ),
+              if (_result.suggestions.isNotEmpty && _result.score < 3)
+                Expanded(
+                  child: Text(
+                    _suggestionDe(_result.suggestions.first),
+                    textAlign: TextAlign.end,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12, color: AppColors.gray400),
+                  ),
+                ),
+            ],
+          ),
         ],
       ],
     );
   }
 
-  static int _scorePassword(String pw) {
-    if (pw.length < 6) return 0;
-    int score = 0;
-    if (pw.length >= 8) score++;
-    if (RegExp(r'[A-Z]').hasMatch(pw) && RegExp(r'[a-z]').hasMatch(pw)) score++;
-    if (RegExp(r'[0-9]').hasMatch(pw)) score++;
-    if (RegExp(r'[^A-Za-z0-9]').hasMatch(pw)) score++;
-    return score;
+  static String _labelDe(String id) {
+    switch (id) {
+      case 'very-weak':
+        return 'Sehr schwach';
+      case 'weak':
+        return 'Schwach';
+      case 'fair':
+        return 'Mittel';
+      case 'strong':
+        return 'Stark';
+      default:
+        return 'Sehr stark';
+    }
+  }
+
+  static String _suggestionDe(String id) {
+    switch (id) {
+      case 'length':
+        return 'Mindestens 8 Zeichen.';
+      case 'mixClasses':
+        return 'Mische Groß-/Kleinbuchstaben, Zahlen und Sonderzeichen.';
+      case 'noSequential':
+        return 'Keine Folgen wie "abc" oder "123".';
+      case 'noRepeats':
+        return 'Vermeide drei gleiche Zeichen hintereinander.';
+      case 'notCommon':
+        return 'Dieses Passwort ist zu weit verbreitet.';
+      default:
+        return '';
+    }
   }
 
   static Color _strengthColor(int score) {
