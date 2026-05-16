@@ -134,18 +134,46 @@ public class AuthService {
     }
 
     /**
-     * Token rotation: the submitted refresh token is revoked on success, and
-     * a new access + refresh pair is issued. A second call with the same
-     * refresh token is rejected — protecting against replayed tokens.
+     * Token rotation with automatic-reuse detection.
+     *
+     * <p>The submitted refresh token's JWT signature is checked first, then
+     * we look up its hash in the Redis registry:
+     * <ul>
+     *   <li><b>Found</b> → revoke this single hash, issue a new access +
+     *       refresh pair. Normal happy path.</li>
+     *   <li><b>Missing</b> → the JWT signature passed (so it was once
+     *       legitimately issued to this user) but the hash is gone, which
+     *       means it has already been rotated. Either the legitimate
+     *       client rotated and someone replayed an old copy, or an
+     *       attacker rotated first and the real user is the one being
+     *       replayed. We cannot tell which is which, so we
+     *       {@link RefreshTokenStore#revokeAll revoke every} session for
+     *       the user. Both sides are forced to re-authenticate.</li>
+     * </ul>
+     * Pattern: OAuth 2.0 "automatic reuse detection" (RFC 6819 §5.2.2.3).
      */
     public AuthResponse refresh(String refreshToken) {
         UUID userId = tokens.validateRefresh(refreshToken);
         if (!refreshStore.isKnown(userId, refreshToken)) {
+            // Reuse detected — burn every session for safety. The actor of
+            // the audit event is the userId (no email yet because we may
+            // not want a DB roundtrip on a hot path), the reason carries
+            // enough context for SOC alerting.
+            refreshStore.revokeAll(userId);
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_REFRESH_REUSE_DETECTED",
+                        userId.toString(), userId.toString(),
+                        "refresh-token-reused-all-sessions-revoked"));
+            }
             throw new BadCredentialsException("Refresh token revoked or reused");
         }
         refreshStore.revoke(userId, refreshToken);
         var user = users.findById(userId)
                 .orElseThrow(() -> ResourceNotFoundException.of("User", userId));
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_TOKEN_REFRESH",
+                    user.getId().toString(), user.getEmail()));
+        }
         return issueTokens(user);
     }
 
