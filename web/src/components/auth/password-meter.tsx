@@ -3,14 +3,7 @@
 import { useMemo } from "react";
 import { evaluatePassword } from "@shared/password-strength";
 import { cn } from "@/lib/cn";
-
-const SUGGESTION_DE: Record<string, string> = {
-  length: "Mindestens 8 Zeichen.",
-  mixClasses: "Mische Groß-/Kleinbuchstaben, Zahlen und Sonderzeichen.",
-  noSequential: 'Keine Folgen wie "abc" oder "123".',
-  noRepeats: "Vermeide drei gleiche Zeichen hintereinander.",
-  notCommon: "Dieses Passwort ist zu weit verbreitet.",
-};
+import { useTranslate } from "@/i18n/use-translate";
 
 const BAR_COLORS: Record<number, string> = {
   0: "bg-accent-500",
@@ -20,21 +13,17 @@ const BAR_COLORS: Record<number, string> = {
   4: "bg-emerald-600",
 };
 
-const LABEL_DE: Record<string, string> = {
-  "very-weak": "Sehr schwach",
-  weak: "Schwach",
-  fair: "Mittel",
-  strong: "Stark",
-  "very-strong": "Sehr stark",
-};
-
 /**
  * Live strength meter — runs the *same* shared evaluator the backend
  * uses, so a password that scores >= 2 client-side will also pass the
  * 422 gate. The bar is purely advisory; submission is still gated by
  * the form's own validators and the server's check.
+ *
+ * Strings come from the i18n dictionary so de/fr/ar all render
+ * correctly when the user switches languages.
  */
 export function PasswordMeter({ value }: { value: string }) {
+  const t = useTranslate();
   const result = useMemo(() => evaluatePassword(value), [value]);
   if (!value) return null;
 
@@ -53,11 +42,11 @@ export function PasswordMeter({ value }: { value: string }) {
       </div>
       <div className="flex items-center justify-between gap-2">
         <p className="text-xs text-gray-500 dark:text-dark-muted">
-          {LABEL_DE[result.label]}
+          {t(`auth.password.strength.${result.label}`)}
         </p>
         {result.suggestions.length > 0 && result.score < 3 && (
           <p className="text-xs text-gray-400">
-            {SUGGESTION_DE[result.suggestions[0]] ?? ""}
+            {t(`auth.password.suggest.${result.suggestions[0]}`)}
           </p>
         )}
       </div>

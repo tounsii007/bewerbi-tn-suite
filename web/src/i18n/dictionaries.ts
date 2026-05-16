@@ -95,6 +95,17 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "cv.parsing": "Lebenslauf wird analysiert…",
     "cv.autofillTitle": "Automatisches Ausfüllen",
     "cv.applyAll": "Alle übernehmen",
+
+    "auth.password.strength.very-weak": "Sehr schwach",
+    "auth.password.strength.weak": "Schwach",
+    "auth.password.strength.fair": "Mittel",
+    "auth.password.strength.strong": "Stark",
+    "auth.password.strength.very-strong": "Sehr stark",
+    "auth.password.suggest.length": "Mindestens 8 Zeichen.",
+    "auth.password.suggest.mixClasses": "Mische Groß-/Kleinbuchstaben, Zahlen und Sonderzeichen.",
+    "auth.password.suggest.noSequential": "Keine Folgen wie \"abc\" oder \"123\".",
+    "auth.password.suggest.noRepeats": "Vermeide drei gleiche Zeichen hintereinander.",
+    "auth.password.suggest.notCommon": "Dieses Passwort ist zu weit verbreitet.",
   },
 
   fr: {
@@ -185,6 +196,17 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "cv.parsing": "Analyse du CV…",
     "cv.autofillTitle": "Remplissage automatique",
     "cv.applyAll": "Tout appliquer",
+
+    "auth.password.strength.very-weak": "Très faible",
+    "auth.password.strength.weak": "Faible",
+    "auth.password.strength.fair": "Moyen",
+    "auth.password.strength.strong": "Fort",
+    "auth.password.strength.very-strong": "Très fort",
+    "auth.password.suggest.length": "8 caractères minimum.",
+    "auth.password.suggest.mixClasses": "Mélangez majuscules, minuscules, chiffres et caractères spéciaux.",
+    "auth.password.suggest.noSequential": "Évitez les suites comme « abc » ou « 123 ».",
+    "auth.password.suggest.noRepeats": "Évitez trois caractères identiques d'affilée.",
+    "auth.password.suggest.notCommon": "Ce mot de passe est trop courant.",
   },
 
   ar: {
@@ -275,5 +297,16 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "cv.parsing": "جاري تحليل السيرة…",
     "cv.autofillTitle": "ملء تلقائي",
     "cv.applyAll": "تطبيق الكل",
+
+    "auth.password.strength.very-weak": "ضعيفة جدًا",
+    "auth.password.strength.weak": "ضعيفة",
+    "auth.password.strength.fair": "متوسطة",
+    "auth.password.strength.strong": "قوية",
+    "auth.password.strength.very-strong": "قوية جدًا",
+    "auth.password.suggest.length": "8 أحرف على الأقل.",
+    "auth.password.suggest.mixClasses": "استخدم أحرفًا كبيرة وصغيرة وأرقامًا ورموزًا.",
+    "auth.password.suggest.noSequential": "تجنب التسلسلات مثل \"abc\" أو \"123\".",
+    "auth.password.suggest.noRepeats": "تجنب تكرار نفس الحرف ثلاث مرات.",
+    "auth.password.suggest.notCommon": "كلمة المرور هذه شائعة جدًا.",
   },
 };
