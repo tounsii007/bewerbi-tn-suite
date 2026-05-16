@@ -44,7 +44,24 @@
     "welcome": "Willkommen bei bewerbi.tn",
     "subtitle": "Deine Brücke nach Deutschland",
     "loginError": "Ungültige Anmeldedaten",
-    "registerSuccess": "Registrierung erfolgreich! Bitte bestätige deine E-Mail."
+    "registerSuccess": "Registrierung erfolgreich! Bitte bestätige deine E-Mail.",
+    "newPassword": "Neues Passwort",
+    "password.strength.very-weak": "Sehr schwach",
+    "password.strength.weak": "Schwach",
+    "password.strength.fair": "Mittel",
+    "password.strength.strong": "Stark",
+    "password.strength.very-strong": "Sehr stark"
+  },
+  "error": {
+    "auth.email.exists": "Diese E-Mail ist bereits registriert.",
+    "auth.invalidCredentials": "E-Mail oder Passwort falsch.",
+    "rate.limited": "Zu viele Versuche. Bitte später erneut versuchen.",
+    "auth.password.weak.length": "Passwort zu kurz — mindestens 8 Zeichen.",
+    "auth.password.weak.mixClasses": "Bitte mische Groß-/Kleinbuchstaben, Zahlen und Sonderzeichen.",
+    "auth.password.weak.noSequential": "Keine aufeinanderfolgenden Zeichen wie \"abc\" oder \"123\".",
+    "auth.password.weak.noRepeats": "Vermeide drei gleiche Zeichen hintereinander.",
+    "auth.password.weak.notCommon": "Dieses Passwort ist zu weit verbreitet.",
+    "auth.password.weak.weak": "Passwort zu schwach."
   },
   "home": {
     "greeting": "Hallo, {{name}}!",

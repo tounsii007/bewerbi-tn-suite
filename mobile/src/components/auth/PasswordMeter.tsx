@@ -1,22 +1,7 @@
 import { useMemo } from "react";
 import { View, Text } from "react-native";
+import { useTranslation } from "react-i18next";
 import { evaluatePassword } from "@shared/password-strength";
-
-const SUGGESTION_DE: Record<string, string> = {
-  length: "Mindestens 8 Zeichen.",
-  mixClasses: "Mische Groß-/Kleinbuchstaben, Zahlen und Sonderzeichen.",
-  noSequential: 'Keine Folgen wie "abc" oder "123".',
-  noRepeats: "Vermeide drei gleiche Zeichen hintereinander.",
-  notCommon: "Dieses Passwort ist zu weit verbreitet.",
-};
-
-const LABEL_DE: Record<string, string> = {
-  "very-weak": "Sehr schwach",
-  weak: "Schwach",
-  fair: "Mittel",
-  strong: "Stark",
-  "very-strong": "Sehr stark",
-};
 
 const BAR_COLORS: Record<number, string> = {
   0: "#dc2626",
@@ -32,6 +17,7 @@ const BAR_COLORS: Record<number, string> = {
  * green here will also pass the 422 gate on submit.
  */
 export function PasswordMeter({ value }: { value: string }) {
+  const { t } = useTranslation();
   const result = useMemo(() => evaluatePassword(value), [value]);
   if (!value) return null;
   const barColor = BAR_COLORS[result.score];
@@ -58,7 +44,7 @@ export function PasswordMeter({ value }: { value: string }) {
         }}
       >
         <Text style={{ fontSize: 12, color: "#6b7280" }}>
-          {LABEL_DE[result.label]}
+          {t(`auth.password.strength.${result.label}`)}
         </Text>
         {result.suggestions.length > 0 && result.score < 3 && (
           <Text
@@ -66,7 +52,7 @@ export function PasswordMeter({ value }: { value: string }) {
             numberOfLines={1}
             ellipsizeMode="tail"
           >
-            {SUGGESTION_DE[result.suggestions[0]] ?? ""}
+            {t(`error.auth.password.weak.${result.suggestions[0]}`)}
           </Text>
         )}
       </View>

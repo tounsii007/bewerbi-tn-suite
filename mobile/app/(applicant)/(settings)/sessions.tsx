@@ -14,6 +14,7 @@ import { ArrowLeft, Smartphone, Monitor, Globe, X } from "lucide-react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { authApi, IS_API_MODE } from "../../../src/lib/apiClient";
+import { apiErrorMessage } from "../../../src/lib/apiError";
 import { useThemeStore } from "../../../src/hooks/useColorScheme";
 
 type Session = {
@@ -82,8 +83,8 @@ export default function SessionsScreen() {
     try {
       const list = await authApi.sessions();
       setItems(list);
-    } catch (e: any) {
-      Alert.alert(t("common.error"), e?.message ?? "Konnte Sitzungen nicht laden.");
+    } catch (e) {
+      Alert.alert(t("common.error"), apiErrorMessage(e, "Konnte Sitzungen nicht laden."));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -107,8 +108,8 @@ export default function SessionsScreen() {
             try {
               await authApi.revokeSession(s.tokenHash);
               setItems((curr) => curr?.filter((x) => x.tokenHash !== s.tokenHash) ?? null);
-            } catch (e: any) {
-              Alert.alert(t("common.error"), e?.message ?? "Beenden fehlgeschlagen.");
+            } catch (e) {
+              Alert.alert(t("common.error"), apiErrorMessage(e, "Beenden fehlgeschlagen."));
             }
           },
         },

@@ -9,6 +9,7 @@ import { Input } from "../../src/components/ui/Input";
 import { Button } from "../../src/components/ui/Button";
 import { PasswordMeter } from "../../src/components/auth/PasswordMeter";
 import { authApi, IS_API_MODE } from "../../src/lib/apiClient";
+import { apiErrorMessage } from "../../src/lib/apiError";
 import { useThemeStore } from "../../src/hooks/useColorScheme";
 
 /**
@@ -53,8 +54,11 @@ export default function ResetPasswordScreen() {
       }
       setDone(true);
       setTimeout(() => router.replace("/(auth)/login"), 1500);
-    } catch (error: any) {
-      Alert.alert(t("common.error"), error?.message ?? "Link ungültig oder abgelaufen.");
+    } catch (error) {
+      Alert.alert(
+        t("common.error"),
+        apiErrorMessage(error, "Link ungültig oder abgelaufen."),
+      );
     } finally {
       setLoading(false);
     }

@@ -44,7 +44,24 @@
     "welcome": "Bienvenue sur bewerbi.tn",
     "subtitle": "Votre passerelle vers l'Allemagne",
     "loginError": "Identifiants invalides",
-    "registerSuccess": "Inscription réussie ! Vérifiez votre e-mail."
+    "registerSuccess": "Inscription réussie ! Vérifiez votre e-mail.",
+    "newPassword": "Nouveau mot de passe",
+    "password.strength.very-weak": "Très faible",
+    "password.strength.weak": "Faible",
+    "password.strength.fair": "Moyen",
+    "password.strength.strong": "Fort",
+    "password.strength.very-strong": "Très fort"
+  },
+  "error": {
+    "auth.email.exists": "Cette adresse e-mail est déjà enregistrée.",
+    "auth.invalidCredentials": "E-mail ou mot de passe incorrect.",
+    "rate.limited": "Trop de tentatives. Veuillez réessayer plus tard.",
+    "auth.password.weak.length": "Mot de passe trop court — 8 caractères minimum.",
+    "auth.password.weak.mixClasses": "Mélangez majuscules, minuscules, chiffres et caractères spéciaux.",
+    "auth.password.weak.noSequential": "Évitez les suites comme « abc » ou « 123 ».",
+    "auth.password.weak.noRepeats": "Évitez trois caractères identiques d'affilée.",
+    "auth.password.weak.notCommon": "Ce mot de passe est trop courant.",
+    "auth.password.weak.weak": "Mot de passe trop faible."
   },
   "home": {
     "greeting": "Bonjour, {{name}} !",

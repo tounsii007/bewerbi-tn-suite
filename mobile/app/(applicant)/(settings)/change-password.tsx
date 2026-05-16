@@ -9,6 +9,7 @@ import { Input } from "../../../src/components/ui/Input";
 import { Button } from "../../../src/components/ui/Button";
 import { PasswordMeter } from "../../../src/components/auth/PasswordMeter";
 import { authApi, IS_API_MODE } from "../../../src/lib/apiClient";
+import { apiErrorMessage } from "../../../src/lib/apiError";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { useThemeStore } from "../../../src/hooks/useColorScheme";
 
@@ -48,8 +49,8 @@ export default function ChangePasswordScreen() {
       setDone(true);
       await signOut();
       setTimeout(() => router.replace("/(auth)/login"), 1200);
-    } catch (e: any) {
-      Alert.alert(t("common.error"), e?.message ?? "Änderung fehlgeschlagen.");
+    } catch (e) {
+      Alert.alert(t("common.error"), apiErrorMessage(e, "Änderung fehlgeschlagen."));
     } finally {
       setLoading(false);
     }

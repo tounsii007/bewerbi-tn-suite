@@ -44,7 +44,24 @@
     "welcome": "مرحباً بك في bewerbi.tn",
     "subtitle": "جسرك نحو ألمانيا",
     "loginError": "بيانات غير صحيحة",
-    "registerSuccess": "تم التسجيل بنجاح! يرجى تأكيد بريدك الإلكتروني."
+    "registerSuccess": "تم التسجيل بنجاح! يرجى تأكيد بريدك الإلكتروني.",
+    "newPassword": "كلمة المرور الجديدة",
+    "password.strength.very-weak": "ضعيفة جدًا",
+    "password.strength.weak": "ضعيفة",
+    "password.strength.fair": "متوسطة",
+    "password.strength.strong": "قوية",
+    "password.strength.very-strong": "قوية جدًا"
+  },
+  "error": {
+    "auth.email.exists": "هذا البريد الإلكتروني مسجل بالفعل.",
+    "auth.invalidCredentials": "البريد أو كلمة المرور غير صحيحة.",
+    "rate.limited": "محاولات كثيرة جدًا. حاول لاحقًا.",
+    "auth.password.weak.length": "كلمة المرور قصيرة جدًا — 8 أحرف على الأقل.",
+    "auth.password.weak.mixClasses": "استخدم أحرفًا كبيرة وصغيرة وأرقامًا ورموزًا.",
+    "auth.password.weak.noSequential": "تجنب التسلسلات مثل \"abc\" أو \"123\".",
+    "auth.password.weak.noRepeats": "تجنب تكرار نفس الحرف ثلاث مرات.",
+    "auth.password.weak.notCommon": "كلمة المرور هذه شائعة جدًا.",
+    "auth.password.weak.weak": "كلمة المرور ضعيفة جدًا."
   },
   "home": {
     "greeting": "مرحباً، {{name}}!",
