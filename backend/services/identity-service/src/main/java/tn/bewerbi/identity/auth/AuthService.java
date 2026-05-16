@@ -6,16 +6,21 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
 import java.util.UUID;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.bewerbi.common.api.exception.ConflictException;
 import tn.bewerbi.common.api.exception.ResourceNotFoundException;
+import tn.bewerbi.common.api.exception.TooManyRequestsException;
 import tn.bewerbi.common.events.DomainEvents;
 import tn.bewerbi.common.events.EventPublisher;
 import tn.bewerbi.common.events.Topics;
 import tn.bewerbi.common.i18n.LocaleContext;
+import tn.bewerbi.common.security.audit.AuditEvent;
+import tn.bewerbi.common.security.audit.AuditLogger;
+import tn.bewerbi.common.security.audit.LoginAttemptTracker;
 import tn.bewerbi.identity.domain.*;
 
 @Service
@@ -23,6 +28,10 @@ import tn.bewerbi.identity.domain.*;
 public class AuthService {
 
     private static final SecureRandom RND = new SecureRandom();
+    // bcrypt hash of an empty string — used in equal-time login flow to neutralise
+    // the latency difference between "user missing" and "wrong password".
+    private static final String DUMMY_HASH =
+            "$2a$10$YQv5xKLh2VJxk0CGqDqPNeOZ/g5JqV3KqMOd0YkUkqfn5cQyqaQR2";
 
     private final UserRepository users;
     private final ProfileRepository profiles;
@@ -30,14 +39,21 @@ public class AuthService {
     private final JwtTokenService tokens;
     private final EventPublisher events;
     private final RefreshTokenStore refreshStore;
+    private final LoginAttemptTracker attempts;
+    private final AuditLogger audit;
 
     public AuthService(UserRepository users, ProfileRepository profiles,
                        PasswordEncoder passwords, JwtTokenService tokens,
-                       EventPublisher events, RefreshTokenStore refreshStore) {
+                       EventPublisher events, RefreshTokenStore refreshStore,
+                       ObjectProvider<LoginAttemptTracker> attemptsProvider,
+                       ObjectProvider<AuditLogger> auditProvider) {
         this.users = users; this.profiles = profiles;
         this.passwords = passwords; this.tokens = tokens;
         this.events = events;
         this.refreshStore = refreshStore;
+        // Optional: in unit tests without Redis these beans are absent.
+        this.attempts = attemptsProvider.getIfAvailable();
+        this.audit = auditProvider.getIfAvailable();
     }
 
     public AuthResponse register(RegisterRequest req) {
@@ -69,10 +85,43 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest req) {
-        var user = users.findByEmail(req.email().toLowerCase())
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
-        if (!passwords.matches(req.password(), user.getPasswordHash())) {
+        String email = req.email().toLowerCase();
+
+        // Per-account lockout — short-circuit before touching the DB / bcrypt.
+        if (attempts != null && attempts.isLockedOut(email)) {
+            long retryAfter = attempts.remainingLockoutSeconds(email);
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_LOGIN_LOCKED", email, email,
+                        "locked-out " + retryAfter + "s"));
+            }
+            throw TooManyRequestsException.of(retryAfter);
+        }
+
+        var user = users.findByEmail(email).orElse(null);
+        // Equal-time check: even if the user is missing, run bcrypt against the
+        // configured dummy hash so an attacker can't enumerate accounts by
+        // measuring response latency.
+        boolean valid = user != null && passwords.matches(req.password(), user.getPasswordHash());
+        if (user == null) {
+            passwords.matches(req.password(), DUMMY_HASH);
+        }
+        if (!valid) {
+            if (attempts != null) {
+                attempts.recordFailure(email);
+            }
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_LOGIN_FAILED", email, email,
+                        "invalid-credentials"));
+            }
             throw new BadCredentialsException("Invalid credentials");
+        }
+
+        if (attempts != null) {
+            attempts.reset(email);
+        }
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_LOGIN_SUCCESS",
+                    user.getId().toString(), email));
         }
         user.touchLogin();
         return issueTokens(user);
