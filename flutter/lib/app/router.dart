@@ -39,6 +39,7 @@ import 'package:bewerbi_tn_flutter/screens/admin/admin_listings_screen.dart';
 import 'package:bewerbi_tn_flutter/screens/admin/admin_reports_screen.dart';
 import 'package:bewerbi_tn_flutter/screens/applicant/account_screen.dart';
 import 'package:bewerbi_tn_flutter/screens/applicant/change_password_screen.dart';
+import 'package:bewerbi_tn_flutter/screens/applicant/sessions_screen.dart';
 import 'package:bewerbi_tn_flutter/screens/applicant/onboarding_quiz_screen.dart';
 import 'package:bewerbi_tn_flutter/screens/applicant/saved_searches_screen.dart';
 import 'package:bewerbi_tn_flutter/screens/applicant/anerkennung_screen.dart';
@@ -435,6 +436,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'change-password',
                     builder: (context, state) => const ChangePasswordScreen(),
+                  ),
+                  GoRoute(
+                    path: 'sessions',
+                    builder: (context, state) => const SessionsScreen(),
                   ),
                 ],
               ),

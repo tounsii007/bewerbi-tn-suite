@@ -108,6 +108,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 onTap: () => context.go('/applicant/settings/change-password'),
               ),
+              _buildSettingTile(
+                icon: LucideIcons.smartphone,
+                iconColor: AppColors.info,
+                title: 'Aktive Sitzungen',
+                isDark: isDark,
+                trailing: Icon(
+                  Icons.chevron_right,
+                  color: isDark ? AppColors.gray500 : AppColors.gray400,
+                ),
+                onTap: () => context.go('/applicant/settings/sessions'),
+              ),
 
               const SizedBox(height: 16),
 
