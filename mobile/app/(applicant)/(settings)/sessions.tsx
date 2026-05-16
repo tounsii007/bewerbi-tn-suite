@@ -19,6 +19,7 @@ import { useThemeStore } from "../../../src/hooks/useColorScheme";
 type Session = {
   tokenHash: string;
   createdAt: number;
+  lastUsedAt: number;
   userAgent: string;
   expiresInSeconds: number;
 };
@@ -172,7 +173,7 @@ export default function SessionsScreen() {
                     <Text
                       className={`text-xs mt-0.5 ${isDark ? "text-dark-muted" : "text-gray-500"}`}
                     >
-                      Angemeldet seit {formatCreatedAt(item.createdAt)}
+                      Zuletzt aktiv {formatCreatedAt(item.lastUsedAt || item.createdAt)}
                     </Text>
                   </View>
                 </View>

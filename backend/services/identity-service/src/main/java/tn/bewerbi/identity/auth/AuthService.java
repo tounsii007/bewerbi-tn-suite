@@ -188,7 +188,12 @@ public class AuthService {
             audit.log(AuditEvent.success("AUTH_TOKEN_REFRESH",
                     user.getId().toString(), user.getEmail()));
         }
-        return issueTokens(user);
+        AuthResponse response = issueTokens(user);
+        // Update lastUsedAt on the freshly-issued session so the
+        // active-sessions screen shows "currently active" instead of
+        // the moment the original token was minted.
+        refreshStore.touch(user.getId(), response.refreshToken());
+        return response;
     }
 
     public void logout(UUID userId, String refreshToken) {

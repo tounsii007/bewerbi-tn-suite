@@ -39,15 +39,39 @@ public class RefreshTokenStore {
     /**
      * Persist a freshly-issued refresh token's hash with metadata. Stored
      * as a tiny pipe-delimited string instead of JSON so we don't pull in
-     * Jackson on this hot path: {@code <createdAtEpochSec>|<ua>}. The
-     * user-agent is truncated to 200 chars so a hostile client can't
-     * bloat Redis. If null/blank, just the timestamp is stored.
+     * Jackson on this hot path:
+     *   {@code <createdAtEpochSec>|<lastUsedAtEpochSec>|<ua>}
+     * The user-agent is truncated to 200 chars so a hostile client
+     * can't bloat Redis. If null/blank, just the timestamps are stored.
      */
     public void remember(UUID userId, String token, Duration ttl, String userAgent) {
         String ua = userAgent == null ? "" : userAgent.replace('|', ' ');
         if (ua.length() > 200) ua = ua.substring(0, 200);
-        String payload = Instant.now().getEpochSecond() + "|" + ua;
+        long now = Instant.now().getEpochSecond();
+        String payload = now + "|" + now + "|" + ua;
         redis.opsForValue().set(key(userId, token), payload, ttl);
+    }
+
+    /**
+     * Bump {@code lastUsedAt} without changing the createdAt / UA / TTL.
+     * Called from AuthService.refresh on the *new* token (we want the
+     * "now active" indicator on the freshly-rotated session, not the
+     * one we just revoked).
+     */
+    public void touch(UUID userId, String token) {
+        String k = key(userId, token);
+        String existing = redis.opsForValue().get(k);
+        if (existing == null) return;
+        Long ttl = redis.getExpire(k);
+        String[] parts = existing.split("\\|", 3);
+        String createdAt = parts.length > 0 ? parts[0] : "0";
+        String ua = parts.length > 2 ? parts[2] : "";
+        String updated = createdAt + "|" + Instant.now().getEpochSecond() + "|" + ua;
+        if (ttl != null && ttl > 0) {
+            redis.opsForValue().set(k, updated, Duration.ofSeconds(ttl));
+        } else {
+            redis.opsForValue().set(k, updated);
+        }
     }
 
     /** Back-compat shim — equivalent to {@link #remember(UUID, String, Duration, String)}
@@ -72,8 +96,8 @@ public class RefreshTokenStore {
         return Boolean.TRUE.equals(redis.delete(KEY_PREFIX + userId + ":" + tokenHash));
     }
 
-    /** Returns one entry per active refresh token of the user. Most recent
-     * first. Cheap: SCAN streams, parse is O(1) per row. */
+    /** Returns one entry per active refresh token of the user. Most recently
+     *  used first — typically the device the user is currently on. */
     public List<SessionInfo> list(UUID userId) {
         String prefix = KEY_PREFIX + userId + ":";
         ScanOptions options = ScanOptions.scanOptions().match(prefix + "*").count(100).build();
@@ -85,22 +109,34 @@ public class RefreshTokenStore {
                     String hash = fullKey.substring(prefix.length());
                     String value = redis.opsForValue().get(fullKey);
                     long createdAt = 0;
+                    long lastUsedAt = 0;
                     String ua = "";
                     if (value != null) {
-                        int sep = value.indexOf('|');
-                        if (sep > 0) {
-                            try { createdAt = Long.parseLong(value.substring(0, sep)); }
+                        String[] parts = value.split("\\|", 3);
+                        if (parts.length >= 1) {
+                            try { createdAt = Long.parseLong(parts[0]); }
                             catch (NumberFormatException ignore) { }
-                            ua = value.substring(sep + 1);
                         }
+                        if (parts.length >= 2) {
+                            try { lastUsedAt = Long.parseLong(parts[1]); }
+                            catch (NumberFormatException ignore) {
+                                // Backwards-compat: pre-Iter 55 rows have
+                                // only `createdAt|ua`; treat the second
+                                // segment as UA in that case.
+                                ua = parts[1];
+                            }
+                        }
+                        if (parts.length >= 3) ua = parts[2];
                     }
+                    if (lastUsedAt == 0) lastUsedAt = createdAt;
                     Long ttl = redis.getExpire(fullKey);
-                    out.add(new SessionInfo(hash, createdAt, ua, ttl == null ? -1 : ttl));
+                    out.add(new SessionInfo(hash, createdAt, lastUsedAt, ua,
+                            ttl == null ? -1 : ttl));
                 }
             }
             return null;
         });
-        out.sort(Comparator.comparingLong(SessionInfo::createdAt).reversed());
+        out.sort(Comparator.comparingLong(SessionInfo::lastUsedAt).reversed());
         return out;
     }
 
@@ -109,6 +145,8 @@ public class RefreshTokenStore {
             String tokenHash,
             /** Unix-epoch seconds when the session was issued. */
             long createdAt,
+            /** Unix-epoch seconds when the session last rotated. */
+            long lastUsedAt,
             /** Truncated User-Agent of the issuing request. */
             String userAgent,
             /** Remaining TTL in seconds; -1 if none. */

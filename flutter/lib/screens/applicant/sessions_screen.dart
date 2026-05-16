@@ -11,6 +11,7 @@ class _Session {
   _Session({
     required this.tokenHash,
     required this.createdAt,
+    required this.lastUsedAt,
     required this.userAgent,
     required this.expiresInSeconds,
   });
@@ -18,12 +19,14 @@ class _Session {
   factory _Session.fromJson(Map<String, dynamic> json) => _Session(
         tokenHash: json['tokenHash'] as String,
         createdAt: (json['createdAt'] as num?)?.toInt() ?? 0,
+        lastUsedAt: (json['lastUsedAt'] as num?)?.toInt() ?? 0,
         userAgent: (json['userAgent'] as String?) ?? '',
         expiresInSeconds: (json['expiresInSeconds'] as num?)?.toInt() ?? -1,
       );
 
   final String tokenHash;
   final int createdAt;
+  final int lastUsedAt;
   final String userAgent;
   final int expiresInSeconds;
 }
@@ -214,7 +217,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Angemeldet seit ${_formatCreatedAt(s.createdAt)}',
+                  'Zuletzt aktiv ${_formatCreatedAt(s.lastUsedAt == 0 ? s.createdAt : s.lastUsedAt)}',
                   style: GoogleFonts.inter(fontSize: 12, color: AppColors.gray500),
                 ),
               ],

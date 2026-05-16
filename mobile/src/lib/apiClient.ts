@@ -196,7 +196,13 @@ export const authApi = {
     }),
   sessions: () =>
     request<
-      { tokenHash: string; createdAt: number; userAgent: string; expiresInSeconds: number }[]
+      {
+        tokenHash: string;
+        createdAt: number;
+        lastUsedAt: number;
+        userAgent: string;
+        expiresInSeconds: number;
+      }[]
     >("/api/v1/auth/me/sessions"),
   revokeSession: (tokenHash: string) =>
     request<void>(`/api/v1/auth/me/sessions/${encodeURIComponent(tokenHash)}`, {

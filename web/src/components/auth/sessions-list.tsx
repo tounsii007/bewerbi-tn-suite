@@ -87,7 +87,7 @@ export function SessionsList() {
                 {deviceLabel(s.userAgent)}
               </p>
               <p className="text-xs text-gray-500 dark:text-dark-muted">
-                Angemeldet seit {formatCreatedAt(s.createdAt)}
+                Zuletzt aktiv {formatCreatedAt(s.lastUsedAt || s.createdAt)}
               </p>
             </div>
           </div>
