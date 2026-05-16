@@ -29,6 +29,13 @@ export default function robots(): MetadataRoute.Robots {
           "/settings",
           "/saved-searches",
           "/verify",
+          // Auth flows shouldn't show up in search results — they
+          // include tokens (verify, reset-password) and the search
+          // listing for the reset page would never be useful.
+          "/login",
+          "/register",
+          "/forgot-password",
+          "/reset-password",
         ],
       },
     ],
