@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:bewerbi_tn_flutter/app/theme.dart';
+import 'package:bewerbi_tn_flutter/services/api_client.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -38,8 +39,21 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     setState(() => _isLoading = true);
 
-    // Simulate API delay
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    if (ApiClient.isApiMode) {
+      try {
+        // Backend always returns 204; the success card below renders no
+        // matter what so the screen cannot leak whether the address is
+        // registered (anti-enumeration).
+        await ApiClient.instance.post(
+          '/api/v1/auth/password/forgot',
+          body: {'email': email},
+        );
+      } catch (_) {
+        // Swallow on purpose — see comment above.
+      }
+    } else {
+      await Future<void>.delayed(const Duration(milliseconds: 600));
+    }
 
     if (!mounted) return;
     setState(() {

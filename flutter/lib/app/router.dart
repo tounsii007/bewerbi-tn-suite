@@ -11,6 +11,7 @@ import 'package:bewerbi_tn_flutter/screens/splash_screen.dart';
 import 'package:bewerbi_tn_flutter/screens/auth/login_screen.dart';
 import 'package:bewerbi_tn_flutter/screens/auth/register_screen.dart';
 import 'package:bewerbi_tn_flutter/screens/auth/forgot_password_screen.dart';
+import 'package:bewerbi_tn_flutter/screens/auth/reset_password_screen.dart';
 import 'package:bewerbi_tn_flutter/screens/applicant/home_screen.dart';
 import 'package:bewerbi_tn_flutter/screens/applicant/search_screen.dart';
 import 'package:bewerbi_tn_flutter/screens/applicant/applications_screen.dart';
@@ -242,9 +243,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       // While loading, stay on splash
       if (isLoading) return '/';
 
-      // Auth routes
-      final isAuthRoute =
-          path == '/login' || path == '/register' || path == '/forgot-password';
+      // Auth routes — public, no session required. Includes the
+      // deep-link landing page for password reset so a stale session does
+      // not redirect the user away from the reset link.
+      final isAuthRoute = path == '/login' ||
+          path == '/register' ||
+          path == '/forgot-password' ||
+          path.startsWith('/reset-password');
 
       if (!loggedIn && !isAuthRoute && path != '/' && path != '/onboarding') {
         return '/login';
@@ -308,6 +313,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        builder: (context, state) {
+          // Token arrives via `?token=…` deep link from the email.
+          final token = state.uri.queryParameters['token'] ?? '';
+          return ResetPasswordScreen(token: token);
+        },
       ),
 
       // -----------------------------------------------------------------------
