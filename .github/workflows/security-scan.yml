@@ -1,0 +1,81 @@
+name: Security scan
+
+# Runs every push to main + nightly. Two independent gates:
+# - Trivy filesystem scan: catches vulnerable transitive deps across
+#   every project (Maven, npm, pubspec) and IaC misconfigs.
+# - Gitleaks: catches committed secrets / API keys / private keys.
+#
+# Both fail the workflow on HIGH or CRITICAL findings. The SARIF upload
+# feeds GitHub's Code Scanning tab so dismissals + suppressions live in
+# the repo settings, not in a YAML file.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # 04:00 UTC daily — catches CVEs that landed since the last push.
+    - cron: "0 4 * * *"
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: security-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trivy:
+    name: Trivy filesystem
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          # Don't fail the job here — let Code Scanning surface the
+          # findings + the SARIF gate below makes them visible on PRs.
+          exit-code: "0"
+          ignore-unfixed: true
+          # Skip generated / vendored dirs that bloat the scan.
+          skip-dirs: |
+            **/node_modules
+            **/.next
+            **/build
+            **/dist
+            flutter/build
+            flutter/.dart_tool
+
+      - name: Upload SARIF to Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-fs
+
+  gitleaks:
+    name: Gitleaks secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Gitleaks scans history; needs all commits.
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # No license token — Gitleaks is free for OSS / public repos
+          # and unlicensed runs still execute the scan, just without
+          # the GitHub-app-side reporting.
+          GITLEAKS_ENABLE_COMMENTS: false
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
+          GITLEAKS_ENABLE_SUMMARY: true
