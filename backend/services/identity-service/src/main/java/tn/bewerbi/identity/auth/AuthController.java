@@ -112,5 +112,20 @@ public class AuthController {
         authService.revokeSession(CurrentUser.id(), tokenHash);
     }
 
+    /**
+     * "Sign out everywhere except this device". The client passes the
+     * SHA-256 of *its* refresh token as a query parameter; that one is
+     * preserved, every other session for the user is revoked.
+     */
+    @PostMapping("/me/sessions/revoke-others")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Revoke every session of the current user except keepHash")
+    public RevokedResponse revokeOtherSessions(
+            @org.springframework.web.bind.annotation.RequestParam(value = "keepHash",
+                    required = false) String keepHash) {
+        return new RevokedResponse(authService.revokeAllExcept(CurrentUser.id(), keepHash));
+    }
+
     public record RefreshRequest(String refreshToken) {}
+    public record RevokedResponse(int revoked) {}
 }

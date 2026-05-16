@@ -96,10 +96,35 @@ export function SessionsList() {
   if (sessions.length === 0) {
     return <p className="text-sm text-gray-500 dark:text-dark-muted">Keine aktiven Sitzungen.</p>;
   }
+  const otherCount = currentHash
+    ? sessions.filter((s) => s.tokenHash !== currentHash).length
+    : sessions.length;
+
+  const revokeOthers = async () => {
+    try {
+      const result = await authApi.revokeOtherSessions(currentHash ?? undefined);
+      toast.success(
+        result.revoked === 1
+          ? "1 andere Sitzung beendet."
+          : `${result.revoked} andere Sitzungen beendet.`,
+      );
+      await qc.invalidateQueries({ queryKey: ["auth", "sessions"] });
+    } catch (e) {
+      toastApiError(e, "Beenden fehlgeschlagen");
+    }
+  };
 
   return (
-    <ul className="flex flex-col gap-2">
-      {sessions.map((s) => {
+    <div className="flex flex-col gap-3">
+      {otherCount > 0 && (
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={() => void revokeOthers()}>
+            Auf allen anderen Geräten abmelden
+          </Button>
+        </div>
+      )}
+      <ul className="flex flex-col gap-2">
+        {sessions.map((s) => {
         const isCurrent = currentHash !== null && s.tokenHash === currentHash;
         return (
           <li
@@ -137,7 +162,8 @@ export function SessionsList() {
             </Button>
           </li>
         );
-      })}
-    </ul>
+        })}
+      </ul>
+    </div>
   );
 }

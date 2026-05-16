@@ -435,6 +435,29 @@ public class AuthService {
         return removed;
     }
 
+    /**
+     * Revoke every refresh token of the user *except* the one whose
+     * hash matches {@code keepHash} — typically the caller's current
+     * session. Used by the settings UI: "Auf allen anderen Geräten
+     * abmelden" without forcing a fresh login on the device that
+     * triggered the action.
+     *
+     * @return number of revoked sessions
+     */
+    public int revokeAllExcept(UUID userId, String keepHash) {
+        int removed = 0;
+        var sessions = refreshStore.list(userId);
+        for (var s : sessions) {
+            if (keepHash != null && keepHash.equalsIgnoreCase(s.tokenHash())) continue;
+            if (refreshStore.revokeByHash(userId, s.tokenHash())) removed++;
+        }
+        if (removed > 0 && audit != null) {
+            audit.log(AuditEvent.success("AUTH_OTHER_SESSIONS_REVOKED",
+                    userId.toString(), userId.toString()));
+        }
+        return removed;
+    }
+
     private static String currentUserAgent() {
         try {
             var attrs = org.springframework.web.context.request.RequestContextHolder

@@ -65,6 +65,10 @@ export const authApi = {
     }[]>("/api/v1/auth/me/sessions"),
   revokeSession: (tokenHash: string) =>
     api.del<void>(`/api/v1/auth/me/sessions/${encodeURIComponent(tokenHash)}`),
+  revokeOtherSessions: (keepHash?: string) => {
+    const qs = keepHash ? `?keepHash=${encodeURIComponent(keepHash)}` : "";
+    return api.post<{ revoked: number }>(`/api/v1/auth/me/sessions/revoke-others${qs}`);
+  },
 };
 
 // ─── Profile ───────────────────────────────────────────────────────────
