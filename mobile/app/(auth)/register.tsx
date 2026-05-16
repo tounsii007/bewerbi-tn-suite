@@ -7,6 +7,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Input } from "../../src/components/ui/Input";
 import { Button } from "../../src/components/ui/Button";
+import { PasswordMeter } from "../../src/components/auth/PasswordMeter";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useThemeStore } from "../../src/hooks/useColorScheme";
 import type { UserRole } from "../../src/types";
@@ -32,7 +33,7 @@ export default function RegisterScreen() {
     if (!email) newErrors.email = t("common.required");
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Invalid email";
     if (!password) newErrors.password = t("common.required");
-    else if (password.length < 6) newErrors.password = "Min. 6 Zeichen";
+    else if (password.length < 8) newErrors.password = "Min. 8 Zeichen";
     if (password !== confirmPassword) newErrors.confirmPassword = "Passwörter stimmen nicht überein";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -148,11 +149,12 @@ export default function RegisterScreen() {
               label={t("auth.password")}
               value={password}
               onChangeText={setPassword}
-              placeholder="Min. 6 Zeichen"
+              placeholder="Min. 8 Zeichen"
               secureTextEntry
               error={errors.password}
               icon={<Lock size={20} color={isDark ? "#94a3b8" : "#6b7280"} />}
             />
+            <PasswordMeter value={password} />
 
             <Input
               label={t("auth.confirmPassword")}

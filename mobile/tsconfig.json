@@ -6,12 +6,16 @@
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "@shared/*": [
+        "../shared/lib/*"
       ]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "../shared/lib/**/*.ts",
     "nativewind-env.d.ts"
   ]
 }

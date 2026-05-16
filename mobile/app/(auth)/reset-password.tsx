@@ -7,6 +7,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Input } from "../../src/components/ui/Input";
 import { Button } from "../../src/components/ui/Button";
+import { PasswordMeter } from "../../src/components/auth/PasswordMeter";
 import { authApi, IS_API_MODE } from "../../src/lib/apiClient";
 import { useThemeStore } from "../../src/hooks/useColorScheme";
 
@@ -111,6 +112,7 @@ export default function ResetPasswordScreen() {
                 autoCapitalize="none"
                 icon={<Lock size={20} color={isDark ? "#94a3b8" : "#6b7280"} />}
               />
+              <PasswordMeter value={password} />
               <View style={{ height: 12 }} />
               <Input
                 label={t("auth.confirmPassword")}
