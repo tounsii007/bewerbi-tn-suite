@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Production network security baseline for the Android build.
+
+    - HTTPS-only by default for every domain — cleartext HTTP traffic
+      is rejected at the OS level, so a bug that hardcodes http:// will
+      fail loudly instead of silently leaking tokens over the wire.
+    - System CA trust anchors only (no user-installed CAs), which
+      defeats the most common MitM setup (a CA installed via a profile
+      to inspect TLS traffic of a managed device).
+    - The debug-overrides block keeps cleartext + user CAs on for the
+      debug build so developers can keep using Charles / mitmproxy
+      against localhost without weakening the release APK.
+
+    To pin specific public keys for bewerbi.tn in the future, add a
+    <pin-set> under <domain-config> here — see
+    https://developer.android.com/training/articles/security-config
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
+
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system"/>
+            <certificates src="user"/>
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

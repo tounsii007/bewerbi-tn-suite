@@ -66,5 +66,19 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!--
+	    App Transport Security: enforce TLS 1.2+ for every outbound
+	    connection. NSAllowsArbitraryLoads explicitly false so a
+	    third-party SDK can't relax this for the whole app.
+	    Per-domain exceptions (e.g. for a staging endpoint without a
+	    cert) belong under NSExceptionDomains, not under the global key.
+	-->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<false/>
+	</dict>
 </dict>
 </plist>
