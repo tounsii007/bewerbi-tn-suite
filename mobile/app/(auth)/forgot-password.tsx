@@ -8,6 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Input } from "../../src/components/ui/Input";
 import { Button } from "../../src/components/ui/Button";
 import { supabase, IS_MOCK_MODE } from "../../src/lib/supabase";
+import { authApi, IS_API_MODE } from "../../src/lib/apiClient";
 import { useThemeStore } from "../../src/hooks/useColorScheme";
 
 export default function ForgotPasswordScreen() {
@@ -22,16 +23,23 @@ export default function ForgotPasswordScreen() {
     if (!email) return;
     setLoading(true);
     try {
+      if (IS_API_MODE) {
+        // Backend always returns 204 — the success card below renders
+        // regardless of whether the address is registered, so the screen
+        // cannot be used to enumerate accounts.
+        await authApi.forgotPassword(email);
+        setSent(true);
+        return;
+      }
       if (IS_MOCK_MODE) {
         setSent(true);
-        setLoading(false);
         return;
       }
       const { error } = await supabase.auth.resetPasswordForEmail(email);
       if (error) throw error;
       setSent(true);
     } catch (error: any) {
-      Alert.alert(t("common.error"), error.message);
+      Alert.alert(t("common.error"), error?.message ?? "");
     } finally {
       setLoading(false);
     }

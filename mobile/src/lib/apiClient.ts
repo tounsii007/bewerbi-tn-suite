@@ -179,6 +179,16 @@ export const authApi = {
   logoutAll: () => request<void>("/api/v1/auth/logout-all", { method: "POST" }),
   verifyEmail: (token: string) =>
     rawRequest<void>(`/api/v1/auth/verify-email?token=${encodeURIComponent(token)}`),
+  forgotPassword: (email: string) =>
+    rawRequest<void>("/api/v1/auth/password/forgot", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+  resetPassword: (token: string, newPassword: string) =>
+    rawRequest<void>("/api/v1/auth/password/reset", {
+      method: "POST",
+      body: JSON.stringify({ token, newPassword }),
+    }),
 };
 
 // ---------- Profile ----------
