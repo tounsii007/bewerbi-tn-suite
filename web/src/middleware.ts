@@ -30,6 +30,7 @@ const PUBLIC_PATHS = [
   "/register",
   "/verify",
   "/forgot-password",
+  "/reset-password",
   "/favicon.ico",
 ];
 const PUBLIC_PREFIXES = [
