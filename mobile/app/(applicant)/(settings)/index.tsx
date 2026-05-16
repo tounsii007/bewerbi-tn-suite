@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, Switch, Alert, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Globe, Moon, Bell, Shield, FileText, LogOut, ChevronRight, Info, KeyRound } from "lucide-react-native";
+import { Globe, Moon, Bell, Shield, FileText, LogOut, ChevronRight, Info, KeyRound, Smartphone } from "lucide-react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "../../../src/components/ui/Card";
@@ -42,6 +42,7 @@ export default function SettingsScreen() {
     { title: t("settings.language"), icon: Globe, color: "#2563EB", bg: "bg-blue-50", onPress: changeLanguage, value: i18n.language === "de" ? "Deutsch" : i18n.language === "ar" ? "العربية" : "Français" },
     { title: t("settings.darkMode"), icon: Moon, color: "#8b5cf6", bg: "bg-violet-50", toggle: true, value: isDark, onToggle: toggleTheme },
     { title: "Passwort ändern", icon: KeyRound, color: "#dc2626", bg: "bg-rose-50", onPress: () => router.push("/(applicant)/(settings)/change-password") },
+    { title: "Aktive Sitzungen", icon: Smartphone, color: "#0891b2", bg: "bg-cyan-50", onPress: () => router.push("/(applicant)/(settings)/sessions") },
   ];
 
   const appItems = [

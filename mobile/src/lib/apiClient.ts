@@ -194,6 +194,14 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify({ oldPassword, newPassword }),
     }),
+  sessions: () =>
+    request<
+      { tokenHash: string; createdAt: number; userAgent: string; expiresInSeconds: number }[]
+    >("/api/v1/auth/me/sessions"),
+  revokeSession: (tokenHash: string) =>
+    request<void>(`/api/v1/auth/me/sessions/${encodeURIComponent(tokenHash)}`, {
+      method: "DELETE",
+    }),
 };
 
 // ---------- Profile ----------
