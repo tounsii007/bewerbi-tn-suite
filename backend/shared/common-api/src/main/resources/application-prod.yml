@@ -1,0 +1,51 @@
+# Production overrides imported into every service via the shared
+# common-api starter (spring.factories). Applied when the `prod` Spring
+# profile is active. Local development inherits the looser defaults from
+# the base application.yml of each service.
+
+server:
+  # Don't echo stack traces or framework error messages to the client.
+  # Even with the GlobalExceptionHandler in place, a misconfigured route
+  # (no handler, wrong content-type) can still reach Spring's default
+  # error page, which by default includes path / timestamp / message.
+  # `none` is the only safe value for an attacker-facing service.
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+    whitelabel:
+      enabled: false
+
+management:
+  endpoints:
+    web:
+      # Strip out everything except the probes + Prometheus scrape.
+      # Loggers/env/beans/configprops are useful in dev but each one is
+      # a fingerprinting / disclosure surface in prod.
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      # `when-authorized` already gates the verbose payload, but the
+      # default *probes* response (liveness/readiness) is still pure 200.
+      show-details: when-authorized
+    info:
+      # Don't leak git commit / build version to anonymous callers.
+      access: read-only
+
+springdoc:
+  # Swagger UI + the JSON spec are huge fingerprints for the API surface.
+  # Off entirely in prod; a dedicated internal docs portal is the right
+  # place to expose them for engineers.
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+bewerbi:
+  security:
+    headers:
+      # Lock the strictest CSP — services don't serve HTML in prod
+      # (the gateway returns JSON only).
+      csp: "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
