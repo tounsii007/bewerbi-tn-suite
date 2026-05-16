@@ -19,8 +19,10 @@ import tn.bewerbi.common.api.exception.ResourceNotFoundException;
 import tn.bewerbi.common.api.exception.TooManyRequestsException;
 import tn.bewerbi.common.events.DomainEvents;
 import tn.bewerbi.common.events.EventPublisher;
+import tn.bewerbi.common.api.exception.UnprocessableEntityException;
 import tn.bewerbi.common.events.Topics;
 import tn.bewerbi.common.i18n.LocaleContext;
+import tn.bewerbi.common.security.PasswordStrength;
 import tn.bewerbi.common.security.audit.AuditEvent;
 import tn.bewerbi.common.security.audit.AuditLogger;
 import tn.bewerbi.common.security.audit.LoginAttemptTracker;
@@ -60,6 +62,7 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest req) {
+        rejectWeakPassword(req.password());
         if (users.existsByEmail(req.email().toLowerCase())) {
             throw new ConflictException("Email already registered", "error.auth.email.exists");
         }
@@ -228,6 +231,7 @@ public class AuthService {
                 || user.getPasswordResetExpiresAt().isBefore(Instant.now())) {
             throw new BadCredentialsException("Reset token expired");
         }
+        rejectWeakPassword(newPassword);
         user.setPasswordHash(passwords.encode(newPassword));
         user.clearPasswordReset();
         refreshStore.revokeAll(user.getId());
@@ -238,6 +242,28 @@ public class AuthService {
             audit.log(AuditEvent.success("AUTH_PASSWORD_CHANGED",
                     user.getId().toString(), user.getEmail()));
         }
+    }
+
+    /**
+     * Reject passwords that score below {@code MIN_PASSWORD_SCORE} on the
+     * shared rubric. The Bean-Validation `@Size(min=8)` runs first and
+     * catches the obvious too-short case; this catches everything else
+     * (single character class, sequential / repeating, common). The 422
+     * response carries the first suggestion ID so clients translate it
+     * via `auth.password.suggest.<id>`.
+     */
+    private static final int MIN_PASSWORD_SCORE = 2;
+
+    private static void rejectWeakPassword(String password) {
+        var result = PasswordStrength.evaluate(password);
+        if (result.score() >= MIN_PASSWORD_SCORE) return;
+        String firstSuggestion = result.suggestions().isEmpty()
+                ? "weak"
+                : result.suggestions().get(0);
+        throw new UnprocessableEntityException(
+                "Password too weak (score=" + result.score() + "; suggestion="
+                        + firstSuggestion + ")",
+                "error.auth.password.weak." + firstSuggestion);
     }
 
     private static String sha256(String input) {
