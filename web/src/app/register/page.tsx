@@ -15,6 +15,8 @@ import { useAuthStore } from "@/stores/auth-store";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { PasswordMeter } from "@/components/auth/password-meter";
 import { cn } from "@/lib/cn";
+import { apiErrorMessage } from "@/lib/api-errors";
+import { useTranslate } from "@/i18n/use-translate";
 
 const schema = z.object({
   firstName: z.string().min(1, "Vorname erforderlich"),
@@ -30,6 +32,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const signUp = useAuthStore((s) => s.signUp);
   const [submitting, setSubmitting] = useState(false);
+  const t = useTranslate();
 
   const form = useForm<RegisterValues>({
     resolver: zodResolver(schema),
@@ -46,8 +49,7 @@ export default function RegisterPage() {
       toast.success("Willkommen! Bitte bestätige deine E-Mail.");
       router.replace(values.role === "EMPLOYER" ? "/employer/dashboard" : "/onboarding");
     } catch (e) {
-      const err = e as { message?: string };
-      toast.error(err.message ?? "Registrierung fehlgeschlagen");
+      toast.error(apiErrorMessage(t, e, "Registrierung fehlgeschlagen"));
     } finally {
       setSubmitting(false);
     }

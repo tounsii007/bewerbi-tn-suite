@@ -14,6 +14,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { authApi } from "@/lib/api";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { PasswordMeter } from "@/components/auth/password-meter";
+import { apiErrorMessage } from "@/lib/api-errors";
+import { useTranslate } from "@/i18n/use-translate";
 
 const schema = z
   .object({
@@ -36,6 +38,7 @@ function ResetForm() {
   const token = search.get("token") ?? "";
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const t = useTranslate();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -68,8 +71,7 @@ function ResetForm() {
       // Stay on this page briefly so the success message is seen, then route.
       setTimeout(() => router.replace("/login"), 1500);
     } catch (e) {
-      const err = e as { message?: string };
-      toast.error(err.message ?? "Link ungültig oder abgelaufen.");
+      toast.error(apiErrorMessage(t, e, "Link ungültig oder abgelaufen."));
     } finally {
       setSubmitting(false);
     }

@@ -13,6 +13,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuthStore } from "@/stores/auth-store";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { safeRedirectPath } from "@/lib/security";
+import { apiErrorMessage } from "@/lib/api-errors";
+import { useTranslate } from "@/i18n/use-translate";
 
 const schema = z.object({
   email: z.string().email("Gültige E-Mail erforderlich"),
@@ -26,6 +28,7 @@ export default function LoginPage() {
   const search = useSearchParams();
   const signIn = useAuthStore((s) => s.signIn);
   const [submitting, setSubmitting] = useState(false);
+  const t = useTranslate();
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(schema),
@@ -40,8 +43,7 @@ export default function LoginPage() {
       const redirect = safeRedirectPath(search.get("redirect"), "/dashboard");
       router.replace(redirect);
     } catch (e) {
-      const err = e as { message?: string };
-      toast.error(err.message ?? "Anmeldung fehlgeschlagen");
+      toast.error(apiErrorMessage(t, e, "Anmeldung fehlgeschlagen"));
     } finally {
       setSubmitting(false);
     }

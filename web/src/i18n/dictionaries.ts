@@ -106,6 +106,16 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "auth.password.suggest.noSequential": "Keine Folgen wie \"abc\" oder \"123\".",
     "auth.password.suggest.noRepeats": "Vermeide drei gleiche Zeichen hintereinander.",
     "auth.password.suggest.notCommon": "Dieses Passwort ist zu weit verbreitet.",
+
+    "error.auth.email.exists": "Diese E-Mail ist bereits registriert.",
+    "error.auth.invalidCredentials": "E-Mail oder Passwort falsch.",
+    "error.rate.limited": "Zu viele Versuche. Bitte später erneut versuchen.",
+    "error.auth.password.weak.length": "Passwort zu kurz — mindestens 8 Zeichen.",
+    "error.auth.password.weak.mixClasses": "Bitte mische Groß-/Kleinbuchstaben, Zahlen und Sonderzeichen.",
+    "error.auth.password.weak.noSequential": "Keine aufeinanderfolgenden Zeichen wie \"abc\" oder \"123\".",
+    "error.auth.password.weak.noRepeats": "Vermeide drei gleiche Zeichen hintereinander.",
+    "error.auth.password.weak.notCommon": "Dieses Passwort ist zu weit verbreitet.",
+    "error.auth.password.weak.weak": "Passwort zu schwach.",
   },
 
   fr: {
@@ -207,6 +217,16 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "auth.password.suggest.noSequential": "Évitez les suites comme « abc » ou « 123 ».",
     "auth.password.suggest.noRepeats": "Évitez trois caractères identiques d'affilée.",
     "auth.password.suggest.notCommon": "Ce mot de passe est trop courant.",
+
+    "error.auth.email.exists": "Cette adresse e-mail est déjà enregistrée.",
+    "error.auth.invalidCredentials": "E-mail ou mot de passe incorrect.",
+    "error.rate.limited": "Trop de tentatives. Veuillez réessayer plus tard.",
+    "error.auth.password.weak.length": "Mot de passe trop court — 8 caractères minimum.",
+    "error.auth.password.weak.mixClasses": "Mélangez majuscules, minuscules, chiffres et caractères spéciaux.",
+    "error.auth.password.weak.noSequential": "Évitez les suites comme « abc » ou « 123 ».",
+    "error.auth.password.weak.noRepeats": "Évitez trois caractères identiques d'affilée.",
+    "error.auth.password.weak.notCommon": "Ce mot de passe est trop courant.",
+    "error.auth.password.weak.weak": "Mot de passe trop faible.",
   },
 
   ar: {
@@ -308,5 +328,15 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "auth.password.suggest.noSequential": "تجنب التسلسلات مثل \"abc\" أو \"123\".",
     "auth.password.suggest.noRepeats": "تجنب تكرار نفس الحرف ثلاث مرات.",
     "auth.password.suggest.notCommon": "كلمة المرور هذه شائعة جدًا.",
+
+    "error.auth.email.exists": "هذا البريد الإلكتروني مسجل بالفعل.",
+    "error.auth.invalidCredentials": "البريد أو كلمة المرور غير صحيحة.",
+    "error.rate.limited": "محاولات كثيرة جدًا. حاول لاحقًا.",
+    "error.auth.password.weak.length": "كلمة المرور قصيرة جدًا — 8 أحرف على الأقل.",
+    "error.auth.password.weak.mixClasses": "استخدم أحرفًا كبيرة وصغيرة وأرقامًا ورموزًا.",
+    "error.auth.password.weak.noSequential": "تجنب التسلسلات مثل \"abc\" أو \"123\".",
+    "error.auth.password.weak.noRepeats": "تجنب تكرار نفس الحرف ثلاث مرات.",
+    "error.auth.password.weak.notCommon": "كلمة المرور هذه شائعة جدًا.",
+    "error.auth.password.weak.weak": "كلمة المرور ضعيفة جدًا.",
   },
 };
