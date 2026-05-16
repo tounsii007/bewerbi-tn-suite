@@ -35,6 +35,49 @@
         </encoder>
     </appender>
 
+    <!--
+        Dedicated audit appender — every `tn.bewerbi.audit` event is also
+        written to a separate JSON file with much longer retention than
+        the operational log, so a year-old auth-related incident can
+        still be reconstructed when the matching operational log has
+        rolled away.
+
+        The directory defaults to ./audit-logs and can be overridden via
+        the AUDIT_LOG_DIR env var on a per-pod basis (k8s mounts a PVC
+        or pushes via Fluent Bit). The file rotates daily and keeps 365
+        days with a 5 GB safety cap; well under typical compliance
+        retention windows but high enough that ops can prune via the
+        cluster's own lifecycle policies.
+
+        Audit lines do NOT go through %mskmsg — the audit *content* is
+        already structured key=value (no free-form user input) and the
+        compliance value of those events is reduced when emails are
+        masked. If you start logging customer free-text into audit
+        entries, that decision needs to be revisited.
+    -->
+    <appender name="AUDIT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${AUDIT_LOG_DIR:-./audit-logs}/${appName}.audit.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${AUDIT_LOG_DIR:-./audit-logs}/${appName}.audit.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>365</maxHistory>
+            <totalSizeCap>5GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>{"ts":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}","app":"${appName}","trace":"%X{traceId:-}","corr":"%X{correlationId:-}","user":"%X{userId:-}","type":"%X{audit.type:-}","actor":"%X{audit.actor:-}","target":"%X{audit.target:-}","outcome":"%X{audit.outcome:-}","msg":"%replace(%msg){'\"','\\\"'}"}%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--
+        additivity=false → audit lines don't also hit the regular CONSOLE
+        / JSON appender (otherwise prod logs would get double entries
+        and PII redaction would diverge between the two sinks).
+    -->
+    <logger name="tn.bewerbi.audit" level="INFO" additivity="false">
+        <appender-ref ref="AUDIT_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
     <springProfile name="prod">
         <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
