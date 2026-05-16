@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bewerbi_tn_flutter/models/profile.dart';
+import 'package:bewerbi_tn_flutter/services/api_client.dart';
 import 'package:bewerbi_tn_flutter/services/mock_data.dart';
 import 'package:bewerbi_tn_flutter/services/supabase_service.dart';
+import 'package:bewerbi_tn_flutter/services/token_store.dart';
 
 class AuthState {
   final bool isLoggedIn;
@@ -28,26 +30,72 @@ class AuthState {
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier() : super(const AuthState()) {
+  AuthNotifier({TokenStore? tokenStore})
+      : _tokenStore = tokenStore ?? TokenStore(),
+        super(const AuthState()) {
     _init();
   }
 
-  void _init() {
+  final TokenStore _tokenStore;
+
+  Future<void> _init() async {
+    // Mock mode short-circuits: no real backend, no real tokens.
     if (SupabaseService.isMockMode) {
-      // Auto-login as applicant in mock mode
       state = AuthState(
         isLoggedIn: true,
         profile: mockProfiles[0],
         loading: false,
       );
+      return;
     }
+
+    if (ApiClient.isApiMode) {
+      // Persist *every* refresh so the keystore copy doesn't drift from the
+      // in-memory access token after the first proactive refresh.
+      ApiClient.instance.setTokensRefreshedHandler((tokens) {
+        // Fire-and-forget: a failed write means next launch lands on
+        // login, which is a tolerable degradation.
+        // ignore: discarded_futures
+        _tokenStore.write(tokens);
+      });
+      ApiClient.instance.setUnauthorizedHandler(() {
+        // ignore: discarded_futures
+        signOut();
+      });
+
+      // Re-arm the ApiClient with whatever was previously persisted. On a
+      // clean install this returns null and the user lands on login.
+      final tokens = await _tokenStore.read();
+      if (tokens != null) {
+        ApiClient.instance.setTokens(tokens);
+        state = state.copyWith(isLoggedIn: true, loading: false);
+        return;
+      }
+    }
+    state = state.copyWith(loading: false);
   }
 
   Future<void> signIn(String email, String password) async {
     state = state.copyWith(loading: true);
 
+    if (ApiClient.isApiMode) {
+      try {
+        final data = await ApiClient.instance.post(
+          '/api/v1/auth/login',
+          body: {'email': email, 'password': password},
+        ) as Map<String, dynamic>;
+        final tokens = AuthTokens.fromJson(data);
+        ApiClient.instance.setTokens(tokens);
+        await _tokenStore.write(tokens);
+        state = state.copyWith(isLoggedIn: true, loading: false);
+      } catch (_) {
+        state = state.copyWith(loading: false);
+        rethrow;
+      }
+      return;
+    }
+
     if (SupabaseService.isMockMode) {
-      // Simulate network delay
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
       if (email.contains('employer') || email.contains('arbeitgeber')) {
@@ -90,6 +138,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> signOut() async {
+    if (ApiClient.isApiMode) {
+      ApiClient.instance.setTokens(null);
+      await _tokenStore.clear();
+    }
     state = const AuthState(isLoggedIn: false, loading: false);
   }
 }
