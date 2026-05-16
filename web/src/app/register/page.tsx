@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuthStore } from "@/stores/auth-store";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { PasswordMeter } from "@/components/auth/password-meter";
 import { cn } from "@/lib/cn";
 
 const schema = z.object({
@@ -36,6 +37,7 @@ export default function RegisterPage() {
   });
 
   const role = form.watch("role");
+  const password = form.watch("password");
 
   async function onSubmit(values: RegisterValues) {
     setSubmitting(true);
@@ -97,14 +99,17 @@ export default function RegisterPage() {
               {...form.register("email")}
             />
 
-            <LabeledInput
-              label="Passwort"
-              type="password"
-              autoComplete="new-password"
-              invalid={!!form.formState.errors.password}
-              error={form.formState.errors.password?.message}
-              {...form.register("password")}
-            />
+            <div>
+              <LabeledInput
+                label="Passwort"
+                type="password"
+                autoComplete="new-password"
+                invalid={!!form.formState.errors.password}
+                error={form.formState.errors.password?.message}
+                {...form.register("password")}
+              />
+              <PasswordMeter value={password} />
+            </div>
 
             <Button type="submit" size="lg" disabled={submitting}>
               {submitting ? "Erstelle Konto…" : "Registrieren"}

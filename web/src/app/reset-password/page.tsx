@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { authApi } from "@/lib/api";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { PasswordMeter } from "@/components/auth/password-meter";
 
 const schema = z
   .object({
@@ -40,6 +41,7 @@ function ResetForm() {
     resolver: zodResolver(schema),
     defaultValues: { newPassword: "", confirm: "" },
   });
+  const newPassword = form.watch("newPassword");
 
   if (!token) {
     return (
@@ -113,6 +115,7 @@ function ResetForm() {
                 {form.formState.errors.newPassword.message}
               </p>
             )}
+            <PasswordMeter value={newPassword} />
           </div>
 
           <div>
