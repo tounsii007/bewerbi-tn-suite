@@ -568,29 +568,44 @@ public class AuthService {
         return HexFormat.of().formatHex(b);
     }
 
+    // 254 chars is the RFC 5321 hard limit for an addressable email.
+    // Names are clamped to 80 chars (matches the DB column width) so a
+    // 10MB payload can't waste CPU on bean-validation.
+    // bcrypt only hashes the first 72 bytes, so anything beyond that is
+    // ignored — capping the field there is both safe and DoS-friendly.
+
     public record RegisterRequest(
-            @jakarta.validation.constraints.Email String email,
+            @jakarta.validation.constraints.Email
+            @jakarta.validation.constraints.Size(max = 254) String email,
             @jakarta.validation.constraints.Size(min = 8, max = 72) String password,
-            @jakarta.validation.constraints.NotBlank String firstName,
-            @jakarta.validation.constraints.NotBlank String lastName,
+            @jakarta.validation.constraints.NotBlank
+            @jakarta.validation.constraints.Size(max = 80) String firstName,
+            @jakarta.validation.constraints.NotBlank
+            @jakarta.validation.constraints.Size(max = 80) String lastName,
             UserRole role) {}
 
     public record LoginRequest(
-            @jakarta.validation.constraints.Email String email,
-            @jakarta.validation.constraints.NotBlank String password) {}
+            @jakarta.validation.constraints.Email
+            @jakarta.validation.constraints.Size(max = 254) String email,
+            @jakarta.validation.constraints.NotBlank
+            @jakarta.validation.constraints.Size(max = 200) String password) {}
 
     public record ForgotPasswordRequest(
-            @jakarta.validation.constraints.Email String email) {}
+            @jakarta.validation.constraints.Email
+            @jakarta.validation.constraints.Size(max = 254) String email) {}
 
     public record ResendVerificationRequest(
-            @jakarta.validation.constraints.Email String email) {}
+            @jakarta.validation.constraints.Email
+            @jakarta.validation.constraints.Size(max = 254) String email) {}
 
     public record ResetPasswordRequest(
-            @jakarta.validation.constraints.NotBlank String token,
+            @jakarta.validation.constraints.NotBlank
+            @jakarta.validation.constraints.Size(max = 128) String token,
             @jakarta.validation.constraints.Size(min = 8, max = 72) String newPassword) {}
 
     public record ChangePasswordRequest(
-            @jakarta.validation.constraints.NotBlank String oldPassword,
+            @jakarta.validation.constraints.NotBlank
+            @jakarta.validation.constraints.Size(max = 200) String oldPassword,
             @jakarta.validation.constraints.Size(min = 8, max = 72) String newPassword) {}
 
     public record AuthResponse(
