@@ -120,6 +120,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onTap: () => context.go('/applicant/settings/sessions'),
               ),
 
+              _buildSettingTile(
+                icon: LucideIcons.trash2,
+                iconColor: AppColors.error,
+                title: 'Konto löschen',
+                isDark: isDark,
+                trailing: Icon(
+                  Icons.chevron_right,
+                  color: isDark ? AppColors.gray500 : AppColors.gray400,
+                ),
+                onTap: () => context.go('/applicant/settings/delete-account'),
+              ),
+
               const SizedBox(height: 16),
 
               // APP section

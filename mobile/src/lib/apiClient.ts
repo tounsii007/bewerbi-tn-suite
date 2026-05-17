@@ -219,6 +219,11 @@ export const authApi = {
       method: "POST",
     });
   },
+  deleteAccount: (password: string) =>
+    request<void>("/api/v1/auth/me/delete", {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    }),
 };
 
 // ---------- Profile ----------

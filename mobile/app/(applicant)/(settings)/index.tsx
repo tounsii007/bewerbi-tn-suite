@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, Switch, Alert, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Globe, Moon, Bell, Shield, FileText, LogOut, ChevronRight, Info, KeyRound, Smartphone } from "lucide-react-native";
+import { Globe, Moon, Bell, Shield, FileText, LogOut, ChevronRight, Info, KeyRound, Smartphone, Trash2 } from "lucide-react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "../../../src/components/ui/Card";
@@ -120,6 +120,16 @@ export default function SettingsScreen() {
           Rechtliches
         </Text>
         {legalItems.map((item, index) => renderItem(item, index, 3))}
+
+        {/* GEFAHRENZONE */}
+        <Text className={`text-xs font-bold uppercase tracking-widest px-1 mt-6 mb-2 text-rose-500`}>
+          Gefahrenzone
+        </Text>
+        {renderItem(
+          { title: "Konto löschen", icon: Trash2, color: "#dc2626", bg: "bg-rose-50", onPress: () => router.push("/(applicant)/(settings)/delete-account") },
+          0,
+          5,
+        )}
 
         {/* Logout */}
         <Animated.View entering={FadeInDown.delay(350).springify()} className="mt-8">
