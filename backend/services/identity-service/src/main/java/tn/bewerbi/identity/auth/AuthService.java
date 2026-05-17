@@ -366,6 +366,65 @@ public class AuthService {
         }
     }
 
+    /**
+     * Re-issue a verification token and dispatch the welcome email again.
+     * Used by the UI's "E-Mail nicht erhalten?" link.
+     *
+     * <p>Same anti-enumeration / anti-spam shape as
+     * {@link #requestPasswordReset(String)}:
+     * <ul>
+     *   <li>Always succeeds from the controller's POV (204).</li>
+     *   <li>No-op for unknown addresses (no event published, no token
+     *       generated).</li>
+     *   <li>No-op for accounts already verified.</li>
+     *   <li>No-op while a fresh token is still alive (per-account
+     *       throttle: avoids inbox flooding).</li>
+     * </ul>
+     */
+    public void resendVerification(String email) {
+        String normalized = email == null ? "" : email.trim().toLowerCase();
+        if (normalized.isEmpty()) return;
+        var user = users.findByEmail(normalized).orElse(null);
+        if (user == null) {
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_EMAIL_VERIFY_RESEND",
+                        normalized, normalized, "unknown-account"));
+            }
+            return;
+        }
+        if (user.isEmailVerified()) {
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_EMAIL_VERIFY_RESEND",
+                        user.getId().toString(), normalized, "already-verified"));
+            }
+            return;
+        }
+        if (user.getEmailVerificationExpiresAt() != null
+                && user.getEmailVerificationExpiresAt().isAfter(Instant.now())) {
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_EMAIL_VERIFY_RESEND",
+                        user.getId().toString(), normalized, "throttled"));
+            }
+            return;
+        }
+
+        String plain = randomToken();
+        user.setEmailVerification(sha256(plain),
+                Instant.now().plus(48, ChronoUnit.HOURS));
+        String firstName = profiles.findById(user.getId())
+                .map(Profile::getFirstName).orElse("");
+        events.publish(Topics.USER_REGISTERED, user.getId().toString(),
+                new DomainEvents.UserRegistered(
+                        user.getId(), user.getEmail(), firstName,
+                        user.getRole().name(), user.getPreferredLocale(),
+                        plain, Instant.now()));
+
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_EMAIL_VERIFY_RESEND",
+                    user.getId().toString(), normalized));
+        }
+    }
+
     public void verifyEmail(String token) {
         if (token == null || token.isBlank()) {
             throw new BadCredentialsException("Invalid verification token");
@@ -490,6 +549,9 @@ public class AuthService {
             @jakarta.validation.constraints.NotBlank String password) {}
 
     public record ForgotPasswordRequest(
+            @jakarta.validation.constraints.Email String email) {}
+
+    public record ResendVerificationRequest(
             @jakarta.validation.constraints.Email String email) {}
 
     public record ResetPasswordRequest(

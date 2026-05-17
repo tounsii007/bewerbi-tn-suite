@@ -53,6 +53,20 @@ public class AuthController {
     }
 
     /**
+     * Re-issue the verification email. Always 204 (anti-enumeration).
+     * Same per-account throttle as /password/forgot: while a fresh
+     * token is alive the call silently no-ops.
+     */
+    @PostMapping("/verify-email/resend")
+    @org.springframework.web.bind.annotation.ResponseStatus(
+            org.springframework.http.HttpStatus.NO_CONTENT)
+    @Operation(summary = "Re-issue the verification email (always 204)")
+    public void resendVerification(@Valid @RequestBody
+                                   AuthService.ResendVerificationRequest req) {
+        authService.resendVerification(req.email());
+    }
+
+    /**
      * Request a password reset. Always returns 204 — caller cannot tell
      * whether the address is registered (anti-enumeration). Notification
      * happens asynchronously over Kafka.
