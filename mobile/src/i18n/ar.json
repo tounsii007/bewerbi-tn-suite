@@ -61,7 +61,8 @@
     "auth.password.weak.noSequential": "تجنب التسلسلات مثل \"abc\" أو \"123\".",
     "auth.password.weak.noRepeats": "تجنب تكرار نفس الحرف ثلاث مرات.",
     "auth.password.weak.notCommon": "كلمة المرور هذه شائعة جدًا.",
-    "auth.password.weak.weak": "كلمة المرور ضعيفة جدًا."
+    "auth.password.weak.weak": "كلمة المرور ضعيفة جدًا.",
+    "auth.password.weak.breached": "كلمة المرور هذه ظهرت في تسريبات بيانات معروفة. الرجاء اختيار كلمة مرور أخرى."
   },
   "home": {
     "greeting": "مرحباً، {{name}}!",

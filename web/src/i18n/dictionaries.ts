@@ -116,6 +116,7 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "error.auth.password.weak.noRepeats": "Vermeide drei gleiche Zeichen hintereinander.",
     "error.auth.password.weak.notCommon": "Dieses Passwort ist zu weit verbreitet.",
     "error.auth.password.weak.weak": "Passwort zu schwach.",
+    "error.auth.password.weak.breached": "Dieses Passwort taucht in bekannten Datenlecks auf. Bitte wähle ein anderes.",
   },
 
   fr: {
@@ -227,6 +228,7 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "error.auth.password.weak.noRepeats": "Évitez trois caractères identiques d'affilée.",
     "error.auth.password.weak.notCommon": "Ce mot de passe est trop courant.",
     "error.auth.password.weak.weak": "Mot de passe trop faible.",
+    "error.auth.password.weak.breached": "Ce mot de passe figure dans des fuites de données connues. Choisissez-en un autre.",
   },
 
   ar: {
@@ -338,5 +340,6 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "error.auth.password.weak.noRepeats": "تجنب تكرار نفس الحرف ثلاث مرات.",
     "error.auth.password.weak.notCommon": "كلمة المرور هذه شائعة جدًا.",
     "error.auth.password.weak.weak": "كلمة المرور ضعيفة جدًا.",
+    "error.auth.password.weak.breached": "كلمة المرور هذه ظهرت في تسريبات بيانات معروفة. الرجاء اختيار كلمة مرور أخرى.",
   },
 };

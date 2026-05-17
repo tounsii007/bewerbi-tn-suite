@@ -23,6 +23,7 @@ import tn.bewerbi.common.events.EventPublisher;
 import tn.bewerbi.common.api.exception.UnprocessableEntityException;
 import tn.bewerbi.common.events.Topics;
 import tn.bewerbi.common.i18n.LocaleContext;
+import tn.bewerbi.common.security.BreachedPasswordChecker;
 import tn.bewerbi.common.security.PasswordStrength;
 import tn.bewerbi.common.security.audit.AuditEvent;
 import tn.bewerbi.common.security.audit.AuditLogger;
@@ -47,12 +48,14 @@ public class AuthService {
     private final RefreshTokenStore refreshStore;
     private final LoginAttemptTracker attempts;
     private final AuditLogger audit;
+    private final BreachedPasswordChecker breachedChecker;
 
     public AuthService(UserRepository users, ProfileRepository profiles,
                        PasswordEncoder passwords, JwtTokenService tokens,
                        EventPublisher events, RefreshTokenStore refreshStore,
                        ObjectProvider<LoginAttemptTracker> attemptsProvider,
-                       ObjectProvider<AuditLogger> auditProvider) {
+                       ObjectProvider<AuditLogger> auditProvider,
+                       ObjectProvider<BreachedPasswordChecker> breachedProvider) {
         this.users = users; this.profiles = profiles;
         this.passwords = passwords; this.tokens = tokens;
         this.events = events;
@@ -60,6 +63,9 @@ public class AuthService {
         // Optional: in unit tests without Redis these beans are absent.
         this.attempts = attemptsProvider.getIfAvailable();
         this.audit = auditProvider.getIfAvailable();
+        // Off by default; opt in via
+        //   bewerbi.security.password.breach-check.enabled=true
+        this.breachedChecker = breachedProvider.getIfAvailable();
     }
 
     public AuthResponse register(RegisterRequest req) {
@@ -344,16 +350,27 @@ public class AuthService {
      */
     private static final int MIN_PASSWORD_SCORE = 2;
 
-    private static void rejectWeakPassword(String password) {
+    private void rejectWeakPassword(String password) {
         var result = PasswordStrength.evaluate(password);
-        if (result.score() >= MIN_PASSWORD_SCORE) return;
-        String firstSuggestion = result.suggestions().isEmpty()
-                ? "weak"
-                : result.suggestions().get(0);
-        throw new UnprocessableEntityException(
-                "Password too weak (score=" + result.score() + "; suggestion="
-                        + firstSuggestion + ")",
-                "error.auth.password.weak." + firstSuggestion);
+        if (result.score() < MIN_PASSWORD_SCORE) {
+            String firstSuggestion = result.suggestions().isEmpty()
+                    ? "weak"
+                    : result.suggestions().get(0);
+            throw new UnprocessableEntityException(
+                    "Password too weak (score=" + result.score() + "; suggestion="
+                            + firstSuggestion + ")",
+                    "error.auth.password.weak." + firstSuggestion);
+        }
+        // Optional HIBP check — runs only when the feature flag is on,
+        // and fails open if the API can't be reached. Catches passwords
+        // that score >= 2 on the local rubric but appear in known
+        // breaches (e.g. "Sunshine123!" — meets the rubric, leaked
+        // 200k+ times).
+        if (breachedChecker != null && breachedChecker.isBreached(password)) {
+            throw new UnprocessableEntityException(
+                    "Password appears in a known breach",
+                    "error.auth.password.weak.breached");
+        }
     }
 
     private static String sha256(String input) {

@@ -61,7 +61,8 @@
     "auth.password.weak.noSequential": "Évitez les suites comme « abc » ou « 123 ».",
     "auth.password.weak.noRepeats": "Évitez trois caractères identiques d'affilée.",
     "auth.password.weak.notCommon": "Ce mot de passe est trop courant.",
-    "auth.password.weak.weak": "Mot de passe trop faible."
+    "auth.password.weak.weak": "Mot de passe trop faible.",
+    "auth.password.weak.breached": "Ce mot de passe figure dans des fuites de données connues. Choisissez-en un autre."
   },
   "home": {
     "greeting": "Bonjour, {{name}} !",
