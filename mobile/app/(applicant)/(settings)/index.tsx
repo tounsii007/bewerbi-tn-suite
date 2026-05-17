@@ -123,10 +123,16 @@ export default function SettingsScreen() {
 
         {/* GEFAHRENZONE */}
         <Text className={`text-xs font-bold uppercase tracking-widest px-1 mt-6 mb-2 text-rose-500`}>
-          Gefahrenzone
+          {t("settings.dangerZone")}
         </Text>
         {renderItem(
-          { title: "Konto löschen", icon: Trash2, color: "#dc2626", bg: "bg-rose-50", onPress: () => router.push("/(applicant)/(settings)/delete-account") },
+          {
+            title: t("account.delete.title"),
+            icon: Trash2,
+            color: "#dc2626",
+            bg: "bg-rose-50",
+            onPress: () => router.push("/(applicant)/(settings)/delete-account"),
+          },
           0,
           5,
         )}

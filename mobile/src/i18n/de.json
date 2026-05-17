@@ -172,7 +172,24 @@
     "about": "Über bewerbi.tn",
     "privacy": "Datenschutz",
     "terms": "Nutzungsbedingungen",
-    "version": "Version"
+    "version": "Version",
+    "dangerZone": "Gefahrenzone"
+  },
+  "account": {
+    "delete": {
+      "title": "Konto löschen",
+      "confirmPhrase": "LÖSCHEN",
+      "warning": "Diese Aktion kann nicht rückgängig gemacht werden. Profil, Bewerbungen, Favoriten und Anerkennungs-Cases werden entfernt.",
+      "passwordLabel": "Passwort zur Bestätigung",
+      "confirmLabel": "Tippe {{phrase}} zur Bestätigung",
+      "confirmHelp": "Schutz vor versehentlichem Klick.",
+      "button": "Endgültig löschen",
+      "busy": "Lösche…",
+      "failure": "Löschen fehlgeschlagen.",
+      "passwordRequired": "Passwort eingeben.",
+      "confirmRequired": "Bitte \"{{phrase}}\" zur Bestätigung tippen.",
+      "apiOnly": "Funktion nur im API-Modus verfügbar."
+    }
   },
   "tier": {
     "starter": "Starter",

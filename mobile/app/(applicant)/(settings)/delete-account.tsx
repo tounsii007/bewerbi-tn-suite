@@ -13,12 +13,10 @@ import { useAuthStore } from "../../../src/stores/authStore";
 import { useThemeStore } from "../../../src/hooks/useColorScheme";
 
 /**
- * GDPR right-to-erasure. Re-enter password + type "LÖSCHEN" → POST
- * /me/delete. The backend revokes every refresh token; we just sign
- * out locally and bounce to /login.
+ * GDPR right-to-erasure. Re-enter password + type the localised
+ * confirm phrase → POST /me/delete. The backend revokes every refresh
+ * token; we just sign out locally and bounce to /login.
  */
-const CONFIRM_PHRASE = "LÖSCHEN";
-
 export default function DeleteAccountScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -28,17 +26,24 @@ export default function DeleteAccountScreen() {
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // The confirm phrase is localised so each user types something
+  // natural in their own language.
+  const confirmPhrase = t("account.delete.confirmPhrase");
+
   const submit = async () => {
     if (!IS_API_MODE) {
-      Alert.alert(t("common.error"), "Funktion nur im API-Modus verfügbar.");
+      Alert.alert(t("common.error"), t("account.delete.apiOnly"));
       return;
     }
     if (!password) {
-      Alert.alert(t("common.error"), "Passwort eingeben.");
+      Alert.alert(t("common.error"), t("account.delete.passwordRequired"));
       return;
     }
-    if (confirm !== CONFIRM_PHRASE) {
-      Alert.alert(t("common.error"), `Bitte "${CONFIRM_PHRASE}" zur Bestätigung tippen.`);
+    if (confirm.trim() !== confirmPhrase) {
+      Alert.alert(
+        t("common.error"),
+        t("account.delete.confirmRequired", { phrase: confirmPhrase }),
+      );
       return;
     }
     setLoading(true);
@@ -47,7 +52,10 @@ export default function DeleteAccountScreen() {
       await signOut();
       router.replace("/(auth)/login");
     } catch (e) {
-      Alert.alert(t("common.error"), apiErrorMessage(e, "Löschen fehlgeschlagen."));
+      Alert.alert(
+        t("common.error"),
+        apiErrorMessage(e, t("account.delete.failure")),
+      );
     } finally {
       setLoading(false);
     }
@@ -70,25 +78,24 @@ export default function DeleteAccountScreen() {
           <View className="flex-row items-center gap-2 mb-2">
             <Trash2 size={22} color="#dc2626" />
             <Text className={`text-2xl font-bold ${isDark ? "text-dark-text" : "text-gray-900"}`}>
-              Konto löschen
+              {t("account.delete.title")}
             </Text>
           </View>
-          <Text className={`text-base mb-6 ${isDark ? "text-dark-muted" : "text-gray-500"}`}>
-            Permanente Löschung deines Kontos
-            {session?.user?.email ? ` (${session.user.email})` : ""} und aller
-            verknüpften Daten.
-          </Text>
+          {session?.user?.email && (
+            <Text className={`text-base mb-2 ${isDark ? "text-dark-muted" : "text-gray-500"}`}>
+              {session.user.email}
+            </Text>
+          )}
 
           <View className="flex-row items-start gap-2 mb-6 p-3 rounded-xl bg-rose-50 border border-rose-200">
             <AlertTriangle size={16} color="#9f1239" />
             <Text className="flex-1 text-[13px] text-rose-900">
-              Diese Aktion kann nicht rückgängig gemacht werden. Profil,
-              Bewerbungen, Favoriten und Anerkennungs-Cases werden entfernt.
+              {t("account.delete.warning")}
             </Text>
           </View>
 
           <Input
-            label="Passwort zur Bestätigung"
+            label={t("account.delete.passwordLabel")}
             value={password}
             onChangeText={setPassword}
             placeholder="••••••••"
@@ -98,18 +105,18 @@ export default function DeleteAccountScreen() {
           />
           <View style={{ height: 12 }} />
           <Text className={`text-xs mb-1 ${isDark ? "text-dark-muted" : "text-gray-500"}`}>
-            Tippe {CONFIRM_PHRASE} zur Bestätigung
+            {t("account.delete.confirmLabel", { phrase: confirmPhrase })}
           </Text>
           <Input
             label=""
             value={confirm}
             onChangeText={setConfirm}
-            placeholder={CONFIRM_PHRASE}
+            placeholder={confirmPhrase}
             autoCapitalize="characters"
           />
 
           <Button
-            title={loading ? "Lösche…" : "Endgültig löschen"}
+            title={loading ? t("account.delete.busy") : t("account.delete.button")}
             onPress={submit}
             loading={loading}
             size="lg"

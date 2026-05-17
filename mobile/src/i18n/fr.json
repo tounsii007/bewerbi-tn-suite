@@ -172,7 +172,24 @@
     "about": "À propos",
     "privacy": "Confidentialité",
     "terms": "Conditions",
-    "version": "Version"
+    "version": "Version",
+    "dangerZone": "Zone de danger"
+  },
+  "account": {
+    "delete": {
+      "title": "Supprimer le compte",
+      "confirmPhrase": "SUPPRIMER",
+      "warning": "Cette action est irréversible. Profil, candidatures, favoris et dossiers de reconnaissance seront supprimés.",
+      "passwordLabel": "Mot de passe pour confirmer",
+      "confirmLabel": "Tapez {{phrase}} pour confirmer",
+      "confirmHelp": "Protection contre les clics accidentels.",
+      "button": "Supprimer définitivement",
+      "busy": "Suppression…",
+      "failure": "Échec de la suppression.",
+      "passwordRequired": "Saisissez votre mot de passe.",
+      "confirmRequired": "Veuillez taper « {{phrase}} » pour confirmer.",
+      "apiOnly": "Fonction disponible uniquement en mode API."
+    }
   },
   "onboarding": {
     "title": "Bienvenue sur bewerbi.tn",

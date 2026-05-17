@@ -172,7 +172,24 @@
     "about": "حول",
     "privacy": "الخصوصية",
     "terms": "الشروط",
-    "version": "الإصدار"
+    "version": "الإصدار",
+    "dangerZone": "منطقة الخطر"
+  },
+  "account": {
+    "delete": {
+      "title": "حذف الحساب",
+      "confirmPhrase": "حذف",
+      "warning": "هذا الإجراء لا يمكن التراجع عنه. سيتم حذف الملف الشخصي والترشيحات والمفضلات وملفات الاعتراف.",
+      "passwordLabel": "كلمة المرور للتأكيد",
+      "confirmLabel": "اكتب {{phrase}} للتأكيد",
+      "confirmHelp": "حماية من النقر العرضي.",
+      "button": "حذف نهائي",
+      "busy": "جاري الحذف…",
+      "failure": "فشل الحذف.",
+      "passwordRequired": "أدخل كلمة المرور.",
+      "confirmRequired": "الرجاء كتابة \"{{phrase}}\" للتأكيد.",
+      "apiOnly": "هذه الميزة متاحة فقط في وضع API."
+    }
   },
   "onboarding": {
     "title": "مرحباً بك في bewerbi.tn",
