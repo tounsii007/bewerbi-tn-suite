@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +9,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:bewerbi_tn_flutter/app/theme.dart';
 import 'package:bewerbi_tn_flutter/services/api_client.dart';
+import 'package:bewerbi_tn_flutter/services/token_store.dart';
 
 class _Session {
   _Session({
@@ -86,11 +90,22 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   List<_Session>? _items;
   bool _loading = true;
   String? _error;
+  String? _currentHash;
+  final _tokenStore = TokenStore();
 
   @override
   void initState() {
     super.initState();
+    _loadCurrentHash();
     _refresh();
+  }
+
+  Future<void> _loadCurrentHash() async {
+    final tokens = await _tokenStore.read();
+    if (tokens == null) return;
+    final hash = sha256.convert(utf8.encode(tokens.refreshToken)).toString();
+    if (!mounted) return;
+    setState(() => _currentHash = hash);
   }
 
   Future<void> _refresh() async {
@@ -119,6 +134,54 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
         _loading = false;
         _error = e.message;
       });
+    }
+  }
+
+  Future<void> _revokeOthers() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Auf allen anderen Geräten abmelden'),
+        content: const Text(
+            'Diese Sitzung bleibt aktiv, alle anderen werden beendet.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Beenden'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      final query = _currentHash == null
+          ? ''
+          : '?keepHash=${Uri.encodeComponent(_currentHash!)}';
+      final data = await ApiClient.instance.post(
+        '/api/v1/auth/me/sessions/revoke-others$query',
+      ) as Map<String, dynamic>;
+      final revoked = (data['revoked'] as num?)?.toInt() ?? 0;
+      if (!mounted) return;
+      setState(() {
+        _items = _items?.where((x) => x.tokenHash == _currentHash).toList();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            revoked == 1
+                ? '1 andere Sitzung beendet.'
+                : '$revoked andere Sitzungen beendet.',
+          ),
+        ),
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
     }
   }
 
@@ -152,6 +215,13 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
     }
   }
 
+  bool _hasOthers() {
+    final list = _items;
+    if (list == null) return false;
+    if (_currentHash == null) return list.isNotEmpty;
+    return list.any((s) => s.tokenHash != _currentHash);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -162,6 +232,13 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
           onPressed: () => context.pop(),
         ),
         title: const Text('Aktive Sitzungen'),
+        actions: [
+          if (_hasOthers())
+            TextButton(
+              onPressed: _revokeOthers,
+              child: const Text('Andere beenden'),
+            ),
+        ],
       ),
       body: SafeArea(
         child: RefreshIndicator(
@@ -184,6 +261,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   }
 
   Widget _buildTile(_Session s, bool isDark) {
+    final isCurrent = _currentHash != null && s.tokenHash == _currentHash;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -205,15 +283,36 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  _deviceLabel(s.userAgent),
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.white : AppColors.gray900,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Wrap(
+                  spacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      _deviceLabel(s.userAgent),
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? AppColors.white : AppColors.gray900,
+                      ),
+                    ),
+                    if (isCurrent)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.success.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          'Dieses Gerät',
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.success,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -224,9 +323,10 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
             ),
           ),
           IconButton(
-            icon: const Icon(LucideIcons.x, color: AppColors.error),
-            onPressed: () => _revoke(s),
-            tooltip: 'Sitzung beenden',
+            icon: Icon(LucideIcons.x,
+                color: isCurrent ? AppColors.gray300 : AppColors.error),
+            onPressed: isCurrent ? null : () => _revoke(s),
+            tooltip: isCurrent ? 'Aktuelle Sitzung' : 'Sitzung beenden',
           ),
         ],
       ),

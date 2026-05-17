@@ -15,6 +15,7 @@ dependencies:
   flutter_riverpod: ^2.6.1
   shared_preferences: ^2.5.3
   flutter_secure_storage: ^9.2.4
+  crypto: ^3.0.5
   intl: ^0.20.2
   lucide_icons: ^0.257.0
   cached_network_image: ^3.4.1
