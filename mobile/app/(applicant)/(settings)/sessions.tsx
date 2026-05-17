@@ -24,6 +24,7 @@ type Session = {
   createdAt: number;
   lastUsedAt: number;
   userAgent: string;
+  ip: string;
   expiresInSeconds: number;
 };
 
@@ -246,6 +247,7 @@ export default function SessionsScreen() {
                         className={`text-xs mt-0.5 ${isDark ? "text-dark-muted" : "text-gray-500"}`}
                       >
                         Zuletzt aktiv {formatCreatedAt(item.lastUsedAt || item.createdAt)}
+                        {item.ip ? ` · ${item.ip}` : ""}
                       </Text>
                     </View>
                   </View>

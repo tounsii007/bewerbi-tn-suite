@@ -146,6 +146,12 @@ export function SessionsList() {
                 </p>
                 <p className="text-xs text-gray-500 dark:text-dark-muted">
                   Zuletzt aktiv {formatCreatedAt(s.lastUsedAt || s.createdAt)}
+                  {s.ip && (
+                    <>
+                      {" · "}
+                      <span className="font-mono">{s.ip}</span>
+                    </>
+                  )}
                 </p>
               </div>
             </div>

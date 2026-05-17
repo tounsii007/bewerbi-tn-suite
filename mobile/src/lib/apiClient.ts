@@ -206,6 +206,7 @@ export const authApi = {
         createdAt: number;
         lastUsedAt: number;
         userAgent: string;
+        ip: string;
         expiresInSeconds: number;
       }[]
     >("/api/v1/auth/me/sessions"),

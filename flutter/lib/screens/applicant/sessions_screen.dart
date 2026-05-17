@@ -17,6 +17,7 @@ class _Session {
     required this.createdAt,
     required this.lastUsedAt,
     required this.userAgent,
+    required this.ip,
     required this.expiresInSeconds,
   });
 
@@ -25,6 +26,7 @@ class _Session {
         createdAt: (json['createdAt'] as num?)?.toInt() ?? 0,
         lastUsedAt: (json['lastUsedAt'] as num?)?.toInt() ?? 0,
         userAgent: (json['userAgent'] as String?) ?? '',
+        ip: (json['ip'] as String?) ?? '',
         expiresInSeconds: (json['expiresInSeconds'] as num?)?.toInt() ?? -1,
       );
 
@@ -32,6 +34,7 @@ class _Session {
   final int createdAt;
   final int lastUsedAt;
   final String userAgent;
+  final String ip;
   final int expiresInSeconds;
 }
 
@@ -316,7 +319,8 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Zuletzt aktiv ${_formatCreatedAt(s.lastUsedAt == 0 ? s.createdAt : s.lastUsedAt)}',
+                  'Zuletzt aktiv ${_formatCreatedAt(s.lastUsedAt == 0 ? s.createdAt : s.lastUsedAt)}'
+                      '${s.ip.isEmpty ? '' : ' · ${s.ip}'}',
                   style: GoogleFonts.inter(fontSize: 12, color: AppColors.gray500),
                 ),
               ],
