@@ -118,6 +118,17 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "error.auth.password.weak.weak": "Passwort zu schwach.",
     "error.auth.password.weak.breached": "Dieses Passwort taucht in bekannten Datenlecks auf. Bitte wähle ein anderes.",
     "error.auth.password.reused": "Das neue Passwort muss sich vom aktuellen unterscheiden.",
+
+    "account.delete.title": "Konto löschen",
+    "account.delete.confirmPhrase": "LÖSCHEN",
+    "account.delete.warning": "Diese Aktion kann nicht rückgängig gemacht werden. Profil, Bewerbungen, Favoriten und Anerkennungs-Cases werden entfernt.",
+    "account.delete.passwordLabel": "Passwort zur Bestätigung",
+    "account.delete.confirmLabel": "Tippe {phrase} zur Bestätigung",
+    "account.delete.confirmHelp": "Schutz vor versehentlichem Klick.",
+    "account.delete.button": "Endgültig löschen",
+    "account.delete.busy": "Lösche…",
+    "account.delete.success": "Konto gelöscht. Schade, dass du gehst.",
+    "account.delete.failure": "Löschen fehlgeschlagen",
   },
 
   fr: {
@@ -231,6 +242,17 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "error.auth.password.weak.weak": "Mot de passe trop faible.",
     "error.auth.password.weak.breached": "Ce mot de passe figure dans des fuites de données connues. Choisissez-en un autre.",
     "error.auth.password.reused": "Le nouveau mot de passe doit être différent de l'actuel.",
+
+    "account.delete.title": "Supprimer le compte",
+    "account.delete.confirmPhrase": "SUPPRIMER",
+    "account.delete.warning": "Cette action est irréversible. Profil, candidatures, favoris et dossiers de reconnaissance seront supprimés.",
+    "account.delete.passwordLabel": "Mot de passe pour confirmer",
+    "account.delete.confirmLabel": "Tapez {phrase} pour confirmer",
+    "account.delete.confirmHelp": "Protection contre les clics accidentels.",
+    "account.delete.button": "Supprimer définitivement",
+    "account.delete.busy": "Suppression…",
+    "account.delete.success": "Compte supprimé. Dommage de vous voir partir.",
+    "account.delete.failure": "Échec de la suppression",
   },
 
   ar: {
@@ -344,5 +366,16 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "error.auth.password.weak.weak": "كلمة المرور ضعيفة جدًا.",
     "error.auth.password.weak.breached": "كلمة المرور هذه ظهرت في تسريبات بيانات معروفة. الرجاء اختيار كلمة مرور أخرى.",
     "error.auth.password.reused": "يجب أن تكون كلمة المرور الجديدة مختلفة عن الحالية.",
+
+    "account.delete.title": "حذف الحساب",
+    "account.delete.confirmPhrase": "حذف",
+    "account.delete.warning": "هذا الإجراء لا يمكن التراجع عنه. سيتم حذف الملف الشخصي والترشيحات والمفضلات وملفات الاعتراف.",
+    "account.delete.passwordLabel": "كلمة المرور للتأكيد",
+    "account.delete.confirmLabel": "اكتب {phrase} للتأكيد",
+    "account.delete.confirmHelp": "حماية من النقر العرضي.",
+    "account.delete.button": "حذف نهائي",
+    "account.delete.busy": "جاري الحذف…",
+    "account.delete.success": "تم حذف الحساب. يؤسفنا رحيلك.",
+    "account.delete.failure": "فشل الحذف",
   },
 };

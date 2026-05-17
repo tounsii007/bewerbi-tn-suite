@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { authApi } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
 import { useApiErrorToast } from "@/hooks/use-api-error-toast";
+import { useTranslate } from "@/i18n/use-translate";
 
 /**
  * Destructive-action card for /settings. Two-step UX:
@@ -17,35 +18,36 @@ import { useApiErrorToast } from "@/hooks/use-api-error-toast";
  *   2) The password is sent to POST /me/delete; on success the auth
  *      state is cleared and the browser is routed to /login.
  *
- * The confirm-phrase ("LÖSCHEN") is a UX speed-bump so the user can't
- * accidentally delete by muscle memory. It's NOT a security control —
- * the password re-entry is.
+ * The confirm-phrase is a UX speed-bump so the user can't accidentally
+ * delete by muscle memory. It's NOT a security control — the password
+ * re-entry is.
  */
-const CONFIRM_PHRASE = "LÖSCHEN";
-
 export function DeleteAccountCard() {
   const router = useRouter();
   const signOut = useAuthStore((s) => s.signOut);
   const user = useAuthStore((s) => s.user);
   const toastApiError = useApiErrorToast();
+  const t = useTranslate();
   const [opened, setOpened] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const canSubmit = password.length > 0 && confirm === CONFIRM_PHRASE && !busy;
+  // Confirm phrase is localised — "LÖSCHEN" in DE, "SUPPRIMER" in FR,
+  // "حذف" in AR — so the user types something natural in their language.
+  const confirmPhrase = t("account.delete.confirmPhrase");
+  const canSubmit =
+    password.length > 0 && confirm.trim() === confirmPhrase && !busy;
 
   const onDelete = async () => {
     setBusy(true);
     try {
       await authApi.deleteAccount(password);
-      // Server already revoked every token. Mirror the change-password
-      // pattern: clear local state and route to /login.
-      toast.success("Konto gelöscht. Schade, dass du gehst.");
+      toast.success(t("account.delete.success"));
       await signOut();
       router.replace("/login");
     } catch (e) {
-      toastApiError(e, "Löschen fehlgeschlagen");
+      toastApiError(e, t("account.delete.failure"));
     } finally {
       setBusy(false);
     }
@@ -55,11 +57,11 @@ export function DeleteAccountCard() {
     <Card className="border-accent-300 dark:border-accent-500/40">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-accent-700 dark:text-accent-400">
-          <Trash2 className="size-5" /> Konto löschen
+          <Trash2 className="size-5" /> {t("account.delete.title")}
         </CardTitle>
         <CardDescription>
-          Permanente, unwiderrufliche Löschung deines bewerbi.tn-Kontos
-          {user?.email ? ` (${user.email})` : ""} und aller verknüpften Daten.
+          {t("account.delete.warning")}
+          {user?.email ? ` (${user.email})` : ""}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
@@ -69,21 +71,17 @@ export function DeleteAccountCard() {
             className="self-start"
             onClick={() => setOpened(true)}
           >
-            <Trash2 className="size-4" /> Konto löschen
+            <Trash2 className="size-4" /> {t("account.delete.title")}
           </Button>
         ) : (
           <>
             <div className="flex items-start gap-2 rounded-xl border border-accent-200 bg-accent-50 px-3 py-2 text-sm text-accent-900 dark:border-accent-500/30 dark:bg-accent-500/10 dark:text-accent-200">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-              <p>
-                Diese Aktion kann nicht rückgängig gemacht werden.
-                Profil, Bewerbungen, Favoriten und Anerkennungs-Cases
-                werden entfernt.
-              </p>
+              <p>{t("account.delete.warning")}</p>
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">
-                Passwort zur Bestätigung
+                {t("account.delete.passwordLabel")}
               </label>
               <Input
                 type="password"
@@ -94,17 +92,16 @@ export function DeleteAccountCard() {
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">
-                Tippe <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs dark:bg-dark-card">{CONFIRM_PHRASE}</code>{" "}
-                zur Bestätigung
+                {t("account.delete.confirmLabel", { phrase: confirmPhrase })}
               </label>
               <Input
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                placeholder={CONFIRM_PHRASE}
+                placeholder={confirmPhrase}
                 aria-describedby="delete-confirm-help"
               />
               <p id="delete-confirm-help" className="mt-1 text-xs text-gray-500 dark:text-dark-muted">
-                Schutz vor versehentlichem Klick.
+                {t("account.delete.confirmHelp")}
               </p>
             </div>
             <div className="flex gap-2">
@@ -113,7 +110,7 @@ export function DeleteAccountCard() {
                 disabled={!canSubmit}
                 onClick={() => void onDelete()}
               >
-                {busy ? "Lösche…" : "Endgültig löschen"}
+                {busy ? t("account.delete.busy") : t("account.delete.button")}
               </Button>
               <Button
                 variant="outline"
@@ -123,7 +120,7 @@ export function DeleteAccountCard() {
                   setConfirm("");
                 }}
               >
-                Abbrechen
+                {t("common.cancel")}
               </Button>
             </div>
           </>
