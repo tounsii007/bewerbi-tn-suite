@@ -10,21 +10,34 @@ class AuthState {
   final Profile? profile;
   final bool loading;
 
+  /// Optional — populated from the API's AuthResponse.user on signIn.
+  /// Null in mock-mode and on app-cold-start re-hydration (we don't
+  /// persist user details, just tokens), which the banner treats as
+  /// "unknown → don't show".
+  final String? email;
+  final bool? emailVerified;
+
   const AuthState({
     this.isLoggedIn = false,
     this.profile,
     this.loading = true,
+    this.email,
+    this.emailVerified,
   });
 
   AuthState copyWith({
     bool? isLoggedIn,
     Profile? profile,
     bool? loading,
+    String? email,
+    bool? emailVerified,
   }) {
     return AuthState(
       isLoggedIn: isLoggedIn ?? this.isLoggedIn,
       profile: profile ?? this.profile,
       loading: loading ?? this.loading,
+      email: email ?? this.email,
+      emailVerified: emailVerified ?? this.emailVerified,
     );
   }
 }
@@ -87,7 +100,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
         final tokens = AuthTokens.fromJson(data);
         ApiClient.instance.setTokens(tokens);
         await _tokenStore.write(tokens);
-        state = state.copyWith(isLoggedIn: true, loading: false);
+        // Persist email + verification status in memory so the
+        // verify-email banner can decide whether to render. Not stored
+        // on disk — on next launch we'll re-fetch from /me when needed.
+        final user = data['user'] as Map<String, dynamic>?;
+        state = state.copyWith(
+          isLoggedIn: true,
+          loading: false,
+          email: user?['email'] as String?,
+          emailVerified: user?['emailVerified'] as bool?,
+        );
       } catch (_) {
         state = state.copyWith(loading: false);
         rethrow;

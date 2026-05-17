@@ -12,6 +12,7 @@ import 'package:bewerbi_tn_flutter/providers/job_provider.dart';
 import 'package:bewerbi_tn_flutter/services/profile_completeness.dart';
 import 'package:bewerbi_tn_flutter/widgets/job_card.dart';
 import 'package:bewerbi_tn_flutter/widgets/skeleton_loader.dart';
+import 'package:bewerbi_tn_flutter/widgets/verify_email_banner.dart';
 
 part 'home/home_screen_constants.dart';
 part 'home/home_screen_painter.dart';
@@ -73,6 +74,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const VerifyEmailBanner(),
               // Hero card
               _buildHeroCard(
                 context,
