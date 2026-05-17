@@ -12,6 +12,7 @@ on:
       - "web/**"
       - "shared/**"
       - ".github/workflows/ci-web.yml"
+  workflow_dispatch:
 
 concurrency:
   group: ci-web-${{ github.ref }}

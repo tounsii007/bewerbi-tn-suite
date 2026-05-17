@@ -12,6 +12,7 @@ on:
       - "mobile/**"
       - "shared/**"
       - ".github/workflows/ci-mobile.yml"
+  workflow_dispatch:
 
 concurrency:
   group: ci-mobile-${{ github.ref }}

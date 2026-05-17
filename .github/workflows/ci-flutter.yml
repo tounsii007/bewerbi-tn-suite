@@ -12,6 +12,7 @@ on:
       - "flutter/**"
       - "shared/**"
       - ".github/workflows/ci-flutter.yml"
+  workflow_dispatch:
 
 concurrency:
   group: ci-flutter-${{ github.ref }}
