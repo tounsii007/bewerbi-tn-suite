@@ -11,6 +11,7 @@ import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { PasswordMeter } from "@/components/auth/password-meter";
 import { SessionsList } from "@/components/auth/sessions-list";
+import { DeleteAccountCard } from "@/components/auth/delete-account-card";
 import { useAuthStore } from "@/stores/auth-store";
 import { authApi } from "@/lib/api";
 import { apiErrorMessage } from "@/lib/api-errors";
@@ -166,6 +167,8 @@ export default function SettingsPage() {
           <a href="/legal/impressum" className="text-primary-600 hover:underline">Impressum</a>
         </CardContent>
       </Card>
+
+      <DeleteAccountCard />
     </div>
   );
 }

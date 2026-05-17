@@ -71,6 +71,8 @@ export const authApi = {
     const qs = keepHash ? `?keepHash=${encodeURIComponent(keepHash)}` : "";
     return api.post<{ revoked: number }>(`/api/v1/auth/me/sessions/revoke-others${qs}`);
   },
+  deleteAccount: (password: string) =>
+    api.post<void>("/api/v1/auth/me/delete", { password }),
 };
 
 // ─── Profile ───────────────────────────────────────────────────────────
