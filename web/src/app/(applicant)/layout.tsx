@@ -1,5 +1,11 @@
 import { AppShell } from "@/components/shared/app-shell";
+import { VerifyEmailBanner } from "@/components/auth/verify-email-banner";
 
 export default function ApplicantLayout({ children }: { children: React.ReactNode }) {
-  return <AppShell>{children}</AppShell>;
+  return (
+    <AppShell>
+      <VerifyEmailBanner />
+      {children}
+    </AppShell>
+  );
 }
