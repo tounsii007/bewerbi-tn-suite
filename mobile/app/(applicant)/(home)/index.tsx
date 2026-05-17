@@ -16,6 +16,7 @@ import { Card } from "../../../src/components/ui/Card";
 import { JobCard } from "../../../src/components/shared/JobCard";
 import { JobCardSkeleton } from "../../../src/components/shared/JobCardSkeleton";
 import { CategoryCard } from "../../../src/components/shared/CategoryCard";
+import { VerifyEmailBanner } from "../../../src/components/auth/VerifyEmailBanner";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { useJobStore } from "../../../src/stores/jobStore";
 import { useThemeStore } from "../../../src/hooks/useColorScheme";
@@ -111,6 +112,7 @@ export default function HomeScreen() {
           />
         }
       >
+        <VerifyEmailBanner />
         <Animated.View
           entering={FadeInDown.springify()}
           className="bg-primary-500 mx-5 mt-4 rounded-3xl px-6 pt-5 pb-6"

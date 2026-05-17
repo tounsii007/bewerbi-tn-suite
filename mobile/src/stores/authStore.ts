@@ -14,6 +14,10 @@ import type { Profile, UserRole } from "../types";
 
 interface SessionUser {
   id: string;
+  // Optional in mock/legacy paths — API mode always populates them so
+  // the "verify your email" banner can decide whether to show.
+  email?: string;
+  emailVerified?: boolean;
 }
 
 interface AuthSession {
@@ -95,7 +99,13 @@ export const useAuthStore = create<AuthState>()(
             apiSetTokens(resp);
             set({
               tokens: toTokenPair(resp),
-              session: { user: { id: resp.user.id } },
+              session: {
+                user: {
+                  id: resp.user.id,
+                  email: resp.user.email,
+                  emailVerified: resp.user.emailVerified,
+                },
+              },
             });
             await get().fetchProfile();
             return;
@@ -129,7 +139,13 @@ export const useAuthStore = create<AuthState>()(
             apiSetTokens(resp);
             set({
               tokens: toTokenPair(resp),
-              session: { user: { id: resp.user.id } },
+              session: {
+                user: {
+                  id: resp.user.id,
+                  email: resp.user.email,
+                  emailVerified: resp.user.emailVerified,
+                },
+              },
             });
             await get().fetchProfile();
             return;
