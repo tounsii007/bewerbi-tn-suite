@@ -62,7 +62,27 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
             response.setHeader("Content-Security-Policy", csp);
         }
 
+        // Token-bearing and per-user responses must never be cached by
+        // an intermediate proxy or the browser HTTP cache. Catches the
+        // entire identity-service surface plus /profile/me-style
+        // endpoints. JWT-bearing paths cover both response bodies that
+        // contain the token (login, register, refresh) and ones that
+        // depend on the requesting user (everything authenticated).
+        String path = request.getRequestURI();
+        if (isSensitivePath(path)) {
+            response.setHeader("Cache-Control", "no-store");
+            response.setHeader("Pragma", "no-cache");
+        }
+
         chain.doFilter(request, response);
+    }
+
+    private static boolean isSensitivePath(String path) {
+        if (path == null) return false;
+        return path.startsWith("/api/v1/auth/")
+                || path.startsWith("/api/v1/profile/")
+                || path.contains("/me/")
+                || path.endsWith("/me");
     }
 
     @Configuration(proxyBeanMethods = false)
