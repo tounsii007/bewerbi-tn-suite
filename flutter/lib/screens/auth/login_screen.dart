@@ -7,6 +7,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:bewerbi_tn_flutter/app/theme.dart';
 import 'package:bewerbi_tn_flutter/providers/auth_provider.dart';
 import 'package:bewerbi_tn_flutter/models/profile.dart';
+import 'package:bewerbi_tn_flutter/services/api_client.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -26,6 +27,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _handleLogin() async {
@@ -141,20 +147,57 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 8),
 
-              // Forgot password link
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => context.push('/forgot-password'),
-                  child: Text(
-                    'Passwort vergessen?',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w500,
+              // Resend-verify + Forgot-password links
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () async {
+                      if (!ApiClient.isApiMode) return;
+                      final email = _emailController.text.trim();
+                      if (email.isEmpty) {
+                        _showError('Bitte E-Mail-Adresse eingeben.');
+                        return;
+                      }
+                      try {
+                        await ApiClient.instance.post(
+                          '/api/v1/auth/verify-email/resend',
+                          body: {'email': email},
+                        );
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Wenn die Adresse noch nicht bestätigt ist, ist ein neuer Link unterwegs.',
+                            ),
+                          ),
+                        );
+                      } on ApiException catch (e) {
+                        if (!mounted) return;
+                        _showError(e.message);
+                      }
+                    },
+                    child: Text(
+                      'Bestätigung erneut senden',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
+                  TextButton(
+                    onPressed: () => context.push('/forgot-password'),
+                    child: Text(
+                      'Passwort vergessen?',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
 

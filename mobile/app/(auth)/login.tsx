@@ -10,6 +10,8 @@ import { Button } from "../../src/components/ui/Button";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useThemeStore } from "../../src/hooks/useColorScheme";
 import { IS_MOCK_MODE } from "../../src/lib/supabase";
+import { authApi, IS_API_MODE } from "../../src/lib/apiClient";
+import { apiErrorMessage } from "../../src/lib/apiError";
 
 export default function LoginScreen() {
   const { t } = useTranslation();
@@ -112,12 +114,38 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity
-              onPress={() => router.push("/(auth)/forgot-password")}
-              className="self-end mb-6 mt-2"
-            >
-              <Text className="text-primary-500 text-[13px] font-medium">{t("auth.forgotPassword")}</Text>
-            </TouchableOpacity>
+            <View className="flex-row justify-between items-center mb-6 mt-2">
+              <TouchableOpacity
+                onPress={async () => {
+                  if (!IS_API_MODE) return;
+                  if (!email) {
+                    Alert.alert(t("common.error"), "Bitte E-Mail-Adresse eingeben.");
+                    return;
+                  }
+                  try {
+                    await authApi.resendVerification(email);
+                    Alert.alert(
+                      "E-Mail unterwegs",
+                      "Wenn die Adresse registriert und noch nicht bestätigt ist, ist ein neuer Link unterwegs.",
+                    );
+                  } catch (e) {
+                    Alert.alert(
+                      t("common.error"),
+                      apiErrorMessage(e, "Senden fehlgeschlagen."),
+                    );
+                  }
+                }}
+              >
+                <Text className="text-primary-500 text-[13px] font-medium">
+                  Bestätigungs-E-Mail erneut senden
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push("/(auth)/forgot-password")}>
+                <Text className="text-primary-500 text-[13px] font-medium">
+                  {t("auth.forgotPassword")}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
             <Button
               title={t("auth.login")}
