@@ -66,6 +66,33 @@ public class KnownDeviceTracker {
         return false;
     }
 
+    /**
+     * Drop every known-device entry for the user — called from
+     * {@code AuthService.deleteAccount} so a hard-deleted account
+     * doesn't leave per-device fingerprints lying around in Redis
+     * past its 180-day TTL.
+     */
+    public void forgetUser(UUID userId) {
+        if (userId == null) return;
+        String pattern = KEY_PREFIX + userId + ":*";
+        var options = org.springframework.data.redis.core.ScanOptions
+                .scanOptions().match(pattern).count(100).build();
+        java.util.List<String> batch = new java.util.ArrayList<>();
+        redis.execute((org.springframework.data.redis.core.RedisCallback<Void>) connection -> {
+            try (var cursor = connection.keyCommands().scan(options)) {
+                while (cursor.hasNext()) {
+                    batch.add(new String(cursor.next()));
+                    if (batch.size() >= 500) {
+                        redis.delete(batch);
+                        batch.clear();
+                    }
+                }
+            }
+            return null;
+        });
+        if (!batch.isEmpty()) redis.delete(batch);
+    }
+
     private static String fingerprint(String ip, String userAgent) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");

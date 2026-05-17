@@ -79,6 +79,12 @@ Quick reference for the security controls in the suite — handy for new joiners
   - **Trivy** filesystem scan (HIGH/CRITICAL, fix-available only) across Maven, npm, pubspec deps and IaC. SARIF uploaded to GitHub Code Scanning.
   - **Gitleaks** secrets scan with full-history fetch.
 
+## Account lifecycle
+
+- **New-device sign-in** (`KnownDeviceTracker` + `NEW_DEVICE_SIGN_IN` Kafka event) — first login from a fresh (IP, UA) fingerprint emits a "new sign-in detected" mail with device + IP + deep-link to `/settings`. 180-day TTL per fingerprint, refresh-on-use, so a device that vanishes for half a year is "new" again.
+- **GDPR right-to-erasure** (`POST /api/v1/auth/me/delete`) — authenticated, password-confirmed. Wipes Redis refresh tokens + lockout state + known-device fingerprints, deletes the user row, emits `USER_DELETED` for downstream services to anonymise their copies. Audited as `AUTH_ACCOUNT_DELETED` while the email is still resolvable.
+- **Audit categories** (extending the list in `AuditEvent.java`): `AUTH_LOGIN_SUCCESS`, `AUTH_LOGIN_FAILED`, `AUTH_LOGIN_LOCKED`, `AUTH_PASSWORD_RESET_REQUESTED`, `AUTH_PASSWORD_CHANGED`, `AUTH_TOKEN_REFRESH`, `AUTH_REFRESH_REUSE_DETECTED`, `AUTH_LOGOUT`, `AUTH_LOGOUT_ALL`, `AUTH_REGISTER`, `AUTH_EMAIL_VERIFY` (success/failure), `AUTH_EMAIL_VERIFY_RESEND`, `AUTH_SESSION_REVOKED`, `AUTH_OTHER_SESSIONS_REVOKED`, `AUTH_NEW_DEVICE_SIGN_IN`, `AUTH_ACCOUNT_DELETED`.
+
 ## Reporting
 
 Found a vulnerability? Email `security@bewerbi.tn`. Please don't open a public issue.

@@ -286,6 +286,9 @@ public class AuthService {
         if (attempts != null) {
             attempts.reset(email);
         }
+        if (devices != null) {
+            devices.forgetUser(user.getId());
+        }
 
         // Persist the audit trail BEFORE the row goes away, so the
         // log entry actually carries the email rather than "unknown".
