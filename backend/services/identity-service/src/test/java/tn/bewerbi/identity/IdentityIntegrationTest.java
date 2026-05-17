@@ -161,4 +161,55 @@ class IdentityIntegrationTest {
                 .andReturn().getResponse().getStatus();
         assertThat(known).isEqualTo(204);
     }
+
+    /**
+     * GDPR delete-account end-to-end. Locks in two contracts:
+     * 1) the wrong password is rejected with 401 (the user stays around),
+     * 2) the right password returns 204 and a subsequent login fails
+     *    with 401 (the account is gone).
+     */
+    @Test
+    void delete_account_requires_password_and_is_irreversible() throws Exception {
+        // Register a fresh account.
+        String register = """
+                {
+                  "email": "tombstone@example.tn",
+                  "password": "StrongP@ss123",
+                  "firstName": "Tomb",
+                  "lastName": "Stone",
+                  "role": "APPLICANT"
+                }
+                """;
+        MvcResult reg = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(register))
+                .andReturn();
+        assertThat(reg.getResponse().getStatus()).isEqualTo(200);
+        String accessToken = mapper.readTree(reg.getResponse().getContentAsString())
+                .get("accessToken").asText();
+
+        // Wrong password → 401, account untouched.
+        int wrong = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/me/delete")
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"password\": \"not-the-password\" }"))
+                .andReturn().getResponse().getStatus();
+        assertThat(wrong).isIn(400, 401);
+
+        // Correct password → 204.
+        int deleted = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/me/delete")
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"password\": \"StrongP@ss123\" }"))
+                .andReturn().getResponse().getStatus();
+        assertThat(deleted).isEqualTo(204);
+
+        // Login with the now-deleted email must fail.
+        int afterLogin = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"email\": \"tombstone@example.tn\", "
+                        + "\"password\": \"StrongP@ss123\" }"))
+                .andReturn().getResponse().getStatus();
+        assertThat(afterLogin).isIn(400, 401);
+    }
 }
