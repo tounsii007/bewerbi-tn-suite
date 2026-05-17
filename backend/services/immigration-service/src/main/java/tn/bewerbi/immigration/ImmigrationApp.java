@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import tn.bewerbi.common.api.CurrentUser;
 import tn.bewerbi.common.api.GlobalExceptionHandler;
 import tn.bewerbi.common.api.exception.ResourceNotFoundException;
+import tn.bewerbi.common.events.DomainEvents;
+import tn.bewerbi.common.events.Topics;
 import tn.bewerbi.common.i18n.LocaleContext;
 import tn.bewerbi.common.i18n.MessageClient;
 import tn.bewerbi.common.security.JwtSecurityConfig;
@@ -108,9 +110,11 @@ public class ImmigrationApp {
 
     public interface AnerkennungRepo extends JpaRepository<AnerkennungCase, UUID> {
         Optional<AnerkennungCase> findByUserId(UUID userId);
+        long deleteByUserId(UUID userId);
     }
     public interface VisaRepo extends JpaRepository<VisaCase, UUID> {
         Optional<VisaCase> findByUserId(UUID userId);
+        long deleteByUserId(UUID userId);
     }
 
     // ─── DTOs ───────────────────────────────────────────────────────────
@@ -349,6 +353,43 @@ public class ImmigrationApp {
                     r.descKey == null ? null : messages.resolveIn(locale, r.descKey),
                     r.required, r.sortOrder, r.completedAt != null, r.completedAt, r.documentId)).toList();
             return new VisaResponse(c.id, c.visaType, c.stage, c.appointmentDate, c.embassyCity, progress, mapped);
+        }
+    }
+
+    /**
+     * GDPR cascade. Anerkennung (skill-recognition) and visa cases hold
+     * a lot of personal status data (profession, embassy appointment
+     * dates, document references). Hard-delete both — they have no
+     * platform value once the account is gone.
+     */
+    @org.springframework.stereotype.Component
+    public static class UserDeletedListener {
+        private static final org.slf4j.Logger log =
+                org.slf4j.LoggerFactory.getLogger(UserDeletedListener.class);
+
+        private final AnerkennungRepo anerkennung;
+        private final VisaRepo visa;
+        private final com.fasterxml.jackson.databind.ObjectMapper mapper;
+
+        public UserDeletedListener(AnerkennungRepo anerkennung, VisaRepo visa,
+                                   com.fasterxml.jackson.databind.ObjectMapper mapper) {
+            this.anerkennung = anerkennung;
+            this.visa = visa;
+            this.mapper = mapper;
+        }
+
+        @org.springframework.transaction.annotation.Transactional
+        @org.springframework.kafka.annotation.KafkaListener(topics = Topics.USER_DELETED)
+        public void onUserDeleted(String payload) {
+            try {
+                var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
+                long aer = anerkennung.deleteByUserId(event.userId());
+                long vsa = visa.deleteByUserId(event.userId());
+                log.info("UserDeleted: removed user={} anerkennung={} visa={}",
+                        event.userId(), aer, vsa);
+            } catch (Exception e) {
+                log.warn("Failed to process UserDeleted: {}", e.getMessage());
+            }
         }
     }
 }

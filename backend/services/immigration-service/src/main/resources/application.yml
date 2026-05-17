@@ -17,6 +17,14 @@ spring:
   data.redis:
     host: ${REDIS_HOST:localhost}
     port: ${REDIS_PORT:6379}
+  kafka:
+    # Iter 88: GDPR cascade — drop the user's anerkennung + visa cases.
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    consumer:
+      group-id: immigration-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: latest
 
 server.port: ${SERVER_PORT:8085}
 
