@@ -826,3 +826,39 @@ gekappt).
 anerkennung + visa. **5 von 9 Microservices** handhaben den GDPR-Event
 end-to-end.
 
+**89 — Docs**: CHANGELOG-Update für Iter 76–88.
+
+**90 — Backend: HSTS-Preload-Alignment** — Servlet- und Reactive-Filter
+emittieren jetzt `max-age=63072000; includeSubDomains; preload`
+identisch zur Web-Ebene (Iter 71), so dass mobile + Flutter beim
+direkten API-Hit dieselbe preload-fähige Policy sehen.
+
+**91 — Backend: Permissions-Policy + Origin-Agent-Cluster** —
+Permissions-Policy von 5 auf 28 Direktiven erweitert (deny-all-by-
+default für jedes bekannte Browser-Feature). Neuer
+`Origin-Agent-Cluster: ?1`-Header so dass same-site iframes nicht
+synchron auf den Origin-Scope zugreifen können.
+
+**92 — Backend: Client-IP in /me/sessions** — Refresh-Store-Payload um
+ein viertes Feld erweitert (`createdAt|lastUsedAt|ua|ip`).
+Backwards-kompatibel für 2- und 3-Segment-Legacy-Rows. IP wird über
+`X-Forwarded-For` aus dem Request gezogen.
+
+**93 — Alle Clients: IP-Anzeige in Sessions-Liste** — Web/Mobile/Flutter
+zeigen die IP nach einem " · "-Separator neben dem "Zuletzt aktiv …"
+Timestamp.
+
+---
+
+### Zusammenfassung der zweiten Welle (Iter 76–93, 18 Commits)
+
+- **Notification**: New-device-sign-in mail + Auth-strict-Gate.
+- **GDPR**: Delete-Endpoint + 5 Microservice-Cascades + Integration-
+  Test + UI-Parität auf 3 Clients + i18n.
+- **Header-Polish**: HSTS-Preload-Alignment, Permissions-Policy
+  vollständig, Origin-Agent-Cluster, Vary auf jedem Endpoint.
+- **Sessions**: Client-IP in der Session-Liste sichtbar.
+
+Insgesamt seit Iter 21: **73 sicherheits- und feature-fokussierte
+Commits**, alle einzeln rollback-fähig, mit konsistenter i18n und
+Tests an den heißesten Pfaden.
