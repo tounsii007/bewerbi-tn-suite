@@ -97,6 +97,7 @@ public class SavedSearchController {
 
     public interface SavedSearchRepository extends JpaRepository<SavedSearch, UUID> {
         List<SavedSearch> findByUserIdOrderByCreatedAtDesc(UUID userId);
+        long deleteByUserId(UUID userId);
     }
 
     @Service

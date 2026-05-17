@@ -17,6 +17,15 @@ spring:
   data.redis:
     host: ${REDIS_HOST:localhost}
     port: ${REDIS_PORT:6379}
+  kafka:
+    # Iter 87: GDPR cascade listens to USER_DELETED to anonymise the
+    # user's reviews (content stays, author link replaced).
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    consumer:
+      group-id: companies-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: latest
 
 server.port: ${SERVER_PORT:8084}
 

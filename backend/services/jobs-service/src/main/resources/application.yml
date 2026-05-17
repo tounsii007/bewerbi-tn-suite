@@ -21,6 +21,15 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+  kafka:
+    # Listener-only — used by UserDeletedListener (Iter 87) for the
+    # GDPR cascade on saved-searches.
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    consumer:
+      group-id: jobs-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: latest
 
 server:
   port: ${SERVER_PORT:8082}

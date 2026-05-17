@@ -25,6 +25,8 @@ import tn.bewerbi.common.api.CurrentUser;
 import tn.bewerbi.common.api.GlobalExceptionHandler;
 import tn.bewerbi.common.api.exception.ConflictException;
 import tn.bewerbi.common.api.exception.ResourceNotFoundException;
+import tn.bewerbi.common.events.DomainEvents;
+import tn.bewerbi.common.events.Topics;
 import tn.bewerbi.common.security.JwtSecurityConfig;
 
 @SpringBootApplication
@@ -83,7 +85,22 @@ public class CompaniesApp {
         Page<Review> findByCompanyId(UUID companyId, Pageable p);
         @Query("select coalesce(avg(r.rating),0), count(r) from Review r where r.companyId = :id")
         Object[] aggregate(UUID id);
+
+        /**
+         * GDPR pseudonymisation. Reviews stay published (they have value
+         * for other applicants) but the author link is replaced with a
+         * sentinel UUID so the row can't be re-attributed. Used by the
+         * USER_DELETED listener (Iter 87) — see {@code DELETED_USER}.
+         */
+        @org.springframework.data.jpa.repository.Modifying
+        @Query("update Review r set r.authorUserId = :sentinel where r.authorUserId = :userId")
+        int anonymizeByAuthor(UUID userId, UUID sentinel);
     }
+
+    /** Sentinel "deleted user" — written to author_user_id when the
+     *  real user exercises GDPR Art. 17. The all-zeros UUID is reserved
+     *  across the platform; no real user can ever be assigned it. */
+    public static final UUID DELETED_USER = new UUID(0L, 0L);
 
     public record CompanyResponse(UUID id, String name, String slug, String description, String website,
                                   String logoUrl, String industry, String size, String country, String city,
@@ -233,6 +250,54 @@ public class CompaniesApp {
         private ReviewResponse to(Review r) {
             return new ReviewResponse(r.id, r.companyId, r.authorUserId, r.rating, r.title, r.body,
                     r.pros, r.cons, r.employmentStatus, r.createdAt);
+        }
+    }
+
+    /**
+     * GDPR cascade for companies-service. Anonymises (does NOT delete)
+     * the user's reviews — review content stays public for other
+     * applicants, but the author_user_id is replaced with the
+     * {@link #DELETED_USER} sentinel so the row can no longer be
+     * re-linked to a real account.
+     *
+     * <p>Why anonymise instead of delete:
+     * <ul>
+     *   <li>Reviews of employers are platform value (helps future
+     *       applicants make informed choices); deleting them on every
+     *       user-deletion would let employers game the system by
+     *       waiting out negative-review authors.</li>
+     *   <li>Author identifiers are the only personal data in a review
+     *       row today; the body is a free-text description of the
+     *       workplace, not the user. If review content evolves to
+     *       carry direct PII (names of colleagues, etc.), this needs
+     *       to be revisited.</li>
+     * </ul>
+     */
+    @org.springframework.stereotype.Component
+    public static class UserDeletedListener {
+        private static final org.slf4j.Logger log =
+                org.slf4j.LoggerFactory.getLogger(UserDeletedListener.class);
+
+        private final ReviewRepo reviews;
+        private final com.fasterxml.jackson.databind.ObjectMapper mapper;
+
+        public UserDeletedListener(ReviewRepo reviews,
+                                   com.fasterxml.jackson.databind.ObjectMapper mapper) {
+            this.reviews = reviews;
+            this.mapper = mapper;
+        }
+
+        @org.springframework.transaction.annotation.Transactional
+        @org.springframework.kafka.annotation.KafkaListener(topics = Topics.USER_DELETED)
+        public void onUserDeleted(String payload) {
+            try {
+                var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
+                int anonymised = reviews.anonymizeByAuthor(event.userId(), DELETED_USER);
+                log.info("UserDeleted: anonymised {} reviews for user={}",
+                        anonymised, event.userId());
+            } catch (Exception e) {
+                log.warn("Failed to process UserDeleted: {}", e.getMessage());
+            }
         }
     }
 }
