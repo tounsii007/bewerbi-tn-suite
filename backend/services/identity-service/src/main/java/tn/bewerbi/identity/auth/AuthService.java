@@ -245,6 +245,11 @@ public class AuthService {
             }
             throw new BadCredentialsException("Invalid credentials");
         }
+        if (passwords.matches(newPassword, user.getPasswordHash())) {
+            throw new UnprocessableEntityException(
+                    "New password must differ from the current one",
+                    "error.auth.password.reused");
+        }
         rejectWeakPassword(newPassword);
         user.setPasswordHash(passwords.encode(newPassword));
         refreshStore.revokeAll(user.getId());
@@ -326,6 +331,15 @@ public class AuthService {
         if (user.getPasswordResetExpiresAt() == null
                 || user.getPasswordResetExpiresAt().isBefore(Instant.now())) {
             throw new BadCredentialsException("Reset token expired");
+        }
+        // Reject reuse of the *current* password — defeats the "reset to
+        // the same thing" anti-pattern. Doesn't track full history (we
+        // don't store old hashes), but the live one is the only one
+        // bcrypt can match against anyway.
+        if (passwords.matches(newPassword, user.getPasswordHash())) {
+            throw new UnprocessableEntityException(
+                    "New password must differ from the current one",
+                    "error.auth.password.reused");
         }
         rejectWeakPassword(newPassword);
         user.setPasswordHash(passwords.encode(newPassword));

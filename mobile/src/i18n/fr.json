@@ -62,7 +62,8 @@
     "auth.password.weak.noRepeats": "Évitez trois caractères identiques d'affilée.",
     "auth.password.weak.notCommon": "Ce mot de passe est trop courant.",
     "auth.password.weak.weak": "Mot de passe trop faible.",
-    "auth.password.weak.breached": "Ce mot de passe figure dans des fuites de données connues. Choisissez-en un autre."
+    "auth.password.weak.breached": "Ce mot de passe figure dans des fuites de données connues. Choisissez-en un autre.",
+    "auth.password.reused": "Le nouveau mot de passe doit être différent de l'actuel."
   },
   "home": {
     "greeting": "Bonjour, {{name}} !",

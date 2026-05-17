@@ -62,7 +62,8 @@
     "auth.password.weak.noRepeats": "Vermeide drei gleiche Zeichen hintereinander.",
     "auth.password.weak.notCommon": "Dieses Passwort ist zu weit verbreitet.",
     "auth.password.weak.weak": "Passwort zu schwach.",
-    "auth.password.weak.breached": "Dieses Passwort taucht in bekannten Datenlecks auf. Bitte wähle ein anderes."
+    "auth.password.weak.breached": "Dieses Passwort taucht in bekannten Datenlecks auf. Bitte wähle ein anderes.",
+    "auth.password.reused": "Das neue Passwort muss sich vom aktuellen unterscheiden."
   },
   "home": {
     "greeting": "Hallo, {{name}}!",

@@ -62,7 +62,8 @@
     "auth.password.weak.noRepeats": "تجنب تكرار نفس الحرف ثلاث مرات.",
     "auth.password.weak.notCommon": "كلمة المرور هذه شائعة جدًا.",
     "auth.password.weak.weak": "كلمة المرور ضعيفة جدًا.",
-    "auth.password.weak.breached": "كلمة المرور هذه ظهرت في تسريبات بيانات معروفة. الرجاء اختيار كلمة مرور أخرى."
+    "auth.password.weak.breached": "كلمة المرور هذه ظهرت في تسريبات بيانات معروفة. الرجاء اختيار كلمة مرور أخرى.",
+    "auth.password.reused": "يجب أن تكون كلمة المرور الجديدة مختلفة عن الحالية."
   },
   "home": {
     "greeting": "مرحباً، {{name}}!",
