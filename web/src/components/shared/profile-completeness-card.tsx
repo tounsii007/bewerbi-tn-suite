@@ -15,7 +15,9 @@ const TIER_STYLE: Record<string, { bg: string; color: string; emoji: string }> =
 
 export function ProfileCompletenessCard({ profile }: { profile: ProfileResponse }) {
   const c = profile.completeness;
-  const tier = TIER_STYLE[c.tier] ?? TIER_STYLE.STARTER;
+  // TIER_STYLE.STARTER is defined in the literal so `!` is safe;
+  // the index access is the noUncheckedIndexedAccess-typed shape.
+  const tier = TIER_STYLE[c.tier] ?? TIER_STYLE.STARTER!;
 
   return (
     <Card className="overflow-hidden">

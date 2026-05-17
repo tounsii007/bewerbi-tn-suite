@@ -24,7 +24,10 @@ const OPTIONS: LangOption[] = [
 export function LanguageSwitcher() {
   const locale = useLocaleStore((s) => s.locale);
   const setLocale = useLocaleStore((s) => s.setLocale);
-  const current = OPTIONS.find((o) => o.code === locale) ?? OPTIONS[0];
+  // The non-null assertion is safe: OPTIONS is a non-empty literal,
+  // so OPTIONS[0] is always defined. noUncheckedIndexedAccess can't
+  // model that, so we narrow explicitly.
+  const current = OPTIONS.find((o) => o.code === locale) ?? OPTIONS[0]!;
 
   return (
     <DropdownMenu.Root>

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, type HTMLMotionProps } from "framer-motion";
+import { motion, type HTMLMotionProps, type Variants } from "framer-motion";
 
 /**
  * Staggered list animation primitives. Use {@link StaggerContainer} as a wrapper around the
@@ -16,9 +16,15 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+// `as Variants` so framer-motion's stricter Easing type accepts the
+// cubic-bezier tuple. The runtime shape is unchanged.
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 8 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] as const },
+  },
 };
 
 export function StaggerContainer({

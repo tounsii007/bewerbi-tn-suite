@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, XCircle, Loader2, Mail } from "lucide-react";
@@ -12,7 +12,16 @@ import { authApi } from "@/lib/api";
 import { apiErrorMessage } from "@/lib/api-errors";
 import { useTranslate } from "@/i18n/use-translate";
 
+// Wrap in Suspense for static build (useSearchParams bails out otherwise).
 export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={null}>
+      <VerifyEmailContent />
+    </Suspense>
+  );
+}
+
+function VerifyEmailContent() {
   const search = useSearchParams();
   const token = search.get("token");
   const t = useTranslate();

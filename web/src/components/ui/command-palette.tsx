@@ -93,7 +93,7 @@ export function CommandPalette({
   function activate(item: CommandItem) {
     setOpen(false);
     if (item.onSelect) item.onSelect();
-    else if (item.href) router.push(item.href as any);
+    else if (item.href) router.push(item.href);
   }
 
   return (

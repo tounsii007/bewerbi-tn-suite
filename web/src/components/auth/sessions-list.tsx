@@ -161,7 +161,7 @@ export function SessionsList() {
               // Revoking the current session would log the user out
               // mid-page. Use the dedicated logout for that.
               disabled={isCurrent}
-              title={isCurrent ? "Über „Abmelden" beenden" : undefined}
+              title={isCurrent ? "Über »Abmelden« beenden" : undefined}
               onClick={() => void revoke(s.tokenHash)}
             >
               Beenden

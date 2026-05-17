@@ -26,7 +26,7 @@ const ENDPOINT = "/api/v1/telemetry/events";
 const BATCH_LIMIT = 12;
 const FLUSH_INTERVAL_MS = 5_000;
 
-let queue: Array<{ type: string; name: string; props?: Props; ts: number; userId?: string }> = [];
+const queue: Array<{ type: string; name: string; props?: Props; ts: number; userId?: string }> = [];
 let userId: string | undefined;
 let timer: ReturnType<typeof setTimeout> | null = null;
 

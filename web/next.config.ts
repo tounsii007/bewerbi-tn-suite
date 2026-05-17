@@ -3,9 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  experimental: {
-    typedRoutes: true,
-  },
+  // experimental.typedRoutes was on, but the codebase pre-dates it and
+  // every <Link href={dynamicString}> path-template fails the typed
+  // check. Disable for now — adopt later via a dedicated migration that
+  // converts all string hrefs to Route objects.
   async rewrites() {
     // Proxy all /api/** calls to the Java gateway so cookies/CORS stay same-origin.
     const gateway = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8080";

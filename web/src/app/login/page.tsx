@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -23,7 +23,17 @@ const schema = z.object({
 
 type LoginValues = z.infer<typeof schema>;
 
+// Wrap the form in Suspense so Next's static page generation
+// (`next build`) doesn't bail out on useSearchParams.
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
   const search = useSearchParams();
   const signIn = useAuthStore((s) => s.signIn);

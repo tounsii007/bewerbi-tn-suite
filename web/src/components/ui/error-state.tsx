@@ -80,13 +80,13 @@ interface BoundaryState {
 }
 
 export class ErrorBoundary extends React.Component<BoundaryProps, BoundaryState> {
-  state: BoundaryState = { error: null };
+  override state: BoundaryState = { error: null };
 
   static getDerivedStateFromError(error: Error): BoundaryState {
     return { error };
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
+  override componentDidCatch(error: Error, info: React.ErrorInfo) {
     if (typeof window !== "undefined") {
       // Don't crash silently; the audit log will pick this up in services that ship it.
       // eslint-disable-next-line no-console
@@ -96,7 +96,7 @@ export class ErrorBoundary extends React.Component<BoundaryProps, BoundaryState>
 
   reset = () => this.setState({ error: null });
 
-  render() {
+  override render() {
     if (this.state.error) {
       if (this.props.fallback) return this.props.fallback(this.state.error, this.reset);
       return (

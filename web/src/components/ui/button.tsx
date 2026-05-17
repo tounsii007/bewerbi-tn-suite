@@ -82,6 +82,23 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const Comp = asChild ? Slot : "button";
     const isDisabled = disabled || loading;
+    // Radix' Slot requires exactly one React element child. When
+    // asChild=true we forward children as-is; the caller is responsible
+    // for putting any icon inside their <Link>/<a>.
+    if (asChild) {
+      return (
+        <Comp
+          ref={ref}
+          aria-busy={loading || undefined}
+          aria-disabled={isDisabled || undefined}
+          disabled={isDisabled}
+          className={cn(buttonVariants({ variant, size, block, className }))}
+          {...props}
+        >
+          {children}
+        </Comp>
+      );
+    }
     return (
       <Comp
         ref={ref}

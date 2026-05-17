@@ -28,5 +28,10 @@
     "../shared/lib/**/*.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "src/mocks/**",
+    "**/*.stories.tsx",
+    "**/*.stories.ts"
+  ]
 }

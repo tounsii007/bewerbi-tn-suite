@@ -99,8 +99,11 @@ function generateNonce(): string {
   // 16 random bytes → base64 (~22 chars); compatible with Edge runtime.
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
-  let binary = "";
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  // Build the binary string via reduce so noUncheckedIndexedAccess
+  // doesn't complain about bytes[i] being `number | undefined`.
+  // Uint8Array indexing IS always defined inside [0, length), but
+  // the type system doesn't model that constraint.
+  const binary = Array.from(bytes, (b) => String.fromCharCode(b)).join("");
   return btoa(binary);
 }
 
