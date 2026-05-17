@@ -64,12 +64,14 @@ public class ApplicationsApp {
     public interface ApplicationRepo extends JpaRepository<Application, UUID> {
         Page<Application> findByApplicantUserId(UUID userId, Pageable p);
         java.util.Optional<Application> findByJobIdAndApplicantUserId(UUID jobId, UUID userId);
+        long deleteByApplicantUserId(UUID userId);
     }
 
     public interface FavoriteRepo extends JpaRepository<Favorite, UUID> {
         List<Favorite> findByUserId(UUID userId);
         java.util.Optional<Favorite> findByUserIdAndJobId(UUID userId, UUID jobId);
         void deleteByUserIdAndJobId(UUID userId, UUID jobId);
+        long deleteByUserId(UUID userId);
     }
 
     public record ApplyRequest(UUID jobId, String coverLetter) {}
@@ -156,6 +158,52 @@ public class ApplicationsApp {
 
         public void remove(UUID userId, UUID jobId) {
             repo.deleteByUserIdAndJobId(userId, jobId);
+        }
+    }
+
+    /**
+     * GDPR cascade. When identity-service hard-deletes a user it
+     * publishes {@code USER_DELETED}; every service that holds
+     * per-user data listens and removes / anonymises its copies.
+     *
+     * <p>Applications + favorites are tied to a user with no real
+     * value once the account is gone — hard-delete is the cleanest
+     * option. Any service that wants to keep aggregated stats can
+     * scrub the userId column to a sentinel UUID before delete; we
+     * don't run analytics on these tables today, so deletion is
+     * preferable to leaving orphan rows.
+     */
+    @org.springframework.stereotype.Component
+    public static class UserDeletedListener {
+        private static final org.slf4j.Logger log =
+                org.slf4j.LoggerFactory.getLogger(UserDeletedListener.class);
+
+        private final ApplicationRepo applications;
+        private final FavoriteRepo favorites;
+        private final com.fasterxml.jackson.databind.ObjectMapper mapper;
+
+        public UserDeletedListener(ApplicationRepo applications, FavoriteRepo favorites,
+                                   com.fasterxml.jackson.databind.ObjectMapper mapper) {
+            this.applications = applications;
+            this.favorites = favorites;
+            this.mapper = mapper;
+        }
+
+        @Transactional
+        @org.springframework.kafka.annotation.KafkaListener(topics = Topics.USER_DELETED)
+        public void onUserDeleted(String payload) {
+            try {
+                var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
+                long apps = applications.deleteByApplicantUserId(event.userId());
+                long favs = favorites.deleteByUserId(event.userId());
+                log.info("UserDeleted: cleaned user={} applications={} favorites={}",
+                        event.userId(), apps, favs);
+            } catch (Exception e) {
+                // Log + swallow: the topic is at-least-once, retries can
+                // re-deliver. Throwing here would put the consumer in
+                // an endless retry loop on a malformed payload.
+                log.warn("Failed to process UserDeleted: {}", e.getMessage());
+            }
         }
     }
 }

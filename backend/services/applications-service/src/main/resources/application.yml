@@ -26,6 +26,14 @@ spring:
       properties:
         enable.idempotence: true
         acks: all
+    consumer:
+      # Required for the USER_DELETED listener (Iter 85). Consumer
+      # group is service-scoped so identity-service can fan-out to
+      # every cascade-handler in parallel.
+      group-id: applications-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: latest
 
 server:
   port: ${SERVER_PORT:8083}
