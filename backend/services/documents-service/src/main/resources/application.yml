@@ -17,6 +17,15 @@ spring:
   servlet.multipart:
     max-file-size: 10MB
     max-request-size: 15MB
+  kafka:
+    # Listener-only client — we don't currently publish from documents-
+    # service. Wired in Iter 86 for the USER_DELETED cascade.
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    consumer:
+      group-id: documents-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: latest
 
 server.port: ${SERVER_PORT:8086}
 

@@ -33,6 +33,8 @@ import org.springframework.web.multipart.MultipartFile;
 import tn.bewerbi.common.api.CurrentUser;
 import tn.bewerbi.common.api.GlobalExceptionHandler;
 import tn.bewerbi.common.api.exception.BadRequestException;
+import tn.bewerbi.common.events.DomainEvents;
+import tn.bewerbi.common.events.Topics;
 import tn.bewerbi.common.security.JwtSecurityConfig;
 
 @SpringBootApplication
@@ -62,6 +64,8 @@ public class DocumentsApp {
 
     public interface DocumentRepo extends JpaRepository<Document, UUID> {
         List<Document> findByOwnerUserId(UUID userId);
+        // GDPR cascade — used by UserDeletedListener (Iter 86).
+        long deleteByOwnerUserId(UUID userId);
     }
 
     public record DocumentResponse(UUID id, DocumentType type, String name, String contentType,
@@ -232,5 +236,44 @@ public class DocumentsApp {
             return out;
         }
         private static String cap(String s) { return s.isEmpty() ? s : s.substring(0,1).toUpperCase() + s.substring(1); }
+    }
+
+    /**
+     * GDPR cascade. Documents are highly sensitive (CVs, IDs, passports
+     * for visa) and must be hard-deleted within reasonable time of the
+     * account going away. Listens to {@link Topics#USER_DELETED}; the
+     * payload carries the userId of the now-deleted account.
+     *
+     * <p>If the project later moves blobs to object storage (S3, MinIO),
+     * extend this listener to also issue a {@code DeleteObject} per row
+     * before the SQL delete — the metadata-row cascade alone leaves the
+     * binary in the bucket.
+     */
+    @org.springframework.stereotype.Component
+    public static class UserDeletedListener {
+        private static final org.slf4j.Logger log =
+                org.slf4j.LoggerFactory.getLogger(UserDeletedListener.class);
+
+        private final DocumentRepo docs;
+        private final com.fasterxml.jackson.databind.ObjectMapper mapper;
+
+        public UserDeletedListener(DocumentRepo docs,
+                                   com.fasterxml.jackson.databind.ObjectMapper mapper) {
+            this.docs = docs;
+            this.mapper = mapper;
+        }
+
+        @org.springframework.transaction.annotation.Transactional
+        @org.springframework.kafka.annotation.KafkaListener(topics = Topics.USER_DELETED)
+        public void onUserDeleted(String payload) {
+            try {
+                var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
+                long removed = docs.deleteByOwnerUserId(event.userId());
+                log.info("UserDeleted: removed {} documents for user={}",
+                        removed, event.userId());
+            } catch (Exception e) {
+                log.warn("Failed to process UserDeleted: {}", e.getMessage());
+            }
+        }
     }
 }
