@@ -130,7 +130,13 @@ jobs:
           context: backend
           file: backend/infra/Dockerfile.service
           push: false
+          # Dockerfile.service expects MODULE_PATH + MODULE_ARTIFACT
+          # (see infra/Dockerfile.service header). The old `SERVICE=…`
+          # arg was never read — `./mvnw -pl ${MODULE_PATH}` saw an
+          # empty value and Maven complained
+          # "Missing argument for option: pl".
           build-args: |
-            SERVICE=gateway
+            MODULE_PATH=gateway
+            MODULE_ARTIFACT=gateway
           cache-from: type=gha
           cache-to: type=gha,mode=max
