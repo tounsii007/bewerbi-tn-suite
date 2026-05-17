@@ -544,3 +544,154 @@ Setup-Action-Caches.
 - Alphabetische Übersicht aller Dokumente — Komplement zur Aufgaben-getriebenen
   Tabelle im Root-README.
 
+## Iterationen 21–64 — Security & Auth-Vertiefung
+
+Eine zusammenhängende Hardening-Welle, die jede Iteration als
+eigenständigen Commit liefert.
+
+**21 — Backend: Account-Lockout + Equal-Time Login** —
+`LoginAttemptTracker` (seit Iter 3 ungenutzt) wird in `AuthService.login`
+verdrahtet: 10 Fehlversuche / 10 min → 15 min Lockout (429 + Retry-After).
+Equal-Time-Bcrypt gegen `DUMMY_HASH` neutralisiert das User-Enumeration-
+Oracle. Audit pro Login-Outcome.
+
+**22 — Backend: Passwort-Reset-Flow (anti-enumeration)** —
+`/password/forgot` (immer 204) + `/password/reset`. 32-Byte-Token; nur
+SHA-256 persistiert (V3-Migration). 30-min-TTL, Single-Use,
+Per-Account-Throttle. Kafka-Topic `PASSWORD_RESET_REQUESTED` +
+Notification-Listener. i18n in DE/FR/AR.
+
+**23 — Web: Nonce-basierte CSP + Open-Redirect-Guard** —
+Middleware emittiert per-Request einen 128-Bit-Nonce; `'unsafe-inline'`/
+`'unsafe-eval'` raus. `safeRedirectPath()` blockiert
+`?redirect=//evil.example` auf `/login`. `lib/security.ts` mit Helfern.
+
+**24 — Web: Forgot/Reset Password UI** — `/forgot-password` +
+`/reset-password` (react-hook-form + Zod), beide whitelisted in
+Middleware.
+
+**25 — Mobile: Hardware-Backed Token Storage** — `expo-secure-store`
+(iOS Keychain / Android EncryptedSharedPreferences). Legacy
+AsyncStorage-Eintrag wird beim ersten Start gewischt.
+
+**26 — Mobile: Forgot/Reset Password Screens** — Deep-Link
+`bewerbitn://reset-password?token=…`.
+
+**27 — Flutter: Hardware-Backed Token Storage** —
+`flutter_secure_storage` + `TokenStore`. Persistiert bei jedem Refresh,
+clear-on-401.
+
+**28 — Flutter: Forgot/Reset Password UI** — Deep-Link
+`/reset-password?token=…` im `go_router`-Redirect-Whitelist.
+
+**29 — Shared: Cross-Platform Password-Strength** — `shared/lib/`
+TS/Dart/Java-Ports mit identischer Rubrik + Suggestion-IDs.
+
+**30 — Backend: 422 bei schwachen Passwörtern** — `register` und
+`resetPassword` rufen `rejectWeakPassword`. messageKey-Suffix =
+Suggestion-ID, lokalisiert in V6-Migration (de/fr/ar).
+
+**31–33 — Live Password-Strength Meter** (Web / Mobile / Flutter) —
+gleicher Evaluator wie das Backend; teilen alle dieselben i18n-Keys.
+
+**34 — Backend: Refresh-Token-Reuse-Detection** — RFC 6819 §5.2.2.3:
+ein bereits rotierter Token revoked *alle* Sessions des Users.
+`RefreshTokenStore.revokeAll` nutzt SCAN statt KEYS.
+
+**35 — Gateway: CORS + Body-Size + Auth-Strict-Erweiterung** —
+explizite Header-Allow-List, env-driven `CORS_ALLOWED_ORIGINS`,
+Netty 8 KB / 16 KB / 2 MB Caps.
+
+**36 — Web: 20-min Idle-Logout** — cross-tab via storage event;
+60-s Warning Toast; no-op auf `/login`.
+
+**37 — Backend: PII-Redaktion in Logs** — `PiiMaskingConverter`
+(`%mskmsg`) maskiert E-Mails, Bearer, JWTs, Hex-Tokens. Wired in
+Dev-Console und Prod-JSON-Layout.
+
+**38 — Flutter: TLS-Only auf Android + iOS** — Android
+`network_security_config.xml` (System-CAs only in Release,
+User-CAs nur in Debug); iOS `NSAppTransportSecurity` strikt.
+
+**39 — Backend: Verify-Email-Token-Hashing + Audit** —
+DB speichert nur SHA-256; Plain-Token nur via Kafka. Internal
+verification-token-Endpoint entfernt.
+
+**40 — Web: Password-Meter-i18n** — drop hard-coded DE; nutzt
+Dictionary-Keys.
+
+**41 — Web: messageKey-Erroranzeige** — `apiErrorMessage(t, …)` plus
+9 neue Error-Keys × 3 Sprachen.
+
+**42 — Backend: Logout-Audit + `/password/change`** — eingeloggter
+Passwort-Wechsel mit equal-time bcrypt + strength check; revoked
+alle Sessions.
+
+**43 — Web: Change-Password in /settings** — Card mit Live-Meter;
+auto-sign-out + Redirect zu /login.
+
+**44 — Mobile: Change-Password-Screen** mit Settings-Verknüpfung.
+
+**45 — Flutter: Change-Password-Screen** + Router-Route.
+
+**46 — Backend: Prod-Profile-Disclosure-Guards** — `server.error.*`
+aus, Whitelabel weg, Swagger/v3-api-docs disabled,
+Actuator auf `health,info,prometheus` reduziert.
+
+**47 — Web: Robots + Auth-Pages noindex** — neue Layouts mit
+`robots: {index:false,follow:false}`; `referrer:"no-referrer"` für
+`/reset-password` und `/verify`.
+
+**48 — Gateway: `/password/change` im Auth-Strict-Bucket**.
+
+**49 — Web: `useApiErrorToast`** — Adoption-Pass durch
+favorites / profile / search.
+
+**50 — Backend: Active-Sessions-Endpoints** —
+`GET /me/sessions`, `DELETE /me/sessions/{hash}`. Metadata
+`createdAt|userAgent` im Refresh-Store. `RequestContextHolder`
+liefert die UA.
+
+**51 — Web: Active-Sessions-Card im /settings** mit Device-Icons,
+Browser+OS-Label, Beenden-Button.
+
+**52 — Mobile: Active-Sessions-Screen** + Pull-to-Refresh +
+Confirm-Revoke.
+
+**53 — Backend: Audit-Anreicherung um IP + UA** —
+`AuditLogger.log` füllt aus dem aktuellen Request (X-Forwarded-For
+aware).
+
+**54 — Flutter: Active-Sessions-Screen** + Settings-Verknüpfung.
+
+**55 — Backend: `lastUsedAt` + Sortierung** — `touch()` auf Refresh;
+Payload jetzt `createdAt|lastUsedAt|ua` mit Rückwärtskompatibilität.
+UI zeigt "Zuletzt aktiv …".
+
+**56 — CI: Trivy + Gitleaks** — neuer `security-scan.yml` Workflow
+(push + PR + nightly).
+
+**57 — Docs: SECURITY.md refresh** — alle Iterationen 21+ dokumentiert.
+
+**58 — Backend: Dedicated Audit-Appender** — 365 Tage Rotation, 5 GB
+Cap, separater JSON-Sink (`AUDIT_LOG_DIR`-Env).
+
+**59 — Mobile: `apiErrorMessage` + i18n Password-Meter** — Parität
+mit der Web-Lösung.
+
+**60 — Backend: Tests** — `PasswordStrengthTest` (Parity-Oracle) +
+Integration-Tests für `/password/forgot` (immer 204) und Register-422.
+
+**61 — Web: "Dieses Gerät"-Marker** — SubtleCrypto-Hash des lokalen
+Refresh-Tokens, Beenden-Button für die aktuelle Session disabled.
+
+**62 — Backend + Web: `/me/sessions/revoke-others`** — alles ausser
+keepHash terminieren. Web zeigt "Auf allen anderen Geräten abmelden".
+
+**63 — Mobile + Flutter: Current-Device-Parity** —
+expo-crypto / `crypto`-Package SHA-256; "Andere beenden" UI.
+
+**64 — Backend + Web: Resend-Verification-Email** —
+`POST /verify-email/resend` (anti-enumeration), `/verify`-Seite
+zeigt inline ein Resend-Formular auf Fehler.
+
