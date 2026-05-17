@@ -30,10 +30,18 @@ public class SecurityOverrides {
                 .cors(cors -> cors.configurationSource(corsSource))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
+                        // Pre-auth endpoints — also mirrored in the
+                        // gateway's permitAll list (Iter 35/48/64/77),
+                        // but the identity-service is reached directly
+                        // by integration tests + future internal calls,
+                        // so the per-service rule has to stay in sync.
                         .requestMatchers(HttpMethod.POST,
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login",
-                                "/api/v1/auth/refresh").permitAll()
+                                "/api/v1/auth/refresh",
+                                "/api/v1/auth/password/forgot",
+                                "/api/v1/auth/password/reset",
+                                "/api/v1/auth/verify-email/resend").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/verify-email").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()

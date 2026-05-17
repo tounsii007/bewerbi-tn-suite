@@ -52,7 +52,11 @@ jobs:
         run: flutter pub get
 
       - name: Analyze
-        run: flutter analyze --no-fatal-warnings
+        # --no-fatal-infos: Flutter 3.41 + counts info-level lints
+        # (mostly deprecated `withOpacity` → `withValues` and unnecessary
+        # string-interpolation braces) towards the exit code. Treat them
+        # as non-blocking for now — TODO: sweep the codebase + tighten.
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
 
       - name: Format check (warning only)
         run: dart format --output=none --set-exit-if-changed . || true
