@@ -60,10 +60,32 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
         response.setHeader("X-Content-Type-Options", "nosniff");
         response.setHeader("X-Frame-Options", "DENY");
         response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+        // Deny every powerful browser feature by default — the API
+        // never serves HTML, but a 4xx body rendered as text/plain
+        // still inherits these headers, so a confused tab can't grant
+        // a feature it never asked for. Expanded list covers every
+        // permission policy directive Chromium currently knows about.
         response.setHeader("Permissions-Policy",
-                "geolocation=(), camera=(), microphone=(), payment=(), usb=()");
+                "accelerometer=(), ambient-light-sensor=(), autoplay=(), "
+                        + "battery=(), camera=(), display-capture=(), "
+                        + "document-domain=(), encrypted-media=(), "
+                        + "execution-while-not-rendered=(), "
+                        + "execution-while-out-of-viewport=(), "
+                        + "fullscreen=(), gamepad=(), geolocation=(), "
+                        + "gyroscope=(), hid=(), idle-detection=(), "
+                        + "magnetometer=(), microphone=(), midi=(), "
+                        + "payment=(), picture-in-picture=(), "
+                        + "publickey-credentials-get=(), "
+                        + "screen-wake-lock=(), serial=(), "
+                        + "sync-xhr=(), usb=(), web-share=(), "
+                        + "xr-spatial-tracking=()");
         response.setHeader("Cross-Origin-Opener-Policy", "same-origin");
         response.setHeader("Cross-Origin-Resource-Policy", "same-site");
+        // Origin-Agent-Cluster: opts the response into an origin-keyed
+        // agent cluster so a same-site iframe (if any slips past
+        // frame-ancestors) can't synchronously access this origin's
+        // globals. Cheap, no downside for JSON APIs.
+        response.setHeader("Origin-Agent-Cluster", "?1");
         if (csp != null && !csp.isBlank()) {
             response.setHeader("Content-Security-Policy", csp);
         }

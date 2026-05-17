@@ -38,10 +38,27 @@ public class SecurityHeadersWebFilter implements WebFilter, Ordered {
         headers.setIfAbsent("X-Content-Type-Options", "nosniff");
         headers.setIfAbsent("X-Frame-Options", "DENY");
         headers.setIfAbsent("Referrer-Policy", "strict-origin-when-cross-origin");
+        // Match the servlet filter's expanded Permissions-Policy
+        // (Iter 91) so gateway-handled error responses (4xx from the
+        // route matcher, rate-limiter, etc.) emit the same strict
+        // policy as proxied responses.
         headers.setIfAbsent("Permissions-Policy",
-                "geolocation=(), camera=(), microphone=(), payment=(), usb=()");
+                "accelerometer=(), ambient-light-sensor=(), autoplay=(), "
+                        + "battery=(), camera=(), display-capture=(), "
+                        + "document-domain=(), encrypted-media=(), "
+                        + "execution-while-not-rendered=(), "
+                        + "execution-while-out-of-viewport=(), "
+                        + "fullscreen=(), gamepad=(), geolocation=(), "
+                        + "gyroscope=(), hid=(), idle-detection=(), "
+                        + "magnetometer=(), microphone=(), midi=(), "
+                        + "payment=(), picture-in-picture=(), "
+                        + "publickey-credentials-get=(), "
+                        + "screen-wake-lock=(), serial=(), "
+                        + "sync-xhr=(), usb=(), web-share=(), "
+                        + "xr-spatial-tracking=()");
         headers.setIfAbsent("Cross-Origin-Opener-Policy", "same-origin");
         headers.setIfAbsent("Cross-Origin-Resource-Policy", "same-site");
+        headers.setIfAbsent("Origin-Agent-Cluster", "?1");
         if (csp != null && !csp.isBlank()) {
             headers.setIfAbsent("Content-Security-Policy", csp);
         }
