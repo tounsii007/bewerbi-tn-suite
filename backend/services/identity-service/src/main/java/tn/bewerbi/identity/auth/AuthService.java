@@ -244,6 +244,66 @@ public class AuthService {
     }
 
     /**
+     * GDPR Art. 17 "right to erasure". The user re-enters their password
+     * (equal-time bcrypt) and we delete the account.
+     *
+     * <p>Cascade behaviour:
+     * <ul>
+     *   <li>{@code profiles}, {@code profile_skills} — cascade ON DELETE
+     *       set up in V1__identity_schema.sql.</li>
+     *   <li>Refresh tokens — wiped via {@link RefreshTokenStore#revokeAll}.</li>
+     *   <li>Failed-login + reset-token state — Redis keys are user-scoped
+     *       and TTL-bound, so they expire on their own; explicit clear
+     *       below avoids a small window of stale state.</li>
+     * </ul>
+     *
+     * <p>Data living outside identity-service (applications, favorites,
+     * documents, reviews, …) is the responsibility of those services —
+     * they listen to {@code USER_DELETED} and remove or anonymise their
+     * copies. Wired here so the audit + event are emitted; downstream
+     * listeners can be added incrementally.
+     */
+    public void deleteAccount(UUID userId, String passwordConfirmation) {
+        var user = users.findById(userId).orElse(null);
+        boolean valid = user != null
+                && passwords.matches(passwordConfirmation, user.getPasswordHash());
+        if (user == null) {
+            passwords.matches(passwordConfirmation, DUMMY_HASH);
+        }
+        if (!valid) {
+            if (audit != null && user != null) {
+                audit.log(AuditEvent.failure("AUTH_ACCOUNT_DELETE",
+                        user.getId().toString(), user.getEmail(),
+                        "invalid-password-confirmation"));
+            }
+            throw new BadCredentialsException("Invalid credentials");
+        }
+
+        String email = user.getEmail();
+        // Wipe live + Redis state first so an in-flight refresh from
+        // another tab can't resurrect tokens mid-delete.
+        refreshStore.revokeAll(user.getId());
+        if (attempts != null) {
+            attempts.reset(email);
+        }
+
+        // Persist the audit trail BEFORE the row goes away, so the
+        // log entry actually carries the email rather than "unknown".
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_ACCOUNT_DELETED",
+                    user.getId().toString(), email));
+        }
+
+        users.delete(user);
+
+        // Tell the rest of the platform. Downstream services anonymise
+        // or hard-delete their per-user data on receipt.
+        events.publish(Topics.USER_DELETED, user.getId().toString(),
+                new DomainEvents.UserDeleted(
+                        user.getId(), email, Instant.now()));
+    }
+
+    /**
      * Change the current user's password by submitting the old one. Distinct
      * from /password/reset (which uses an emailed token): this path is for
      * authenticated users in /settings.
@@ -651,6 +711,10 @@ public class AuthService {
             @jakarta.validation.constraints.NotBlank
             @jakarta.validation.constraints.Size(max = 200) String oldPassword,
             @jakarta.validation.constraints.Size(min = 8, max = 72) String newPassword) {}
+
+    public record DeleteAccountRequest(
+            @jakarta.validation.constraints.NotBlank
+            @jakarta.validation.constraints.Size(max = 200) String password) {}
 
     public record AuthResponse(
             String accessToken,

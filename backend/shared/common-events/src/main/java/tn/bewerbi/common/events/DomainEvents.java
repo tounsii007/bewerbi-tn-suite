@@ -48,4 +48,9 @@ public final class DomainEvents {
     public record NewDeviceSignIn(
             UUID userId, String email, String firstName, String preferredLocale,
             String ip, String userAgent, Instant occurredAt) {}
+
+    /** Fired when an account is hard-deleted via /me/delete (GDPR Art. 17).
+     *  Email is the *former* address, included so downstream services can
+     *  remove or anonymise records keyed by email rather than by userId. */
+    public record UserDeleted(UUID userId, String email, Instant occurredAt) {}
 }

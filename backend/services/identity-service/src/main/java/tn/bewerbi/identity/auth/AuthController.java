@@ -127,6 +127,21 @@ public class AuthController {
     }
 
     /**
+     * GDPR Art. 17 right-to-erasure. The user re-enters their password
+     * for confirmation; success deletes the account and signs out every
+     * device. Downstream services anonymise their per-user copies in
+     * response to the USER_DELETED Kafka event.
+     */
+    @PostMapping("/me/delete")
+    @PreAuthorize("isAuthenticated()")
+    @org.springframework.web.bind.annotation.ResponseStatus(
+            org.springframework.http.HttpStatus.NO_CONTENT)
+    @Operation(summary = "Permanently delete the current account (requires password)")
+    public void deleteAccount(@Valid @RequestBody AuthService.DeleteAccountRequest req) {
+        authService.deleteAccount(CurrentUser.id(), req.password());
+    }
+
+    /**
      * "Sign out everywhere except this device". The client passes the
      * SHA-256 of *its* refresh token as a query parameter; that one is
      * preserved, every other session for the user is revoked.

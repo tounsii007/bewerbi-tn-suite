@@ -24,4 +24,9 @@ public final class Topics {
      * an IP+UA combination the account has never used before. Drives the
      * "new sign-in detected" mail. */
     public static final String NEW_DEVICE_SIGN_IN = "bewerbi.users.new-device.sign-in";
+
+    /** Emitted by identity-service after a confirmed account deletion.
+     * Downstream services hard-delete or anonymise per-user data on
+     * receipt (GDPR Art. 17 — right to erasure). */
+    public static final String USER_DELETED = "bewerbi.users.deleted";
 }
