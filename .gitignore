@@ -89,5 +89,8 @@ tmp/
 coverage/
 
 # ───────────────── Docker ─────────────────
-data/
-volumes/
+# Top-level data/ and volumes/ only — without the leading slash this
+# would also swallow flutter/lib/data/cities.dart (autocomplete data),
+# which is source. Anchored.
+/data/
+/volumes/

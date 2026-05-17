@@ -53,8 +53,12 @@ public class RequestContextFilter extends OncePerRequestFilter {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public static class Config {
-        @org.springframework.context.annotation.Bean
-        public RequestContextFilter requestContextFilter() {
+        // Bean name must NOT be `requestContextFilter` — Spring's
+        // WebMvcAutoConfiguration already defines one under that exact
+        // name (for the framework's own RequestContextHolder filter)
+        // and bean-overriding is disabled by default in Boot 3.
+        @org.springframework.context.annotation.Bean("bewerbiRequestContextFilter")
+        public RequestContextFilter bewerbiRequestContextFilter() {
             return new RequestContextFilter();
         }
     }
