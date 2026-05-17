@@ -18,6 +18,18 @@
             <groupId>tn.bewerbi</groupId>
             <artifactId>common-api</artifactId>
         </dependency>
+        <!--
+            Servlet API for SecurityHeadersFilter + AuditLogger's
+            HttpServletRequest peek. common-api exposes this as
+            `provided`, which doesn't transit to siblings, so re-declare
+            here. Same `provided` semantics — services that include
+            spring-boot-starter-web get the runtime jar transitively.
+        -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>

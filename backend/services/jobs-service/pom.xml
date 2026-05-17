@@ -15,6 +15,9 @@
         <dependency><groupId>tn.bewerbi</groupId><artifactId>common-api</artifactId></dependency>
         <dependency><groupId>tn.bewerbi</groupId><artifactId>common-security</artifactId></dependency>
         <dependency><groupId>tn.bewerbi</groupId><artifactId>common-i18n</artifactId></dependency>
+        <!-- Iter 87: UserDeletedListener for the GDPR cascade. Brings
+             spring-kafka transitively for @KafkaListener. -->
+        <dependency><groupId>tn.bewerbi</groupId><artifactId>common-events</artifactId></dependency>
 
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-validation</artifactId></dependency>

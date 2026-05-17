@@ -13,6 +13,8 @@
     <dependencies>
         <dependency><groupId>tn.bewerbi</groupId><artifactId>common-api</artifactId></dependency>
         <dependency><groupId>tn.bewerbi</groupId><artifactId>common-security</artifactId></dependency>
+        <!-- Iter 86: UserDeletedListener for the GDPR cascade. -->
+        <dependency><groupId>tn.bewerbi</groupId><artifactId>common-events</artifactId></dependency>
 
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-actuator</artifactId></dependency>

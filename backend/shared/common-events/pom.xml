@@ -26,5 +26,11 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
+        <!-- EventPublisher uses SLF4J. Pulled transitively by every
+             Spring Boot starter in real apps, but absent here. -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
     </dependencies>
 </project>

@@ -19,8 +19,11 @@ import org.springframework.stereotype.Component;
 @Configuration(proxyBeanMethods = false)
 public class BuildInfoEndpoint {
 
+    // Inner class is also named `Endpoint`, which would shadow the
+    // imported annotation — use the FQN here so the compiler picks the
+    // annotation, not the nested type.
     @Component
-    @Endpoint(id = "buildinfo")
+    @org.springframework.boot.actuate.endpoint.annotation.Endpoint(id = "buildinfo")
     public static class Endpoint {
         private final Instant startedAt = Instant.now();
 
