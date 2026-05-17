@@ -35,8 +35,9 @@ jobs:
 
       - name: Run Trivy
         # Pin to the latest stable tag at the time of writing.
+        # All tags use the v-prefix shape: v0.36.0, v0.35.0, …
         # Tag list: https://github.com/aquasecurity/trivy-action/tags
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
