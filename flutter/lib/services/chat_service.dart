@@ -96,10 +96,15 @@ class ChatService {
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
   }
 
+  // Monotonic counter so back-to-back sendMessage calls (within the
+  // same millisecond — easy in tests + on fast hardware) still produce
+  // distinct ids.
+  static int _idCounter = 0;
+
   static Message sendMessage(
       String conversationId, String senderId, String text) {
     final message = Message(
-      id: 'msg-${DateTime.now().millisecondsSinceEpoch}',
+      id: 'msg-${DateTime.now().millisecondsSinceEpoch}-${++_idCounter}',
       conversationId: conversationId,
       senderId: senderId,
       text: text,

@@ -18,7 +18,9 @@ class VerifiedBadge extends StatelessWidget {
       VerificationStatus.verified => (LucideIcons.shieldCheck, AppColors.successSoft, AppColors.successDark, 'Verifiziert'),
       VerificationStatus.pendingReview => (LucideIcons.shield, AppColors.warningSoft, AppColors.warningDark, 'Prüfung läuft'),
       VerificationStatus.unverified => (LucideIcons.shieldAlert, AppColors.gray100, AppColors.gray600, 'Nicht verifiziert'),
-      VerificationStatus.rejected => (LucideIcons.shieldX, AppColors.errorSoft, AppColors.error, 'Abgelehnt'),
+      // `shieldX` doesn't exist in lucide_icons 0.257; the equivalent
+      // "rejected" glyph is `shieldClose`.
+      VerificationStatus.rejected => (LucideIcons.shieldClose, AppColors.errorSoft, AppColors.error, 'Abgelehnt'),
     };
     return Container(
       padding: EdgeInsets.symmetric(

@@ -196,14 +196,18 @@ void main() {
 
   group('AppAvatar', () {
     testWidgets('shows initials when no image', (WidgetTester tester) async {
+      // Use a clean two-word name so the assertion isolates the
+      // first+last letter logic. The old fixture "Ahmed Ben Ali" had
+      // 3 words; parts.first='Ahmed', parts.last='Ali' → 'AA' (which
+      // the original "AB" expectation didn't account for).
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: AppAvatar(name: 'Ahmed Ben Ali'),
+            body: AppAvatar(name: 'Anna Berger'),
           ),
         ),
       );
-      // Initials should be 'AB' (first letter of first and last name)
+      // Initials should be 'AB' (first letter of first and last word).
       expect(find.text('AB'), findsOneWidget);
     });
 

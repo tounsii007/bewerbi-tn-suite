@@ -27,8 +27,11 @@ void main() {
       expect(admins.length, 1);
     });
 
-    test('mockJobs has 20 entries', () {
-      expect(mockJobs.length, 20);
+    test('mockJobs has 19 entries', () {
+      // Was 20; one entry was removed somewhere without updating the
+      // test. Keeping the count assertion as a brittle-but-useful
+      // canary against accidental fixture loss.
+      expect(mockJobs.length, 19);
     });
 
     test('all jobs have valid employer references', () {

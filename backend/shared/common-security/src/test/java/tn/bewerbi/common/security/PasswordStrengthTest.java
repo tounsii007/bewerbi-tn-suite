@@ -37,16 +37,18 @@ class PasswordStrengthTest {
 
     @Test
     void mixedClassMediumLengthIsFair() {
-        var r = PasswordStrength.evaluate("Ab1!cdef");
-        // len>=8 +1, 4 classes +1, no length>=10 bonus → 2
+        // 8 chars, 4 classes, no sequential run (cde would trigger one),
+        // no repeats → len>=8 +1, classes>=3 +1 → 2.
+        var r = PasswordStrength.evaluate("Ab1!xq9z");
         assertThat(r.score()).isEqualTo(2);
         assertThat(r.label()).isEqualTo("fair");
     }
 
     @Test
     void strongMixedLong() {
-        var r = PasswordStrength.evaluate("Tr0ub!eMaker");
-        // len>=8 +1, len>=12 +1, 4 classes +1, len>=10 +1 → 4
+        // 12 chars, 4 classes, no sequential, no repeats →
+        // len>=8 +1, len>=12 +1, classes>=3 +1, len>=10 +1 → 4.
+        var r = PasswordStrength.evaluate("Kp9!xq7zM2#v");
         assertThat(r.score()).isEqualTo(4);
         assertThat(r.label()).isEqualTo("very-strong");
     }

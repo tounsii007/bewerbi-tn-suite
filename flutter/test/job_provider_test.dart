@@ -234,9 +234,12 @@ void main() {
     });
 
     test('RecommendedJob matchPercent caps at 100', () {
+      // Original test tried to pass `job: null` in a const constructor
+      // to exercise the null-job branch — but Job is non-nullable in the
+      // current model, so the line never compiled with stricter null
+      // safety. Dropped it; the two real assertions below cover the
+      // capping behaviour we actually care about.
       final job = mockJobs.first;
-      const rec = RecommendedJob(job: null, score: 25);
-      // We can't construct with null job in production, so test via the class
       final rec2 = RecommendedJob(job: job, score: 25);
       expect(rec2.matchPercent, 100); // 25 * 5 = 125, capped at 100
 
