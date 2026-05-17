@@ -37,4 +37,15 @@ public final class DomainEvents {
     public record PasswordResetRequested(
             UUID userId, String email, String firstName, String preferredLocale,
             String resetToken, Instant expiresAt, Instant occurredAt) {}
+
+    /**
+     * Successful login from a previously-unseen IP+UA combination. The
+     * mail is purely informational — by the time it arrives the user is
+     * already signed in. We include enough device + network detail that
+     * a recipient who *didn't* trigger this login can immediately
+     * recognise the anomaly and head to /settings to revoke the session.
+     */
+    public record NewDeviceSignIn(
+            UUID userId, String email, String firstName, String preferredLocale,
+            String ip, String userAgent, Instant occurredAt) {}
 }

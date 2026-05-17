@@ -49,13 +49,15 @@ public class AuthService {
     private final LoginAttemptTracker attempts;
     private final AuditLogger audit;
     private final BreachedPasswordChecker breachedChecker;
+    private final KnownDeviceTracker devices;
 
     public AuthService(UserRepository users, ProfileRepository profiles,
                        PasswordEncoder passwords, JwtTokenService tokens,
                        EventPublisher events, RefreshTokenStore refreshStore,
                        ObjectProvider<LoginAttemptTracker> attemptsProvider,
                        ObjectProvider<AuditLogger> auditProvider,
-                       ObjectProvider<BreachedPasswordChecker> breachedProvider) {
+                       ObjectProvider<BreachedPasswordChecker> breachedProvider,
+                       ObjectProvider<KnownDeviceTracker> devicesProvider) {
         this.users = users; this.profiles = profiles;
         this.passwords = passwords; this.tokens = tokens;
         this.events = events;
@@ -66,6 +68,7 @@ public class AuthService {
         // Off by default; opt in via
         //   bewerbi.security.password.breach-check.enabled=true
         this.breachedChecker = breachedProvider.getIfAvailable();
+        this.devices = devicesProvider.getIfAvailable();
     }
 
     public AuthResponse register(RegisterRequest req) {
@@ -150,7 +153,28 @@ public class AuthService {
                     user.getId().toString(), email));
         }
         user.touchLogin();
+        // Notify on first login from a fresh (IP, UA) pair so the user
+        // can spot a hostile takeover that the rate-limiter + lockout
+        // didn't catch (e.g. credential-stuffing with a leaked password).
+        notifyOnNewDevice(user);
         return issueTokens(user);
+    }
+
+    private void notifyOnNewDevice(User user) {
+        if (devices == null) return;
+        String ip = currentClientIp();
+        String ua = currentUserAgent();
+        if (!devices.recordAndCheckNew(user.getId(), ip, ua)) return;
+        String firstName = profiles.findById(user.getId())
+                .map(Profile::getFirstName).orElse("");
+        events.publish(Topics.NEW_DEVICE_SIGN_IN, user.getId().toString(),
+                new DomainEvents.NewDeviceSignIn(
+                        user.getId(), user.getEmail(), firstName,
+                        user.getPreferredLocale(), ip, ua, Instant.now()));
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_NEW_DEVICE_SIGN_IN",
+                    user.getId().toString(), user.getEmail()));
+        }
     }
 
     /**
@@ -560,6 +584,26 @@ public class AuthService {
             // Outside a request scope — fine, no UA to capture.
         }
         return null;
+    }
+
+    /** Client IP honouring X-Forwarded-For (gateway sits in front of us). */
+    private static String currentClientIp() {
+        try {
+            var attrs = org.springframework.web.context.request.RequestContextHolder
+                    .getRequestAttributes();
+            if (!(attrs instanceof org.springframework.web.context.request
+                    .ServletRequestAttributes sra)) {
+                return null;
+            }
+            String fwd = sra.getRequest().getHeader("X-Forwarded-For");
+            if (fwd != null && !fwd.isBlank()) {
+                int comma = fwd.indexOf(',');
+                return (comma < 0 ? fwd : fwd.substring(0, comma)).trim();
+            }
+            return sra.getRequest().getRemoteAddr();
+        } catch (Exception ignore) {
+            return null;
+        }
     }
 
     private static String randomToken() {

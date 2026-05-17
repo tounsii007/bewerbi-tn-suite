@@ -19,4 +19,9 @@ public final class Topics {
     /** Emitted by identity-service when a user requests a password reset.
      * Notification-service consumes it to send the reset email. */
     public static final String PASSWORD_RESET_REQUESTED = "bewerbi.users.password-reset.requested";
+
+    /** Emitted by identity-service when a successful login arrives from
+     * an IP+UA combination the account has never used before. Drives the
+     * "new sign-in detected" mail. */
+    public static final String NEW_DEVICE_SIGN_IN = "bewerbi.users.new-device.sign-in";
 }

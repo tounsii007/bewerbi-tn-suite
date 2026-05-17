@@ -58,6 +58,54 @@ public class EventListeners {
         }
     }
 
+    @KafkaListener(topics = Topics.NEW_DEVICE_SIGN_IN)
+    public void onNewDeviceSignIn(String payload) {
+        try {
+            var event = mapper.readValue(payload, DomainEvents.NewDeviceSignIn.class);
+            log.info("NewDeviceSignIn: user={} locale={}",
+                    event.userId(), event.preferredLocale());
+
+            // {0..3} args:
+            //   0 — first name (or "")
+            //   1 — short UA label (e.g. "Chrome auf Windows")
+            //   2 — IP address  (helps the recipient confirm "wasn't me")
+            //   3 — deep-link to /settings to terminate the bad session
+            String sessionsLink = "%s/settings".formatted(frontendBaseUrl);
+            String uaLabel = describeUserAgent(event.userAgent());
+
+            emails.sendMessage(new NotificationApp.EmailRequest(
+                    event.email(),
+                    "email.new-device.subject",
+                    "email.new-device.body",
+                    event.preferredLocale(),
+                    new Object[]{
+                            event.firstName(),
+                            uaLabel,
+                            event.ip() == null ? "" : event.ip(),
+                            sessionsLink,
+                    }));
+        } catch (Exception e) {
+            log.warn("Failed to process NewDeviceSignIn: {}", e.getMessage());
+        }
+    }
+
+    /** Cheap UA describer — first browser + OS pair we can spot, no parser. */
+    private static String describeUserAgent(String ua) {
+        if (ua == null || ua.isBlank()) return "Unbekanntes Gerät";
+        String browser = ua.contains("Edg/") ? "Edge"
+                : ua.contains("Chrome/") ? "Chrome"
+                : ua.contains("Firefox/") ? "Firefox"
+                : ua.contains("Safari/") ? "Safari"
+                : "Browser";
+        String os = ua.contains("Android") ? "Android"
+                : ua.contains("iPhone") || ua.contains("iPad") || ua.contains("iOS") ? "iOS"
+                : ua.contains("Windows") ? "Windows"
+                : ua.contains("Mac OS") ? "macOS"
+                : ua.contains("Linux") ? "Linux"
+                : "";
+        return os.isEmpty() ? browser : browser + " auf " + os;
+    }
+
     @KafkaListener(topics = Topics.PASSWORD_RESET_REQUESTED)
     public void onPasswordResetRequested(String payload) {
         try {
