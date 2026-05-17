@@ -60,6 +60,12 @@ jobs:
           cache: maven
           cache-dependency-path: backend/pom.xml
 
+      - name: Ensure mvnw is executable
+        # Defence-in-depth — git stores the +x bit (see Iter 95) but a
+        # fresh clone on a non-POSIX filesystem can lose it. Idempotent
+        # + cheap, runs everywhere.
+        run: chmod +x backend/mvnw
+
       - name: Show toolchain
         run: |
           java -version
@@ -102,6 +108,8 @@ jobs:
           distribution: temurin
           cache: maven
           cache-dependency-path: backend/pom.xml
+      - name: Ensure mvnw is executable
+        run: chmod +x backend/mvnw
       - name: Verify Spring Boot validate
         working-directory: backend
         run: ./mvnw -B -DskipTests -Dmaven.test.skip validate
