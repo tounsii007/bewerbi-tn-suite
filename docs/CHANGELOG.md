@@ -695,3 +695,70 @@ expo-crypto / `crypto`-Package SHA-256; "Andere beenden" UI.
 `POST /verify-email/resend` (anti-enumeration), `/verify`-Seite
 zeigt inline ein Resend-Formular auf Fehler.
 
+**65 — Docs: CHANGELOG.md** — Iterationen 21–64 dokumentiert.
+
+**66 — Mobile + Flutter: "Bestätigung erneut senden" auf Login**
+— Login-Screens bekommen einen zweiten Link neben "Passwort
+vergessen?"; ruft `/verify-email/resend` mit der eingegebenen
+Adresse auf.
+
+**67 — Backend: HIBP-k-Anonymity-Check** — Opt-in über
+`bewerbi.security.password.breach-check.enabled=true`;
+SHA-1-Prefix gegen api.pwnedpasswords.com, fail-open auf Timeout.
+Neuer messageKey `error.auth.password.weak.breached`.
+
+**68 — Backend: Reject password reuse** — `/password/reset` und
+`/password/change` matchen den Vorschlag gegen den aktuellen
+bcrypt-Hash; bei Match 422 mit `error.auth.password.reused`.
+
+**69 — Web: Verify-Email-Banner im Applicant-Shell** — gelbe Pille
+mit "Bestätigungs-Mail senden"-Button; pro-Session dismissable.
+
+**70 — Backend: Bean-Validation-Caps auf jeder Auth-Payload** —
+email max 254, names max 80, password max 72 / 200, reset-token
+max 128. Defence-in-depth zum Gateway-Body-Cap (Iter 35).
+
+**71 — Web: HSTS-Preload + 2-Jahre-max-age** —
+`max-age=63072000; includeSubDomains; preload`.
+
+**72 — Backend: `Cache-Control: no-store`** auf jedem Auth-,
+Profile- und `/me`-Pfad. Verhindert Token-/PII-Lecks via geteilte
+Caches.
+
+**73 — Mobile: Verify-Email-Banner auf der Home-Tab** — AuthState
+trägt jetzt optional `email`+`emailVerified`.
+
+**74 — Flutter: Verify-Email-Banner auf Applicant-Home** — letzte
+Parität-Iteration der Welle.
+
+---
+
+## Zusammenfassung der Welle (Iter 21–74)
+
+54 fokussierte Hardening-Commits. Jede Iteration ein eigenständiger
+Commit mit klarer Fehlerklasse und einzeln rollback-fähig. Die
+Welle verschiebt das Security-Modell der Suite von "gut konfiguriert"
+auf **OWASP-ASVS-Level 2 nahezu komplett**:
+
+- **Identity & Session**: Account-Lockout, Equal-Time-Login,
+  Reuse-Detection (RFC 6819), Active-Sessions UI mit
+  Current-Device-Marker, granularem Revoke, "revoke others",
+  lastUsedAt-Tracking.
+- **Credential Lifecycle**: Shared Password-Strength-Rubrik in 4
+  Sprachen (TS/Dart/Java), HIBP-k-Anon (opt-in), Reuse-Block,
+  hashed Reset- + Verify-Tokens, Resend-Endpoints mit
+  Anti-Enumeration.
+- **Transport & Storage**: HSTS-Preload, Nonce-CSP, Cache-Control,
+  TLS-Only auf Android+iOS, hardware-backed Token-Storage auf
+  jedem Client (Keychain / Keystore / IndexedDB / libsecret).
+- **Observability**: Dedicated Audit-Appender (365d Rotation),
+  PII-Redaction-Converter, IP+UA-Auto-Enrichment,
+  Trivy + Gitleaks CI.
+- **Surface Reduction**: Gateway-Body-Caps, Validation-Bounds,
+  Auth-Strict-Rate-Limits, Prod-Profile-Disclosure-Guards
+  (Swagger/Whitelabel/Actuator), noindex auf Auth-Seiten,
+  no-referrer auf Token-Seiten.
+- **UX-Polish, sicherheitsrelevant**: Verify-Email-Banner auf
+  allen drei Clients, Idle-Timeout-Logout mit Cross-Tab-Sync,
+  vollständige i18n der Error-MessageKeys.
+
