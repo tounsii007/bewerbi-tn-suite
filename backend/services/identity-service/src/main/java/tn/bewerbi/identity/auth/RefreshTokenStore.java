@@ -45,11 +45,28 @@ public class RefreshTokenStore {
      * can't bloat Redis. If null/blank, just the timestamps are stored.
      */
     public void remember(UUID userId, String token, Duration ttl, String userAgent) {
-        String ua = userAgent == null ? "" : userAgent.replace('|', ' ');
-        if (ua.length() > 200) ua = ua.substring(0, 200);
+        remember(userId, token, ttl, userAgent, null);
+    }
+
+    /**
+     * Same as {@link #remember(UUID, String, Duration, String)} but
+     * also captures the client IP. Payload format gains a 4th slot:
+     * {@code <createdAt>|<lastUsedAt>|<ua>|<ip>}. Older 3-slot rows
+     * stay parseable in {@link #list} (IP collapses to empty string).
+     */
+    public void remember(UUID userId, String token, Duration ttl,
+                         String userAgent, String ip) {
+        String ua = sanitise(userAgent, 200);
+        String safeIp = sanitise(ip, 45); // IPv6 textual max
         long now = Instant.now().getEpochSecond();
-        String payload = now + "|" + now + "|" + ua;
+        String payload = now + "|" + now + "|" + ua + "|" + safeIp;
         redis.opsForValue().set(key(userId, token), payload, ttl);
+    }
+
+    private static String sanitise(String value, int maxLen) {
+        if (value == null) return "";
+        String safe = value.replace('|', ' ');
+        return safe.length() > maxLen ? safe.substring(0, maxLen) : safe;
     }
 
     /**
@@ -63,10 +80,15 @@ public class RefreshTokenStore {
         String existing = redis.opsForValue().get(k);
         if (existing == null) return;
         Long ttl = redis.getExpire(k);
-        String[] parts = existing.split("\\|", 3);
+        // Limit 4 so we keep both UA (slot 2) AND IP (slot 3) if the row
+        // was written with the Iter 92 4-field format. Older 3-field
+        // rows leave the IP slot empty.
+        String[] parts = existing.split("\\|", 4);
         String createdAt = parts.length > 0 ? parts[0] : "0";
         String ua = parts.length > 2 ? parts[2] : "";
-        String updated = createdAt + "|" + Instant.now().getEpochSecond() + "|" + ua;
+        String ip = parts.length > 3 ? parts[3] : "";
+        String updated = createdAt + "|" + Instant.now().getEpochSecond()
+                + "|" + ua + "|" + ip;
         if (ttl != null && ttl > 0) {
             redis.opsForValue().set(k, updated, Duration.ofSeconds(ttl));
         } else {
@@ -111,8 +133,12 @@ public class RefreshTokenStore {
                     long createdAt = 0;
                     long lastUsedAt = 0;
                     String ua = "";
+                    String ip = "";
                     if (value != null) {
-                        String[] parts = value.split("\\|", 3);
+                        // Limit 4 covers the Iter 92 format
+                        // (createdAt|lastUsedAt|ua|ip); 3-segment Iter 55
+                        // rows and 2-segment legacy rows still parse.
+                        String[] parts = value.split("\\|", 4);
                         if (parts.length >= 1) {
                             try { createdAt = Long.parseLong(parts[0]); }
                             catch (NumberFormatException ignore) { }
@@ -120,17 +146,16 @@ public class RefreshTokenStore {
                         if (parts.length >= 2) {
                             try { lastUsedAt = Long.parseLong(parts[1]); }
                             catch (NumberFormatException ignore) {
-                                // Backwards-compat: pre-Iter 55 rows have
-                                // only `createdAt|ua`; treat the second
-                                // segment as UA in that case.
+                                // Pre-Iter 55: `createdAt|ua`.
                                 ua = parts[1];
                             }
                         }
                         if (parts.length >= 3) ua = parts[2];
+                        if (parts.length >= 4) ip = parts[3];
                     }
                     if (lastUsedAt == 0) lastUsedAt = createdAt;
                     Long ttl = redis.getExpire(fullKey);
-                    out.add(new SessionInfo(hash, createdAt, lastUsedAt, ua,
+                    out.add(new SessionInfo(hash, createdAt, lastUsedAt, ua, ip,
                             ttl == null ? -1 : ttl));
                 }
             }
@@ -149,6 +174,9 @@ public class RefreshTokenStore {
             long lastUsedAt,
             /** Truncated User-Agent of the issuing request. */
             String userAgent,
+            /** Client IP at session-issue time. Empty for legacy rows
+             *  written before Iter 92. */
+            String ip,
             /** Remaining TTL in seconds; -1 if none. */
             long expiresInSeconds) {}
 

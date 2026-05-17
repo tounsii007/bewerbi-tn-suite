@@ -579,13 +579,14 @@ public class AuthService {
     private AuthResponse issueTokens(User user) {
         var access = tokens.issueAccess(user);
         var refresh = tokens.issueRefresh(user.getId());
-        // Capture the User-Agent of the request that triggered the new
-        // session so the user can identify it later in the active-sessions
-        // screen. The lookup is best-effort — works inside a servlet
-        // request, no-op otherwise (e.g. async tests).
+        // Capture the User-Agent + IP of the request that triggered
+        // the new session so the user can identify it later in the
+        // active-sessions screen. Lookup is best-effort — works inside
+        // a servlet request, no-op otherwise (e.g. async tests).
         String ua = currentUserAgent();
+        String ip = currentClientIp();
         refreshStore.remember(user.getId(), refresh.token(),
-                Duration.ofSeconds(tokens.refreshTtlSeconds()), ua);
+                Duration.ofSeconds(tokens.refreshTtlSeconds()), ua, ip);
         return new AuthResponse(
                 access.token(),
                 access.expiresAt(),
