@@ -74,6 +74,21 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
             response.setHeader("Pragma", "no-cache");
         }
 
+        // Every API response varies by Accept-Language (i18n-service
+        // returns translated copy) and Authorization (per-user payload).
+        // Without Vary, a shared cache could serve a German anonymous
+        // response to a logged-in French user. Append rather than
+        // overwrite so any per-endpoint Vary from upstream (e.g. on
+        // ETag-tagged jobs list) is preserved.
+        String existingVary = response.getHeader("Vary");
+        String wantedVary = "Accept-Language, Authorization";
+        if (existingVary == null || existingVary.isBlank()) {
+            response.setHeader("Vary", wantedVary);
+        } else if (!existingVary.contains("Authorization")
+                || !existingVary.contains("Accept-Language")) {
+            response.setHeader("Vary", existingVary + ", " + wantedVary);
+        }
+
         chain.doFilter(request, response);
     }
 
