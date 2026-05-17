@@ -30,8 +30,11 @@ public class SecurityHeadersWebFilter implements WebFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         HttpHeaders headers = exchange.getResponse().getHeaders();
+        // 2y max-age + preload — matches the web-side HSTS from Iter 71
+        // and the per-service one from Iter 90 so every response —
+        // proxied or local — speaks the same preload-eligible policy.
         headers.setIfAbsent("Strict-Transport-Security",
-                "max-age=31536000; includeSubDomains");
+                "max-age=63072000; includeSubDomains; preload");
         headers.setIfAbsent("X-Content-Type-Options", "nosniff");
         headers.setIfAbsent("X-Frame-Options", "DENY");
         headers.setIfAbsent("Referrer-Policy", "strict-origin-when-cross-origin");

@@ -50,7 +50,13 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
             HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+        // 2y max-age + preload — matches the web HSTS shipped in Iter 71
+        // so a request that hits the API directly (mobile + Flutter) also
+        // gets the preload directive. Removal takes months once you've
+        // submitted to hstspreload.org, so verify every subdomain is
+        // HTTPS-only before going live.
+        response.setHeader("Strict-Transport-Security",
+                "max-age=63072000; includeSubDomains; preload");
         response.setHeader("X-Content-Type-Options", "nosniff");
         response.setHeader("X-Frame-Options", "DENY");
         response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
