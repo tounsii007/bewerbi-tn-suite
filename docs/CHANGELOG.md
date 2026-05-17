@@ -762,3 +762,67 @@ auf **OWASP-ASVS-Level 2 nahezu komplett**:
   allen drei Clients, Idle-Timeout-Logout mit Cross-Tab-Sync,
   vollständige i18n der Error-MessageKeys.
 
+---
+
+## Iterationen 76–88 — Account-Lifecycle & GDPR-Cascade
+
+Diese Welle baut auf der Auth-Härtung auf und schließt zwei reale
+UX/Compliance-Lücken: Awareness bei verdächtigem Login und "right to
+be forgotten" über alle Microservices hinweg.
+
+**76 — Backend: New-Device-Sign-in-Notification** — Erste Anmeldung
+von einem neuen `(IP, UA)`-Fingerprint löst eine E-Mail mit Geräte +
+IP + Settings-Deep-Link aus. `KnownDeviceTracker` als Redis-Key mit
+180-Tage-TTL (Refresh-on-use); SHA-256-Fingerprint, keine Roh-IPs in
+Redis. Neuer Kafka-Topic `NEW_DEVICE_SIGN_IN` + Notification-Listener
++ DE/FR/AR-Mail-Templates.
+
+**77 — Backend: GDPR-Delete-Endpoint** — `POST /api/v1/auth/me/delete`
+mit Passwort-Confirmation (equal-time bcrypt). Wischt zuerst alle
+Redis-States, auditiert, hard-delete der `users`-Zeile, publiziert
+`USER_DELETED`-Event für nachgelagerte Services. Im Gateway-
+Auth-Strict-Bucket (5 rps).
+
+**78 — Web: Delete-Account-Card in /settings** — Zwei-Stufen-UX
+(Passwort + Confirm-Phrase), rote Akzent-Karte, signOut + Redirect.
+
+**79 — Mobile + Flutter: Delete-Account-Screens** — Parität für
+beide Clients mit "Gefahrenzone"-Sektion und i18n-Confirm-Phrase
+(LÖSCHEN/SUPPRIMER/حذف).
+
+**80 — Backend: Integration-Tests** — Falsches Passwort → 401, Konto
+bleibt; richtiges → 204, Login danach fehlgeschlagen.
+
+**81 — Web: i18n delete-account** — 10 neue Keys × 3 Locales unter
+`account.delete.*`, lokalisierte Confirm-Phrase.
+
+**82 — Backend: Cleanup KnownDevice on delete + SECURITY docs** —
+`KnownDeviceTracker.forgetUser` (SCAN-basiert), Audit-Event-Taxonomie
+vollständig in `docs/SECURITY.md`.
+
+**83 — Backend: `Vary: Accept-Language, Authorization`** auf jeder
+Response — verhindert, dass ein Shared Cache eine deutsche anonyme
+Response an einen französischen eingeloggten User ausliefert.
+
+**84 — Mobile: i18n delete-account** — 11 Keys × 3 Locales, Flutter
+bleibt vorerst auf Inline-DE (kein language-switcher).
+
+**85 — Backend: applications-service USER_DELETED-Cascade** —
+hard-delete `applications` + `favorites`, Kafka-Consumer-Block in
+`application.yml`.
+
+**86 — Backend: documents-service USER_DELETED-Cascade** —
+hard-delete `documents`. Höchst-sensitives PII (CVs, Pässe);
+TODO-Hinweis für Object-Storage-Migration.
+
+**87 — Backend: jobs- + companies-service USER_DELETED-Cascade** —
+`saved-searches` hard-delete; `reviews` anonymisiert mit
+`DELETED_USER`-Sentinel (Inhalt bleibt öffentlich, Author-Link
+gekappt).
+
+**88 — Backend: immigration-service USER_DELETED-Cascade** — `anerkennung`
++ `visa`-Cases hard-delete. **Cascade-Chain**: identity → applications
++ favorites + documents + saved-searches + reviews (anonymise) +
+anerkennung + visa. **5 von 9 Microservices** handhaben den GDPR-Event
+end-to-end.
+
