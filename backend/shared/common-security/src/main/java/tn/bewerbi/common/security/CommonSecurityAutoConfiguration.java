@@ -18,9 +18,14 @@ import tn.bewerbi.common.security.audit.LoginAttemptTracker;
  *   <li>{@link LoginAttemptTracker} — only when Redis is present</li>
  * </ul>
  */
+// Iter 107: type=SERVLET so the reactive gateway can depend on this
+// module just for its static PEM helpers (RsaKeyProvider.parsePublicKey,
+// …) without trying to wire JwtSecurityConfig (servlet HttpSecurity)
+// into a WebFlux runtime.
 @AutoConfiguration
-@ConditionalOnWebApplication
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Import({
+    RsaKeyProvider.class,
     JwtSecurityConfig.class,
     SecurityFilterChainRegistrar.class,
     SecurityHeadersFilter.Config.class,

@@ -5,28 +5,41 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
+import tn.bewerbi.common.security.RsaKeyProvider;
 import tn.bewerbi.identity.domain.User;
 
+/**
+ * Mints and validates JWTs for the identity-service.
+ *
+ * <p>Iter 107 cut: HS256 → RS256. The signing key (private RSA) lives only
+ * on this service; verifier services load just the public key. The JWT
+ * header now carries a {@code kid} claim that matches the JWKS endpoint
+ * served at {@code /.well-known/jwks.json}, so any future key rotation
+ * can be staged without a flag day.
+ */
 @Service
 public class JwtTokenService {
 
     private final JwtEncoder encoder;
     private final JwtDecoder decoder;
+    private final String keyId;
 
     @Value("${bewerbi.security.jwt.issuer}") private String issuer;
     @Value("${bewerbi.security.jwt.access-ttl-minutes}") private int accessMin;
     @Value("${bewerbi.security.jwt.refresh-ttl-days}") private int refreshDays;
 
-    public JwtTokenService(JwtEncoder encoder, JwtDecoder decoder) {
+    public JwtTokenService(JwtEncoder encoder, JwtDecoder decoder,
+                           RsaKeyProvider.RsaKeys keys) {
         this.encoder = encoder;
         this.decoder = decoder;
+        this.keyId = keys.keyId();
     }
 
     /** Exposed so callers can surface the TTL to the client. */
@@ -44,7 +57,7 @@ public class JwtTokenService {
                 .claim("token_type", "access")
                 .claim("locale", user.getPreferredLocale())
                 .build();
-        var headers = JwsHeader.with(MacAlgorithm.HS256).build();
+        var headers = JwsHeader.with(SignatureAlgorithm.RS256).keyId(keyId).build();
         String token = encoder.encode(JwtEncoderParameters.from(headers, claims)).getTokenValue();
         return new AccessToken(token, expires);
     }
@@ -55,7 +68,7 @@ public class JwtTokenService {
         var claims = JwtClaimsSet.builder()
                 .issuer(issuer).issuedAt(now).expiresAt(expires)
                 .subject(userId.toString()).claim("token_type", "refresh").build();
-        var headers = JwsHeader.with(MacAlgorithm.HS256).build();
+        var headers = JwsHeader.with(SignatureAlgorithm.RS256).keyId(keyId).build();
         String token = encoder.encode(JwtEncoderParameters.from(headers, claims)).getTokenValue();
         return new RefreshToken(token, expires);
     }

@@ -5,7 +5,7 @@ spring:
 server.port: ${SERVER_PORT:8087}
 
 bewerbi:
-  security.jwt.secret: ${JWT_SECRET:a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+  security.jwt.public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:dev-keys/jwt-public.pem}
   clients:
     jobs-service.base-url: ${JOBS_SERVICE_URL:http://localhost:8082}
     identity-service.base-url: ${IDENTITY_SERVICE_URL:http://localhost:8081}

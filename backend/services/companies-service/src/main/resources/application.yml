@@ -30,7 +30,7 @@ spring:
 server.port: ${SERVER_PORT:8084}
 
 bewerbi:
-  security.jwt.secret: ${JWT_SECRET:a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+  security.jwt.public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:dev-keys/jwt-public.pem}
   clients.i18n-service.base-url: ${I18N_SERVICE_URL:http://localhost:8181}
 
 springdoc:

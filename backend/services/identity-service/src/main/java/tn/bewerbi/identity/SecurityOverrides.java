@@ -43,6 +43,10 @@ public class SecurityOverrides {
                                 "/api/v1/auth/password/reset",
                                 "/api/v1/auth/verify-email/resend").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/verify-email").permitAll()
+                        // OIDC-style JWKS discovery — public-key only;
+                        // safe for unauthenticated fetches by any
+                        // downstream verifier or external client.
+                        .requestMatchers(HttpMethod.GET, "/.well-known/jwks.json").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated())

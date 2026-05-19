@@ -116,7 +116,9 @@ server:
 bewerbi:
   security:
     jwt:
-      secret: ${JWT_SECRET:a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+      # Iter 107: gateway is verifier-only. Public key from classpath in
+      # dev (loaded via common-security's resources), file mount in prod.
+      public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:dev-keys/jwt-public.pem}
 
 management:
   endpoints:

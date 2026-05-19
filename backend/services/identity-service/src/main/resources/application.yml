@@ -44,7 +44,12 @@ server:
 bewerbi:
   security:
     jwt:
-      secret: ${JWT_SECRET:a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
+      # Iter 107: RS256. identity-service is the sole signer — both keys
+      # mounted. Prod override: JWT_PRIVATE_KEY_PATH/JWT_PUBLIC_KEY_PATH
+      # via env, pointing at K8s/secret-store-managed mounts.
+      private-key-path: ${JWT_PRIVATE_KEY_PATH:classpath:dev-keys/jwt-private.pem}
+      public-key-path:  ${JWT_PUBLIC_KEY_PATH:classpath:dev-keys/jwt-public.pem}
+      key-id:           ${JWT_KEY_ID:bewerbi-dev}
       access-ttl-minutes: 60
       refresh-ttl-days: 30
       issuer: bewerbi.tn

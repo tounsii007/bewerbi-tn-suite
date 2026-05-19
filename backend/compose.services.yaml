@@ -33,7 +33,6 @@ services:
       DB_PASSWORD: bewerbi_dev
       REDIS_HOST: redis
       MAIL_HOST: mailhog
-      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
       I18N_SERVICE_URL: http://i18n-service:8181
       KAFKA_BOOTSTRAP: kafka:29092
       SERVER_PORT: "8081"
@@ -71,7 +70,6 @@ services:
       DB_USER: bewerbi
       DB_PASSWORD: bewerbi_dev
       REDIS_HOST: redis
-      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
       I18N_SERVICE_URL: http://i18n-service:8181
       SERVER_PORT: "8082"
       <<: *otel-env
@@ -91,7 +89,6 @@ services:
       DB_USER: bewerbi
       DB_PASSWORD: bewerbi_dev
       REDIS_HOST: redis
-      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
       I18N_SERVICE_URL: http://i18n-service:8181
       KAFKA_BOOTSTRAP: kafka:29092
       SERVER_PORT: "8083"
@@ -112,7 +109,6 @@ services:
       DB_USER: bewerbi
       DB_PASSWORD: bewerbi_dev
       REDIS_HOST: redis
-      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
       I18N_SERVICE_URL: http://i18n-service:8181
       SERVER_PORT: "8084"
       <<: *otel-env
@@ -132,7 +128,6 @@ services:
       DB_USER: bewerbi
       DB_PASSWORD: bewerbi_dev
       REDIS_HOST: redis
-      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
       I18N_SERVICE_URL: http://i18n-service:8181
       SERVER_PORT: "8085"
       <<: *otel-env
@@ -151,7 +146,6 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/bewerbi?currentSchema=documents
       DB_USER: bewerbi
       DB_PASSWORD: bewerbi_dev
-      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
       UPLOAD_ROOT: /data/uploads
       SERVER_PORT: "8086"
       <<: *otel-env
@@ -169,7 +163,6 @@ services:
         MODULE_PATH: services/matching-service
         MODULE_ARTIFACT: matching-service
     environment:
-      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
       JOBS_SERVICE_URL: http://jobs-service:8082
       IDENTITY_SERVICE_URL: http://identity-service:8081
       SERVER_PORT: "8087"
@@ -189,7 +182,6 @@ services:
       MAIL_HOST: mailhog
       MAIL_PORT: "1025"
       REDIS_HOST: redis
-      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
       I18N_SERVICE_URL: http://i18n-service:8181
       KAFKA_BOOTSTRAP: kafka:29092
       SERVER_PORT: "8088"
@@ -206,7 +198,6 @@ services:
         MODULE_PATH: gateway
         MODULE_ARTIFACT: gateway
     environment:
-      JWT_SECRET: ${JWT_SECRET:-a-dev-only-shared-jwt-secret-change-me-in-production-256-bit}
       routes.identity-service: http://identity-service:8081
       routes.i18n-service: http://i18n-service:8181
       routes.jobs-service: http://jobs-service:8082

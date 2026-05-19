@@ -211,7 +211,9 @@ curl -X POST -H "Authorization: Bearer $ADMIN_TOKEN" \
 Alle Secrets und externen URLs via Environment-Variablen:
 
 ```
-JWT_SECRET           Gemeinsames HMAC-Secret (≥ 256 bit in Produktion)
+JWT_PRIVATE_KEY_PATH   RSA-Private-Key PEM (PKCS8) — nur identity-service
+JWT_PUBLIC_KEY_PATH    RSA-Public-Key PEM — jeder Service (incl. gateway)
+JWT_KEY_ID             Kid-Header für JWKS-Rotation (Default: bewerbi-dev)
 DB_URL, DB_USER      Postgres-Credentials
 REDIS_HOST, REDIS_PORT
 MAIL_HOST, MAIL_PORT

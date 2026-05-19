@@ -19,6 +19,14 @@
             <artifactId>common-api</artifactId>
         </dependency>
         <dependency>
+            <!-- Iter 107: only for RsaKeyProvider's static PEM helpers
+                 (no servlet bean wiring — the @AutoConfiguration is
+                 ConditionalOnWebApplication=SERVLET so it won't pollute
+                 this reactive runtime). -->
+            <groupId>tn.bewerbi</groupId>
+            <artifactId>common-security</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
