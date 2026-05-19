@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bewerbi_tn_flutter/services/candidate_scoring.dart';
 import 'package:bewerbi_tn_flutter/models/job.dart';
 import 'package:bewerbi_tn_flutter/models/application.dart';
-import 'package:bewerbi_tn_flutter/models/profile.dart';
 import 'package:bewerbi_tn_flutter/services/mock_data.dart';
 
 void main() {

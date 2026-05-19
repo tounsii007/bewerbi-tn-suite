@@ -44,7 +44,10 @@ class _AppSkeletonState extends State<AppSkeleton> with SingleTickerProviderStat
 
     return AnimatedBuilder(
       animation: _ctrl,
-      builder: (_, __) {
+      // Dart 3.7+ flags `(_, __)` as multiple-underscore reuse — use
+      // the new shared-`_` wildcard pattern that's idiomatic for
+      // "ignored params" since the unnamed-wildcard upgrade.
+      builder: (_, _) {
         // Curve smooths the linear controller into a more "breathing" pulse.
         final t = Curves.easeInOut.transform(_ctrl.value);
         final opacity = 0.45 + t * 0.55;

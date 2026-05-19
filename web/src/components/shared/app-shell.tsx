@@ -15,7 +15,6 @@ import {
   Plane,
   Search,
   Settings,
-  Sparkles,
   Upload,
   User,
 } from "lucide-react";

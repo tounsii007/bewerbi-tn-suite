@@ -32,24 +32,24 @@ class AppChip extends StatelessWidget {
 
     Color bg, fg;
     if (selected) {
-      bg = isDark ? AppColors.primary.withOpacity(0.18) : AppColors.primaryBg;
+      bg = isDark ? AppColors.primary.withValues(alpha: 0.18) : AppColors.primaryBg;
       fg = isDark ? AppColors.primaryLight : AppColors.primaryDark;
     } else {
       switch (tone) {
         case AppChipTone.primary:
-          bg = isDark ? AppColors.primary.withOpacity(0.18) : AppColors.primaryBg;
+          bg = isDark ? AppColors.primary.withValues(alpha: 0.18) : AppColors.primaryBg;
           fg = isDark ? AppColors.primaryLight : AppColors.primaryDark;
           break;
         case AppChipTone.success:
-          bg = isDark ? AppColors.success.withOpacity(0.18) : AppColors.successLight;
+          bg = isDark ? AppColors.success.withValues(alpha: 0.18) : AppColors.successLight;
           fg = isDark ? AppColors.success : AppColors.successDark;
           break;
         case AppChipTone.warning:
-          bg = isDark ? AppColors.warning.withOpacity(0.18) : AppColors.warningLight;
+          bg = isDark ? AppColors.warning.withValues(alpha: 0.18) : AppColors.warningLight;
           fg = isDark ? AppColors.warningAccent : AppColors.warningDark;
           break;
         case AppChipTone.accent:
-          bg = isDark ? AppColors.error.withOpacity(0.18) : AppColors.errorLight;
+          bg = isDark ? AppColors.error.withValues(alpha: 0.18) : AppColors.errorLight;
           fg = isDark ? AppColors.errorAccent : AppColors.error;
           break;
         case AppChipTone.neutral:
@@ -92,7 +92,7 @@ class AppChip extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               child: Padding(
                 padding: const EdgeInsets.only(left: 6),
-                child: Icon(LucideIcons.x, size: 12, color: fg.withOpacity(0.8)),
+                child: Icon(LucideIcons.x, size: 12, color: fg.withValues(alpha: 0.8)),
               ),
             ),
         ],

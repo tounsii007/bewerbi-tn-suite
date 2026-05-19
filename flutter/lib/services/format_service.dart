@@ -49,21 +49,21 @@ class Fmt {
 
     // Simple DE/FR/AR fallback — Flutter's intl doesn't ship RelativeTimeFormat.
     if (absMinutes < 60) {
-      if (localeCode == 'fr') return 'il y a ${absMinutes} min';
-      if (localeCode == 'ar') return 'منذ ${absMinutes} د';
-      return 'vor ${absMinutes} Min';
+      if (localeCode == 'fr') return 'il y a $absMinutes min';
+      if (localeCode == 'ar') return 'منذ $absMinutes د';
+      return 'vor $absMinutes Min';
     }
     final hours = (absMinutes / 60).floor();
     if (hours < 24) {
-      if (localeCode == 'fr') return 'il y a ${hours} h';
-      if (localeCode == 'ar') return 'منذ ${hours} سا';
-      return 'vor ${hours} Std.';
+      if (localeCode == 'fr') return 'il y a $hours h';
+      if (localeCode == 'ar') return 'منذ $hours سا';
+      return 'vor $hours Std.';
     }
     final days = (hours / 24).floor();
     if (days < 30) {
-      if (localeCode == 'fr') return 'il y a ${days} j';
-      if (localeCode == 'ar') return 'منذ ${days} يوم';
-      return 'vor ${days} Tagen';
+      if (localeCode == 'fr') return 'il y a $days j';
+      if (localeCode == 'ar') return 'منذ $days يوم';
+      return 'vor $days Tagen';
     }
     return date(value, localeCode: localeCode);
   }

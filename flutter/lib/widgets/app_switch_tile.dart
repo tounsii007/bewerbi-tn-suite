@@ -73,7 +73,9 @@ class AppSwitchTile extends StatelessWidget {
                 Switch.adaptive(
                   value: value,
                   onChanged: onChanged,
-                  activeColor: AppColors.primary,
+                  // activeColor was deprecated post-3.31 in favour of
+                  // the more granular activeThumbColor / activeTrackColor.
+                  activeThumbColor: AppColors.primary,
                 ),
               ],
             ),

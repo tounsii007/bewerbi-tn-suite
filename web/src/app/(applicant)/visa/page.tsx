@@ -5,7 +5,6 @@ import { Building2, Check, FileCheck2, Plane } from "lucide-react";
 import { toast } from "sonner";
 import { visaApi } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";

@@ -31,7 +31,7 @@ class AppBottomSheet {
       enableDrag: dismissible,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         return Container(

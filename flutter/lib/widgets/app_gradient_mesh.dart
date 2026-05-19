@@ -13,7 +13,7 @@ class AppGradientMesh extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final baseColor = isDark ? AppColors.darkBackground : AppColors.surfaceAlt;
 
-    Color tint(Color c, double a) => c.withOpacity(isDark ? a * 0.4 : a);
+    Color tint(Color c, double a) => c.withValues(alpha: isDark ? a * 0.4 : a);
 
     return Container(
       color: baseColor,
@@ -57,7 +57,7 @@ class _Blob extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
-          colors: [color, color.withOpacity(0)],
+          colors: [color, color.withValues(alpha: 0)],
           stops: const [0.0, 1.0],
         ),
       ),

@@ -32,7 +32,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Testcontainers
+// disabledWithoutDocker=true: skip the whole class (instead of failing
+// with ContainerFetchException) when the dev machine has no running
+// Docker daemon. CI always has one — the test still runs there.
+@Testcontainers(disabledWithoutDocker = true)
 class IdentityIntegrationTest {
 
     @Container

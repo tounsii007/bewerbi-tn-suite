@@ -44,19 +44,19 @@ class AppAlert extends StatelessWidget {
     switch (variant) {
       case AppAlertVariant.success:
         return (
-          bg: (isDark ? AppColors.success : AppColors.successLight).withOpacity(isDark ? 0.1 : 0.4),
+          bg: (isDark ? AppColors.success : AppColors.successLight).withValues(alpha: isDark ? 0.1 : 0.4),
           border: AppColors.success,
           fg: isDark ? AppColors.success : AppColors.successDark,
         );
       case AppAlertVariant.warning:
         return (
-          bg: (isDark ? AppColors.warning : AppColors.warningLight).withOpacity(isDark ? 0.12 : 0.4),
+          bg: (isDark ? AppColors.warning : AppColors.warningLight).withValues(alpha: isDark ? 0.12 : 0.4),
           border: AppColors.warning,
           fg: isDark ? AppColors.warningAccent : AppColors.warningDark,
         );
       case AppAlertVariant.error:
         return (
-          bg: (isDark ? AppColors.error : AppColors.errorLight).withOpacity(isDark ? 0.12 : 0.5),
+          bg: (isDark ? AppColors.error : AppColors.errorLight).withValues(alpha: isDark ? 0.12 : 0.5),
           border: AppColors.error,
           fg: isDark ? AppColors.errorAccent : AppColors.error,
         );
@@ -68,7 +68,7 @@ class AppAlert extends StatelessWidget {
         );
       case AppAlertVariant.info:
         return (
-          bg: (isDark ? AppColors.info : AppColors.infoLight).withOpacity(isDark ? 0.12 : 0.4),
+          bg: (isDark ? AppColors.info : AppColors.infoLight).withValues(alpha: isDark ? 0.12 : 0.4),
           border: AppColors.info,
           fg: AppColors.info,
         );
@@ -85,7 +85,7 @@ class AppAlert extends StatelessWidget {
       padding: EdgeInsets.all(pad),
       decoration: BoxDecoration(
         color: p.bg,
-        border: Border.all(color: p.border.withOpacity(0.4)),
+        border: Border.all(color: p.border.withValues(alpha: 0.4)),
         borderRadius: BorderRadius.circular(AppRadii.md),
       ),
       child: Row(
@@ -113,7 +113,7 @@ class AppAlert extends StatelessWidget {
                   message,
                   style: GoogleFonts.inter(
                     fontSize: compact ? 11.5 : 13,
-                    color: p.fg.withOpacity(0.9),
+                    color: p.fg.withValues(alpha: 0.9),
                     height: 1.4,
                   ),
                 ),

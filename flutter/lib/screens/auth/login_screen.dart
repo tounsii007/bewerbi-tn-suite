@@ -164,7 +164,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           '/api/v1/auth/verify-email/resend',
                           body: {'email': email},
                         );
-                        if (!mounted) return;
+                        // use_build_context_synchronously: prefer
+                        // context.mounted over State.mounted — the lint
+                        // can't link the two but treats the former as
+                        // the safe form.
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
@@ -173,7 +177,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         );
                       } on ApiException catch (e) {
-                        if (!mounted) return;
+                        if (!context.mounted) return;
                         _showError(e.message);
                       }
                     },
