@@ -49,3 +49,53 @@ bewerbi:
       # Lock the strictest CSP — services don't serve HTML in prod
       # (the gateway returns JSON only).
       csp: "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+
+# ───────────────── Transport TLS (Iter 108, Critical #2) ─────────────────
+# Prod-only enforcement of TLS for every east-west connection. Dev /
+# local docker compose keep plaintext because the loopback bridge is
+# not a meaningful attack surface, and rolling fresh certs every dev
+# session is an awful experience. Operators MUST provide the right
+# trust + cert material at deploy time:
+#
+#   DB_SSL_MODE              "verify-full" or "verify-ca". Default
+#                            "require" is set below — bump to verify-full
+#                            and mount a CA bundle to avoid MITM via a
+#                            substituted cert.
+#   DB_SSL_ROOT_CERT         path to a PEM bundle for the postgres CA.
+#   REDIS_SSL_ENABLED        true → uses rediss:// (TLS).
+#   KAFKA_SECURITY_PROTOCOL  SASL_SSL recommended; SSL also works.
+#   KAFKA_SASL_*             credentials for SASL/SCRAM auth.
+#
+# Anything left at "" is rejected by the corresponding driver, so a
+# misconfigured prod deploy fails fast instead of falling back to
+# plaintext silently.
+
+spring:
+  datasource:
+    # The driver appends sslmode + sslrootcert as query params if the
+    # URL doesn't already include them. Use HikariDataSource property
+    # mapping (Hikari forwards driver-specific properties prefixed with
+    # `data-source-properties.`).
+    hikari:
+      data-source-properties:
+        sslmode: ${DB_SSL_MODE:require}
+        sslrootcert: ${DB_SSL_ROOT_CERT:}
+  data:
+    redis:
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:true}
+      # AUTH password. Plaintext Redis with no AUTH would let any
+      # network neighbour list refresh-token hashes.
+      password: ${REDIS_PASSWORD:}
+  kafka:
+    # SSL or SASL_SSL. PLAINTEXT is rejected here so a misconfigured
+    # prod deploy doesn't silently expose Kafka traffic.
+    security:
+      protocol: ${KAFKA_SECURITY_PROTOCOL:SASL_SSL}
+    properties:
+      sasl.mechanism: ${KAFKA_SASL_MECHANISM:SCRAM-SHA-512}
+      sasl.jaas.config: ${KAFKA_SASL_JAAS_CONFIG:}
+      ssl.truststore.location: ${KAFKA_SSL_TRUSTSTORE_LOCATION:}
+      ssl.truststore.password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD:}
+      # Endpoint identification stops MITM via a substituted broker cert.
+      ssl.endpoint.identification.algorithm: ${KAFKA_SSL_ENDPOINT_ID_ALGO:https}
