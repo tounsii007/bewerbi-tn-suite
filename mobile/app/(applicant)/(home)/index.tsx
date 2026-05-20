@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState } from "react";
-import { View, Text, ScrollView, RefreshControl, Platform } from "react-native";
+import { View, Text, ScrollView, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -13,6 +13,10 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Avatar } from "../../../src/components/ui/Avatar";
 import { Card } from "../../../src/components/ui/Card";
+import { AuroraBackground } from "../../../src/components/ui/AuroraBackground";
+import { GlassCard } from "../../../src/components/ui/GlassCard";
+import { GradientText } from "../../../src/components/ui/GradientText";
+import { NumberTicker } from "../../../src/components/ui/NumberTicker";
 import { JobCard } from "../../../src/components/shared/JobCard";
 import { JobCardSkeleton } from "../../../src/components/shared/JobCardSkeleton";
 import { CategoryCard } from "../../../src/components/shared/CategoryCard";
@@ -21,14 +25,6 @@ import { useAuthStore } from "../../../src/stores/authStore";
 import { useJobStore } from "../../../src/stores/jobStore";
 import { useThemeStore } from "../../../src/hooks/useColorScheme";
 import type { Profile } from "../../../src/types";
-
-const heroGradientStyle = Platform.select<Record<string, string>>({
-  web: {
-    background:
-      "linear-gradient(135deg, #2563EB 0%, #1d4ed8 50%, #1e40af 100%)",
-  },
-  default: {},
-}) as Record<string, string>;
 
 function computeProfileCompleteness(profile: Profile | null): number {
   if (!profile) return 0;
@@ -113,52 +109,71 @@ export default function HomeScreen() {
         }
       >
         <VerifyEmailBanner />
+
+        {/* Iter 127 — Aurora hero with glass stats */}
         <Animated.View
           entering={FadeInDown.springify()}
-          className="bg-primary-500 mx-5 mt-4 rounded-3xl px-6 pt-5 pb-6"
-          style={heroGradientStyle}
+          className="mx-5 mt-4"
         >
-          <View className="flex-row items-center justify-between mb-4">
-            <View className="flex-row items-center gap-3">
-              <Avatar
-                uri={profile?.photo_url}
-                name={`${profile?.first_name || ""} ${profile?.last_name || ""}`}
-                size="md"
-                onPress={() => router.push("/(applicant)/(profile)")}
-              />
-              <View>
-                <Text className="text-primary-100 text-[13px]">
-                  {t("home.greeting", {
-                    name: profile?.first_name || "User",
-                  })}
-                </Text>
-                <Text className="text-white text-xl font-bold tracking-wide">
-                  bewerbi.tn
-                </Text>
+          <AuroraBackground variant="default" style={{ padding: 20 }}>
+            <View className="flex-row items-center justify-between mb-5">
+              <View className="flex-row items-center gap-3">
+                <Avatar
+                  uri={profile?.photo_url}
+                  name={`${profile?.first_name || ""} ${profile?.last_name || ""}`}
+                  size="md"
+                  onPress={() => router.push("/(applicant)/(profile)")}
+                />
+                <View>
+                  <Text
+                    className={`text-[12px] font-semibold uppercase ${
+                      isDark ? "text-primary-300" : "text-primary-600"
+                    }`}
+                    style={{ letterSpacing: 1 }}
+                  >
+                    {t("home.greeting", {
+                      name: profile?.first_name || "User",
+                    })}
+                  </Text>
+                  <GradientText
+                    variant="brand"
+                    style={{
+                      fontSize: 22,
+                      fontWeight: "800",
+                      letterSpacing: -0.3,
+                    }}
+                  >
+                    bewerbi.tn
+                  </GradientText>
+                </View>
+              </View>
+              <View
+                className={`w-11 h-11 rounded-full items-center justify-center ${
+                  isDark ? "bg-dark-card" : "bg-white/80"
+                }`}
+              >
+                <Bell size={20} color={isDark ? "#94a3b8" : "#475569"} />
               </View>
             </View>
-            <View className="w-11 h-11 rounded-full bg-white/20 items-center justify-center">
-              <Bell size={20} color="#fff" />
-            </View>
-          </View>
 
-          <View className="flex-row gap-3">
-            <HeroStat
-              icon={<Send size={18} color="#fff" />}
-              value={myApplications.length}
-              label="Bewerbungen"
-            />
-            <HeroStat
-              icon={<Bookmark size={18} color="#fff" />}
-              value={favorites.length}
-              label="Favoriten"
-            />
-            <HeroStat
-              icon={<TrendingUp size={18} color="#fff" />}
-              value={jobs.length}
-              label="Offene Stellen"
-            />
-          </View>
+            <View className="flex-row gap-2">
+              <GlassHeroStat
+                icon={<Send size={16} color="#2563EB" />}
+                value={myApplications.length}
+                label="Bewerbungen"
+              />
+              <GlassHeroStat
+                icon={<Bookmark size={16} color="#DC2626" />}
+                value={favorites.length}
+                label="Favoriten"
+              />
+              <GlassHeroStat
+                icon={<TrendingUp size={16} color="#16a34a" />}
+                value={jobs.length}
+                label="Offen"
+              />
+            </View>
+          </AuroraBackground>
         </Animated.View>
 
         <Animated.View
@@ -315,7 +330,11 @@ export default function HomeScreen() {
   );
 }
 
-function HeroStat({
+/**
+ * Iter 127 — hero stat tile, now in a frosted glass card with a
+ * spring-physics number counter.
+ */
+function GlassHeroStat({
   icon,
   value,
   label,
@@ -325,10 +344,25 @@ function HeroStat({
   label: string;
 }) {
   return (
-    <View className="flex-1 bg-white/15 rounded-2xl px-4 py-3 items-center">
-      {icon}
-      <Text className="text-white text-2xl font-bold mt-1">{value}</Text>
-      <Text className="text-primary-100 text-[11px]">{label}</Text>
-    </View>
+    <GlassCard strength="strong" style={{ flex: 1, padding: 12 }}>
+      <View className="flex-row items-center gap-1.5">
+        {icon}
+        <Text
+          className="text-[10px] font-bold uppercase text-gray-500 dark:text-dark-muted"
+          style={{ letterSpacing: 0.8 }}
+        >
+          {label}
+        </Text>
+      </View>
+      <NumberTicker
+        value={value}
+        style={{
+          fontSize: 22,
+          fontWeight: "800",
+          marginTop: 4,
+          color: "#0f172a",
+        }}
+      />
+    </GlassCard>
   );
 }

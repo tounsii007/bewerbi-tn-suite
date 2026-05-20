@@ -2,6 +2,22 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 127 — Mobile applicant home (hero + glass stats)
+
+Höchsttrafficte authentifizierte Mobile-Screen bekommt das volle Aurora + Glass-Treatment im Hero-Bereich.
+
+**`mobile/app/(applicant)/(home)/index.tsx`** — Hero-Bereich rebuilt:
+- Solider Primary-Background-Block (`bg-primary-500` + Web-Gradient) ersetzt durch `AuroraBackground variant="default"` mit animated Multi-Blob-Drift.
+- Headline-Brand-Name jetzt `GradientText variant="brand"` (gradient-clipped Inter-800).
+- Greeting-Label: small-caps, primary-tinted, letter-spaced.
+- Notification-Bell jetzt auf hellem Glass-Background (vorher: weiße Pille auf Primary).
+- **3 HeroStats als GlassCards** (strength="strong"):
+  - Icon-prefixed Label (Send/Bookmark/TrendingUp in brand colors)
+  - `NumberTicker` mit Spring-Physik für animated Counter (vorher: statisch)
+- `heroGradientStyle` Platform.select Variable entfernt (Aurora übernimmt).
+
+Rest der Page (Profile-Completeness, Categories, Latest Jobs) bleibt unverändert.
+
 ## Iteration 126 — Mobile login screen (first impression)
 
 Erstes Apply der neuen Mobile-Primitives auf die wichtigste Auth-Seite.
