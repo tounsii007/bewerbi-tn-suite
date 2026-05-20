@@ -2,6 +2,35 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 117 — Glass design system (web)
+
+Start einer Frontend-Polish-Welle. Foundation für Bento + Glassmorphism + reichhaltige Motion.
+
+**`web/src/app/globals.css`** — neue Tokens & Utilities:
+- 4 Glass-Varianten (`glass-subtle`, `glass`, `glass-strong`, `glass-frosted`) — abgestufte Blur/Alpha-Werte.
+- `aurora` — animierter Multi-Blob Hintergrund (4 radiale Farbflecken, OKLCH).
+- `gradient-conic`, `text-gradient-conic` — konische Gradients für Buttons und Headlines.
+- `bento` — 12-Spalten-Grid mit `auto-rows minmax(180px, auto)`.
+- `scroll-progress` — Top-Fortschrittsleiste (gradient, 3px, fixed).
+- Neue Keyframes: `blob-drift`, `float`, `conic-spin`, `marquee`, `marquee-vertical`, `border-flow`, `ticker`.
+
+**Neue Primitives in `web/src/components/ui/`:**
+- `AuroraBackground` — 3 GPU-friendly Blobs mit unterschiedlichen Tempos. `variant: subtle | default | vivid`.
+- `BentoGrid` + `BentoCell` — deklaratives Bento mit `span={{ md, lg }}` und `rows`. 5 tones (glass/gradient/solid/accent/dark) + interactive/glow.
+- `GradientText` — animierte Gradient-Headline (4 Varianten: brand, aurora, sunrise, flame).
+- `GlassCard` — opinionated Glass-Karte mit Strength/Glow/Lift/Shimmer/Spotlight.
+- `Marquee` — Infinite-Scroll für Logo-Streifen / Testimonials. Vertikal/horizontal, pause-on-hover, fade-edges.
+- `ShimmerButton` — Premium-CTA mit rotierendem konischem Border + Hover-Glow.
+- `NumberTicker` — animierter Zähler mit Spring-Physik, triggert via IntersectionObserver.
+- `ScrollProgress` — Top-Fortschrittsleiste via framer-motion useScroll.
+- `Spotlight` — Cursor-following radialer Highlight (touch-aware, motion-reduce-safe).
+- `AnimatedGradientBorder` — rotierender konischer Border-Wrapper für Feature-Tiles.
+- `Reveal` — fade-in-on-scroll Motion-Helper (4 Richtungen + delay + duration + repeat).
+
+**Storybook**: Stories für `GlassCard` (6 Stories) und `BentoGrid` (Hero-Layout).
+
+Alle bestehenden Pages bleiben unverändert — Foundation legt nur die Bausteine bereit. Iter 118+ wendet sie auf Landing/Auth/Dashboard/Search etc. an.
+
 ## Iteration 116 — Request body size limits for JSON endpoints
 
 **Security finding (Audit Medium)**: JSON endpoints had no request-body size limit. An attacker could send arbitrarily large bodies to exhaust heap memory or degrade availability. Only `multipart/form-data` uploads (documents-service) had limits.
