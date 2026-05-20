@@ -1,27 +1,24 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Platform } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
-  Edit3, GraduationCap, Briefcase, Languages, FileText,
-  ChevronRight, Camera, MapPin, Phone, Mail
+  GraduationCap, Briefcase, Languages, FileText,
+  ChevronRight, Camera, MapPin, Phone,
 } from "lucide-react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { Avatar } from "../../../src/components/ui/Avatar";
 import { Card } from "../../../src/components/ui/Card";
 import { Badge } from "../../../src/components/ui/Badge";
-import { Button } from "../../../src/components/ui/Button";
+import { AuroraBackground } from "../../../src/components/ui/AuroraBackground";
+import { GlassCard } from "../../../src/components/ui/GlassCard";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { useThemeStore } from "../../../src/hooks/useColorScheme";
 import { supabase, IS_MOCK_MODE } from "../../../src/lib/supabase";
 import { mockEducation, mockExperience, mockLanguages, mockDocuments } from "../../../src/lib/mockData";
 import type { Education, Experience, LanguageSkill, Document } from "../../../src/types";
-
-const headerGradient = Platform.select({
-  web: { background: "linear-gradient(135deg, #2563EB 0%, #1e40af 100%)" },
-  default: {},
-});
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -68,51 +65,100 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView className="flex-1" edges={["top"]}>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Profile Header */}
+        {/* Profile hero on aurora */}
         <Animated.View
           entering={FadeInDown.springify()}
-          className="bg-primary-500 mx-5 mt-4 rounded-3xl px-6 pt-6 pb-7 items-center"
-          style={headerGradient as any}
+          className="mx-5 mt-4"
         >
-          <View className="relative mb-4">
-            <Avatar
-              uri={profile?.photo_url}
-              name={`${profile?.first_name || ""} ${profile?.last_name || ""}`}
-              size="xl"
-              border={true}
-            />
-            <TouchableOpacity
-              className="absolute bottom-0 right-0 w-9 h-9 bg-white rounded-full items-center justify-center"
-              style={Platform.select({ web: { boxShadow: "0 2px 8px rgba(0,0,0,0.15)" } as any, default: {} })}
-              onPress={() => router.push("/(applicant)/(profile)/edit")}
-            >
-              <Camera size={16} color="#2563EB" />
-            </TouchableOpacity>
-          </View>
+          <AuroraBackground variant="vivid" style={{ borderRadius: 24 }}>
+            <View className="items-center px-6 pt-7 pb-8">
+              <View className="relative mb-4">
+                <View
+                  style={{
+                    padding: 3,
+                    borderRadius: 999,
+                    backgroundColor: "rgba(255,255,255,0.6)",
+                  }}
+                >
+                  <Avatar
+                    uri={profile?.photo_url}
+                    name={`${profile?.first_name || ""} ${profile?.last_name || ""}`}
+                    size="xl"
+                    border={false}
+                  />
+                </View>
+                <TouchableOpacity
+                  className="absolute bottom-0 right-0"
+                  onPress={() => router.push("/(applicant)/(profile)/edit")}
+                  accessibilityLabel="Foto ändern"
+                >
+                  <LinearGradient
+                    colors={["#2563EB", "#6d4cf7"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: 17,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderWidth: 2,
+                      borderColor: "white",
+                    }}
+                  >
+                    <Camera size={14} color="white" />
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
 
-          <Text className="text-white text-xl font-bold text-center">
-            {profile?.first_name} {profile?.last_name}
-          </Text>
+              <Text
+                className={`text-xl font-extrabold text-center ${
+                  isDark ? "text-dark-text" : "text-gray-900"
+                }`}
+              >
+                {profile?.first_name} {profile?.last_name}
+              </Text>
 
-          {profile?.city && (
-            <View className="flex-row items-center gap-1.5 mt-1.5">
-              <MapPin size={13} color="#bfdbfe" />
-              <Text className="text-primary-200 text-[13px]">{profile.city}, {profile.country}</Text>
+              {profile?.city && (
+                <View className="flex-row items-center gap-1.5 mt-2">
+                  <MapPin size={13} color={isDark ? "#94a3b8" : "#475569"} />
+                  <Text
+                    className={`text-[13px] font-medium ${
+                      isDark ? "text-dark-muted" : "text-gray-600"
+                    }`}
+                  >
+                    {profile.city}
+                    {profile.country ? `, ${profile.country}` : ""}
+                  </Text>
+                </View>
+              )}
+
+              {profile?.phone && (
+                <View className="flex-row items-center gap-1.5 mt-1">
+                  <Phone size={12} color={isDark ? "#94a3b8" : "#475569"} />
+                  <Text
+                    className={`text-[13px] ${
+                      isDark ? "text-dark-muted" : "text-gray-600"
+                    }`}
+                  >
+                    {profile.phone}
+                  </Text>
+                </View>
+              )}
+
+              {profile?.bio && (
+                <GlassCard strength="strong" style={{ padding: 14, marginTop: 16 }}>
+                  <Text
+                    className={`text-[13px] text-center leading-5 ${
+                      isDark ? "text-dark-text" : "text-gray-700"
+                    }`}
+                  >
+                    {profile.bio}
+                  </Text>
+                </GlassCard>
+              )}
             </View>
-          )}
-
-          {profile?.phone && (
-            <View className="flex-row items-center gap-1.5 mt-1">
-              <Phone size={12} color="#bfdbfe" />
-              <Text className="text-primary-200 text-[13px]">{profile.phone}</Text>
-            </View>
-          )}
-
-          {profile?.bio && (
-            <Text className="text-primary-100 text-[13px] text-center mt-4 leading-5 px-2">
-              {profile.bio}
-            </Text>
-          )}
+          </AuroraBackground>
         </Animated.View>
 
         {/* Sections */}

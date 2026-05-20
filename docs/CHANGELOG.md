@@ -2,6 +2,26 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 134 — Mobile Profile + Settings polish
+
+Beide Account-Screens auf den Iter-127-Standard gehoben.
+
+**`mobile/app/(applicant)/(profile)/index.tsx`** — Hero komplett überarbeitet:
+- Hero-Container von solid-primary auf `AuroraBackground variant="vivid"` umgestellt.
+- Avatar in 3px-Padding-Frame (white/60 backdrop) — wirkt wie ein Polaroid.
+- Camera-Button als Gradient-Pill (primary→violet) mit white-Border statt flat-white-Circle.
+- Name + City/Phone Meta in Dark-Text statt White (sieht auf Aurora besser aus).
+- Bio jetzt in eigener GlassCard (strong) statt direkter Text auf Primary.
+- Section-Cards unverändert (waren schon gut).
+
+**`mobile/app/(applicant)/(settings)/index.tsx`**:
+- `AuroraBackground variant="subtle"` Page-Wrapper.
+- Header: Gradient-Icon-Square (info→primary) + GradientText + Body-Tagline.
+- Section-Headers mit letter-spacing 1.0 + besser tinted "Danger Zone" (accent-600).
+- Footer-Copy: "Made with ♥ in Tunisia" (vorher "love").
+
+Mobile tsc clean.
+
 ## Iteration 133 — Mobile Visa / Anerkennung / CV Upload polish
 
 Drei Feature-Screens mit Header-Upgrade, Aurora-Backdrop und Glass-Treatment.

@@ -1,11 +1,14 @@
-import { View, Text, TouchableOpacity, Switch, Alert, Platform } from "react-native";
+import { View, Text, TouchableOpacity, Switch, Alert, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Globe, Moon, Bell, Shield, FileText, LogOut, ChevronRight, Info, KeyRound, Smartphone, Trash2 } from "lucide-react-native";
+import { Globe, Moon, Bell, Shield, FileText, LogOut, ChevronRight, Info, KeyRound, Smartphone, Trash2, Settings as SettingsIcon } from "lucide-react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { Card } from "../../../src/components/ui/Card";
 import { Button } from "../../../src/components/ui/Button";
+import { AuroraBackground } from "../../../src/components/ui/AuroraBackground";
+import { GradientText } from "../../../src/components/ui/GradientText";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { useThemeStore } from "../../../src/hooks/useColorScheme";
 import i18n from "../../../src/i18n";
@@ -95,66 +98,133 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1" edges={["top"]}>
-      <View className="px-5 pt-6 pb-2">
-        <Text className={`text-2xl font-bold ${isDark ? "text-dark-text" : "text-gray-900"}`}>
-          {t("settings.title")}
-        </Text>
-      </View>
+    <AuroraBackground variant="subtle" style={{ flex: 1, borderRadius: 0 }}>
+      <SafeAreaView className="flex-1" edges={["top"]}>
+        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+          <Animated.View entering={FadeInDown.springify()} className="px-5 pt-6 pb-4">
+            <View className="flex-row items-start gap-3">
+              <LinearGradient
+                colors={["#06b6d4", "#2563EB"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 16,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  shadowColor: "#06b6d4",
+                  shadowOffset: { width: 0, height: 6 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 12,
+                  elevation: 6,
+                }}
+              >
+                <SettingsIcon size={24} color="white" />
+              </LinearGradient>
+              <View className="flex-1">
+                <GradientText
+                  variant="brand"
+                  style={{ fontSize: 24, fontWeight: "800", lineHeight: 28 }}
+                >
+                  {t("settings.title")}
+                </GradientText>
+                <Text
+                  className={`text-[13px] mt-1 ${
+                    isDark ? "text-dark-muted" : "text-gray-600"
+                  }`}
+                >
+                  Konto, Sicherheit, Darstellung — alles an einem Ort.
+                </Text>
+              </View>
+            </View>
+          </Animated.View>
 
-      <View className="flex-1 px-5">
-        {/* KONTO */}
-        <Text className={`text-xs font-bold uppercase tracking-widest px-1 mt-6 mb-2 ${isDark ? "text-dark-muted" : "text-gray-400"}`}>
-          Konto
-        </Text>
-        {accountItems.map((item, index) => renderItem(item, index, 0))}
+          <View className="px-5">
+            {/* KONTO */}
+            <Text
+              className={`text-[11px] font-bold uppercase px-1 mt-4 mb-2 ${
+                isDark ? "text-dark-muted" : "text-gray-500"
+              }`}
+              style={{ letterSpacing: 1 }}
+            >
+              Konto
+            </Text>
+            {accountItems.map((item, index) => renderItem(item, index, 0))}
 
-        {/* APP */}
-        <Text className={`text-xs font-bold uppercase tracking-widest px-1 mt-6 mb-2 ${isDark ? "text-dark-muted" : "text-gray-400"}`}>
-          App
-        </Text>
-        {appItems.map((item, index) => renderItem(item, index, 2))}
+            {/* APP */}
+            <Text
+              className={`text-[11px] font-bold uppercase px-1 mt-6 mb-2 ${
+                isDark ? "text-dark-muted" : "text-gray-500"
+              }`}
+              style={{ letterSpacing: 1 }}
+            >
+              App
+            </Text>
+            {appItems.map((item, index) => renderItem(item, index, 2))}
 
-        {/* RECHTLICHES */}
-        <Text className={`text-xs font-bold uppercase tracking-widest px-1 mt-6 mb-2 ${isDark ? "text-dark-muted" : "text-gray-400"}`}>
-          Rechtliches
-        </Text>
-        {legalItems.map((item, index) => renderItem(item, index, 3))}
+            {/* RECHTLICHES */}
+            <Text
+              className={`text-[11px] font-bold uppercase px-1 mt-6 mb-2 ${
+                isDark ? "text-dark-muted" : "text-gray-500"
+              }`}
+              style={{ letterSpacing: 1 }}
+            >
+              Rechtliches
+            </Text>
+            {legalItems.map((item, index) => renderItem(item, index, 3))}
 
-        {/* GEFAHRENZONE */}
-        <Text className={`text-xs font-bold uppercase tracking-widest px-1 mt-6 mb-2 text-rose-500`}>
-          {t("settings.dangerZone")}
-        </Text>
-        {renderItem(
-          {
-            title: t("account.delete.title"),
-            icon: Trash2,
-            color: "#dc2626",
-            bg: "bg-rose-50",
-            onPress: () => router.push("/(applicant)/(settings)/delete-account"),
-          },
-          0,
-          5,
-        )}
+            {/* GEFAHRENZONE */}
+            <Text
+              className="text-[11px] font-bold uppercase px-1 mt-6 mb-2 text-accent-600"
+              style={{ letterSpacing: 1 }}
+            >
+              {t("settings.dangerZone")}
+            </Text>
+            {renderItem(
+              {
+                title: t("account.delete.title"),
+                icon: Trash2,
+                color: "#dc2626",
+                bg: "bg-rose-50",
+                onPress: () => router.push("/(applicant)/(settings)/delete-account"),
+              },
+              0,
+              5,
+            )}
 
-        {/* Logout */}
-        <Animated.View entering={FadeInDown.delay(350).springify()} className="mt-8">
-          <Button
-            title={t("auth.logout")}
-            onPress={handleLogout}
-            variant="secondary"
-            size="lg"
-            fullWidth={true}
-            icon={<LogOut size={20} color="#ffffff" />}
-          />
-        </Animated.View>
+            {/* Logout */}
+            <Animated.View entering={FadeInDown.delay(350).springify()} className="mt-8">
+              <Button
+                title={t("auth.logout")}
+                onPress={handleLogout}
+                variant="secondary"
+                size="lg"
+                fullWidth={true}
+                icon={<LogOut size={20} color="#ffffff" />}
+              />
+            </Animated.View>
 
-        {/* Footer */}
-        <View className="items-center mt-6 pb-8">
-          <Text className={`text-xs ${isDark ? "text-dark-muted" : "text-gray-300"}`}>bewerbi.tn v1.0.0</Text>
-          <Text className={`text-[10px] mt-1 ${isDark ? "text-dark-muted" : "text-gray-300"}`}>Made with love in Tunisia</Text>
-        </View>
-      </View>
-    </SafeAreaView>
+            {/* Footer */}
+            <View className="items-center mt-6 pb-8">
+              <Text
+                className={`text-[11px] font-bold ${
+                  isDark ? "text-dark-muted" : "text-gray-400"
+                }`}
+              >
+                bewerbi.tn v1.0.0
+              </Text>
+              <Text
+                className={`text-[10px] mt-1 ${
+                  isDark ? "text-dark-muted" : "text-gray-400"
+                }`}
+              >
+                Made with ♥ in Tunisia
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </AuroraBackground>
   );
 }
