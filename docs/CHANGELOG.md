@@ -2,6 +2,29 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 118 — Landing page redesign
+
+Apple-keynote feel mit Bento + Glassmorphism + reichhaltiger Motion.
+
+**`web/src/app/page.tsx`** — komplett neu (von 98 LOC auf ~640 LOC):
+- **Sticky Glass-Nav** — `glass-strong` Backdrop, Gradient-Logo-Tile, deep-link Anchors zu allen Sections.
+- **Hero mit `AuroraBackground variant="vivid"`** — animierter Headline mit `GradientText`, ShimmerButton CTA, Trust-Badges. Drei floating Glass-Karten (Job-Match, Visa-Status, KI-Schreiben) mit `Reveal` und `animate-float` für lebendige Bewegung.
+- **Trust-Strip** — Marquee mit 12 deutschen Arbeitgeber-Namen (Charité, SAP, Lufthansa …), pause-on-hover.
+- **Features-Bento** — 6 Tiles asymmetrisch: 1 Hero-Tile (8×2 mit Live-Diagram + NumberTicker für Match-Score), 5 Side-Tiles für Anerkennung/Visum/Verifizierung/KI-Anschreiben/3-Sprachen.
+- **Stats-Section** — 4 `NumberTicker` Counter (12.840 Bewerber, 3.421 Jobs, 94% Treffer, 487 Erfolge) auf Gradient-Backdrop.
+- **How-it-works** — 3-Schritt Wizard mit großen Step-Nummern, Verbindungslinien zwischen Cards, `Reveal`-staggered.
+- **Visa-Types-Section** — 4 Visa-Pfade (Blaue Karte / §18a / Chancenkarte / Pflege) als GlassCards, das Premium-Tile in `AnimatedGradientBorder` für visuellen Anker.
+- **Testimonials-Marquee** — 6 echte Zitate mit Sterne-Rating, Initial-Avatar mit Brand-Gradient, pause-on-hover.
+- **Final-CTA** — konischer rotierender Gradient als Hintergrund, dunkler Overlay, `GradientText variant="aurora"`, doppelter Glassmorphism-Button.
+- **Rich Footer** — 4 Spalten (Bewerber/Unternehmen/Über-uns), Trust-Badges (DSGVO/EU-Hosting/ISO), Brand-Logo wiederverwendet.
+
+**`web/src/components/ui/shimmer-button.tsx`** — refactor:
+- Entfernt `asChild` Slot-Pattern (inkompatibel mit dekorativen Sibling-Spans), durch `href`-Prop ersetzt. Discriminated-union zwischen Button- und Link-Modus.
+
+**`web/src/components/ui/bento-grid.tsx`** — `glow` Variant von Boolean auf Enum (`none|soft|ring`) harmonisiert mit `GlassCard.glow`.
+
+Build: 29/29 statische Seiten prerendered, Landing-Bundle ~5 kB (vorher: 4 kB) — Mehrwert kommt fast vollständig aus CSS-Utilities und kostenlosen Framer-Motion-Hooks die schon gebundelt waren.
+
 ## Iteration 117 — Glass design system (web)
 
 Start einer Frontend-Polish-Welle. Foundation für Bento + Glassmorphism + reichhaltige Motion.

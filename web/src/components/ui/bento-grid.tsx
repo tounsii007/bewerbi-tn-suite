@@ -53,14 +53,15 @@ const cellVariants = cva(
         false: "",
       },
       glow: {
-        true: "ring-glow",
-        false: "",
+        none: "",
+        soft: "shadow-[0_4px_24px_oklch(0.611_0.1733_254/0.18)]",
+        ring: "ring-glow",
       },
     },
     defaultVariants: {
       tone: "glass",
       interactive: false,
-      glow: false,
+      glow: "none",
     },
   },
 );
