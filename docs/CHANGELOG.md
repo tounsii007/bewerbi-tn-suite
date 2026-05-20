@@ -2,6 +2,34 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 130 — Web UI primitives polish
+
+Vier zentrale Primitives auf Iter-117-Niveau angehoben.
+
+**`web/src/components/ui/empty-state.tsx`**:
+- Neue `tone` Variante: `dashed | glass | subtle` (Default: dashed).
+- Icon-Halo skaliert mit tone: glass = Gradient-Tile mit shadow-glow, dashed = Ring-Background, subtle = primary-tinted Solid.
+- Größere Title-Font (text-xl vs. text-lg), max-w-sm für Description.
+
+**`web/src/components/ui/error-state.tsx`**:
+- Neue `tone` Variante: `accent | glass`. Glass-Variante mit Gradient (accent→warning) Icon-Tile + shadow-glow.
+- Retry-Button im glass-Mode automatisch als `gradient` Variant.
+
+**`web/src/components/ui/skeleton.tsx`**:
+- Neue Props: `tone` (`default | glass`) und `shape` (`rect | rounded | pill | circle`). Skeleton kann jetzt nahtlos in GlassCards genutzt werden.
+- `circle` shape automatisch aspect-square.
+
+**`web/src/components/shared/theme-toggle.tsx`** — komplett überarbeitet:
+- Trigger: Press-Animation + Border + Sun/Moon mit hover-rotate (12° / -12°), brand-coloured hover state.
+- Dropdown: jetzt `glass-strong` mit Fade-In-Up Animation, "Design"-Palette-Header oben, jede Option mit Icon-Tile (Active = Gradient) + Label + Hint-Subtext + Dot-Indicator beim aktiven Theme.
+
+**`web/src/components/ui/toaster.tsx`**:
+- Sonner Toasts jetzt mit `glass-strong` (frosted), `shadow-xl`.
+- Action-Button: brand-Gradient statt Solid-Primary.
+- Side-Stripes als vertikaler Gradient-Pseudo (success→500→700 etc) statt 4px Border-Left.
+
+Alle Änderungen rein additiv — bestehende Verwendungen brechen nicht. Build clean, 29/29 prerender.
+
 ## Iteration 129 — Web onboarding wizard redesign
 
 In Iter 122 übersprungen, jetzt komplett überarbeitet. Onboarding ist die **kritische Conversion-Strecke** zwischen Registrierung und erster Bewerbung — die Seite muss begeistern.

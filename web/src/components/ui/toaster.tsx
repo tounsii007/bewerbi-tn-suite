@@ -32,21 +32,22 @@ export function Toaster() {
       toastOptions={{
         classNames: {
           toast: [
-            "group bg-white text-gray-900 border border-gray-100",
-            "shadow-[var(--shadow-lg)] rounded-2xl backdrop-blur",
-            "dark:bg-dark-card/95 dark:border-dark-border dark:text-dark-text",
+            "group glass-strong text-gray-900",
+            "shadow-[var(--shadow-xl)] rounded-2xl",
+            "dark:text-dark-text",
           ].join(" "),
-          title: "font-semibold text-[14px]",
-          description: "text-gray-500 dark:text-dark-muted text-[13px]",
+          title: "font-bold text-[14px]",
+          description: "text-gray-600 dark:text-dark-muted text-[13px]",
           actionButton:
-            "bg-primary-500 text-white rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-primary-600",
+            "bg-[linear-gradient(135deg,var(--color-primary-500),oklch(0.611_0.18_280))] text-white rounded-lg px-3 py-1.5 text-xs font-semibold hover:brightness-110",
           cancelButton:
             "bg-gray-100 text-gray-700 rounded-lg px-3 py-1.5 text-xs font-semibold " +
             "dark:bg-dark-border dark:text-dark-text",
-          success: "border-l-4 border-l-success-500",
-          error: "border-l-4 border-l-accent-500",
-          warning: "border-l-4 border-l-warning-500",
-          info: "border-l-4 border-l-info-500",
+          // Left accent stripe per kind — wider for visual punch
+          success: "before:absolute before:inset-y-3 before:start-0 before:w-1 before:rounded-r-full before:bg-[linear-gradient(180deg,var(--color-success-400),var(--color-success-600))]",
+          error: "before:absolute before:inset-y-3 before:start-0 before:w-1 before:rounded-r-full before:bg-[linear-gradient(180deg,var(--color-accent-400),var(--color-accent-600))]",
+          warning: "before:absolute before:inset-y-3 before:start-0 before:w-1 before:rounded-r-full before:bg-[linear-gradient(180deg,var(--color-warning-400),var(--color-warning-600))]",
+          info: "before:absolute before:inset-y-3 before:start-0 before:w-1 before:rounded-r-full before:bg-[linear-gradient(180deg,var(--color-info-400),var(--color-info-600))]",
         },
       }}
     />

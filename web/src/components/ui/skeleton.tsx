@@ -3,14 +3,25 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
 /**
- * Loading placeholder. Use a shimmer for content-heavy areas (cards, lists) and a soft pulse
- * for short text lines. The {@code SkeletonGroup} helper makes equal-width text-line stacks
- * trivial — pass {@code lines} and an optional {@code lastWidth}.
+ * Loading placeholder.
+ *
+ * - `shimmer` (default): traveling-light gradient. Use for content-heavy
+ *   areas (cards, lists).
+ * - `pulse-soft`: gentle opacity pulse. Use for short text lines where
+ *   shimmer would feel busy.
+ * - `glass`: frosted shimmer that matches Iter 117 glass cards.
+ *
+ * The {@link SkeletonGroup} helper makes equal-width text-line stacks
+ * trivial.
  */
 const skeletonVariants = cva(
-  "block rounded-md bg-gray-100 dark:bg-dark-bg-alt overflow-hidden relative",
+  "block rounded-md overflow-hidden relative",
   {
     variants: {
+      tone: {
+        default: "bg-gray-100 dark:bg-dark-bg-alt",
+        glass: "bg-white/40 dark:bg-dark-card/40 backdrop-blur-sm",
+      },
       shimmer: {
         true: [
           "before:absolute before:inset-0",
@@ -20,8 +31,14 @@ const skeletonVariants = cva(
         ].join(" "),
         false: "animate-pulse-soft",
       },
+      shape: {
+        rect: "rounded-md",
+        rounded: "rounded-xl",
+        pill: "rounded-full",
+        circle: "rounded-full aspect-square",
+      },
     },
-    defaultVariants: { shimmer: true },
+    defaultVariants: { tone: "default", shimmer: true, shape: "rect" },
   },
 );
 
@@ -30,11 +47,11 @@ export interface SkeletonProps
     VariantProps<typeof skeletonVariants> {}
 
 export const Skeleton = React.forwardRef<HTMLSpanElement, SkeletonProps>(
-  ({ className, shimmer, ...props }, ref) => (
+  ({ className, tone, shimmer, shape, ...props }, ref) => (
     <span
       ref={ref}
       aria-hidden
-      className={cn(skeletonVariants({ shimmer, className }))}
+      className={cn(skeletonVariants({ tone, shimmer, shape, className }))}
       {...props}
     />
   ),

@@ -20,6 +20,8 @@ export interface ErrorStateProps {
   onRetry?: () => void;
   retryLabel?: string;
   className?: string;
+  /** Visual tone — `accent` (default, error-colored) or `glass` (frosted, neutral). */
+  tone?: "accent" | "glass";
   /** When true (dev only), shows the error message and stack below the description. */
   showDetails?: boolean;
 }
@@ -31,6 +33,7 @@ export function ErrorState({
   onRetry,
   retryLabel = "Erneut versuchen",
   showDetails = false,
+  tone = "accent",
   className,
 }: ErrorStateProps) {
   const msg = error instanceof Error ? error.message : error ? String(error) : null;
@@ -39,18 +42,44 @@ export function ErrorState({
       role="alert"
       className={cn(
         "flex flex-col items-center justify-center gap-4 rounded-2xl p-10 text-center",
-        "border border-accent-100 bg-accent-50/40",
-        "dark:border-accent-500/30 dark:bg-accent-500/10",
+        tone === "accent" &&
+          "border border-accent-100 bg-accent-50/40 dark:border-accent-500/30 dark:bg-accent-500/10",
+        tone === "glass" && "glass shadow-[var(--shadow-md)]",
         "animate-fade-in-up",
         className,
       )}
     >
-      <span className="flex size-12 items-center justify-center rounded-full bg-accent-100 text-accent-600 dark:bg-accent-500/20 dark:text-accent-300">
-        <AlertTriangle className="size-6" aria-hidden />
+      <span
+        className={cn(
+          "flex size-14 items-center justify-center rounded-2xl",
+          tone === "accent"
+            ? "bg-accent-100 text-accent-600 dark:bg-accent-500/20 dark:text-accent-300"
+            : "bg-[linear-gradient(135deg,var(--color-accent-500),var(--color-warning-500))] text-white shadow-[var(--shadow-glow)]",
+        )}
+      >
+        <AlertTriangle className="size-7" aria-hidden />
       </span>
       <div className="flex max-w-md flex-col gap-1">
-        <h3 className="text-lg font-bold text-accent-700 dark:text-accent-300">{title}</h3>
-        <p className="text-sm text-accent-700/80 dark:text-accent-200/70">{description}</p>
+        <h3
+          className={cn(
+            "text-xl font-bold",
+            tone === "accent"
+              ? "text-accent-700 dark:text-accent-300"
+              : "text-gray-900 dark:text-dark-text",
+          )}
+        >
+          {title}
+        </h3>
+        <p
+          className={cn(
+            "text-sm",
+            tone === "accent"
+              ? "text-accent-700/80 dark:text-accent-200/70"
+              : "text-gray-600 dark:text-dark-muted",
+          )}
+        >
+          {description}
+        </p>
         {showDetails && msg && (
           <pre className="mt-3 max-h-32 overflow-auto rounded-lg bg-white/60 p-2 text-left text-[11px] text-accent-900 dark:bg-dark-card/60 dark:text-accent-200">
             {msg}
@@ -58,7 +87,11 @@ export function ErrorState({
         )}
       </div>
       {onRetry && (
-        <Button variant="outline" onClick={onRetry} leadingIcon={<RefreshCw className="size-4" />}>
+        <Button
+          variant={tone === "glass" ? "gradient" : "outline"}
+          onClick={onRetry}
+          leadingIcon={<RefreshCw className="size-4" />}
+        >
           {retryLabel}
         </Button>
       )}
