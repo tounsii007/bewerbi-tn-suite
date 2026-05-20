@@ -23,7 +23,7 @@ Quick reference for the security controls in the suite — handy for new joiners
 
 - `oauth2ResourceServer.jwt()` is wired into the default `SecurityFilterChain`. Public routes must be declared explicitly per service.
 - Method-level: `@PreAuthorize("hasRole('ADMIN')")` and friends — `@EnableMethodSecurity` is on in `JwtSecurityConfig`.
-- Actuator: probes are public; `prometheus/metrics/loggers/env/beans/configprops` require `ROLE_ADMIN` and should be blocked at the cluster ingress for external traffic.
+- **Actuator** (Iter 115): a dedicated `ActuatorSecurityConfig` `@Order(1)` chain scoped to `/actuator/**` enforces access at the application layer for every service, regardless of what that service's per-route chain declares. Health/info probes are public; everything else (`/actuator/prometheus`, `/actuator/metrics/**`, etc.) requires `ROLE_ADMIN`. The cluster ingress should additionally block all `/actuator/**` traffic from external networks as a defense-in-depth layer.
 
 ## Rate limiting
 

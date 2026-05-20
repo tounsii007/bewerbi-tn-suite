@@ -27,7 +27,12 @@ import tn.bewerbi.common.security.audit.LoginAttemptTracker;
 @Import({
     RsaKeyProvider.class,
     JwtSecurityConfig.class,
+    // Iter 115: actuator chain must be imported AFTER SecurityFilterChainRegistrar
+    // so that the @ConditionalOnMissingBean on the default chain evaluates first
+    // (before it can see the actuator chain) and still creates the fallback for
+    // services that have no custom chain of their own.
     SecurityFilterChainRegistrar.class,
+    ActuatorSecurityConfig.class,
     SecurityHeadersFilter.Config.class,
     JwtSecretValidator.class,
     AuditLogger.Config.class,

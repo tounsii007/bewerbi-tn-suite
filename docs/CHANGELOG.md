@@ -2,6 +2,17 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 115 — Actuator endpoint security
+
+**Security findings**: (1) i18n-service had `/actuator/prometheus` in its `permitAll()` list — open to the world. (2) Companies, documents, identity, and jobs services required only a valid JWT (not `ROLE_ADMIN`) for prometheus and other sensitive actuator endpoints, because each custom `SecurityFilterChain` forgot to re-declare the `hasRole("ADMIN")` rule.
+
+**Root cause**: every service with public API routes must define its own `SecurityFilterChain`, overriding the shared default one. The correct actuator rules in the default chain were silently dropped. There was no mechanism preventing a service chain from accidentally loosening actuator security.
+
+**Fix**:
+- New `ActuatorSecurityConfig` `@Order(1)` — a dedicated `SecurityFilterChain` with `securityMatcher("/actuator/**")`. It intercepts all actuator traffic before any per-service chain sees it. Health/info probes stay public; everything else requires `ROLE_ADMIN`. Imported by `CommonSecurityAutoConfiguration` so every servlet service gets it automatically.
+- `SecurityFilterChainRegistrar.defaultFilterChain`: added `@Order(10)`, removed actuator rules (now handled by the dedicated chain).
+- `i18n-service/SecurityRules.java`: removed `/actuator/prometheus` from `permitAll` (now a comment points to the shared chain).
+
 ## Iteration 114 — Kafka dead-letter queue (DLQ)
 
 **Security finding (Audit High)**: all `@KafkaListener` methods swallowed exceptions — malformed `USER_DELETED` payloads caused the GDPR cascade to silently do nothing.

@@ -33,8 +33,10 @@ public class SecurityRules {
                 .cors(cors -> cors.configurationSource(corsSource))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        // Infra
-                        .requestMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
+                        // Infra probes only — actuator security enforced by the shared
+                        // ActuatorSecurityConfig (@Order(1)) which intercepts /actuator/**
+                        // before this chain sees it.
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Public reads
                         .requestMatchers(HttpMethod.GET,
