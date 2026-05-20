@@ -2,6 +2,21 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 128 — Flutter foundation (Glass + Aurora primitives)
+
+Foundation für die Flutter-App, mirroring die Web (Iter 117) und Mobile (Iter 125) Primitives.
+
+**Neue Widgets in `flutter/lib/widgets/`:**
+- `app_glass_card.dart` — `AppGlassCard` mit `BackdropFilter + ImageFilter.blur`, 4 `GlassStrength` Varianten (subtle/default/strong/frosted), optional `glow` für brand-coloured BoxShadow. Optional `onTap` mit InkWell-Ripple.
+- `app_gradient_text.dart` — `AppGradientText` mit `ShaderMask + LinearGradient`. 4 `GradientVariant` (brand/aurora/sunrise/flame) matching web/mobile.
+- `app_aurora_background.dart` — animated 3-Blob-Hintergrund mit `AnimationController` (vsync), drift bei 18s + 28s Cycles. `AuroraVariant` (subtle/default/vivid), `static`-Prop für motion-reduce.
+- `app_number_ticker.dart` — `TweenAnimationBuilder<double>` mit `Curves.easeOutCubic`, `intl`-aware Formatting (de_DE Default).
+- `app_reveal.dart` — Fade + Translate on Mount, 5 Richtungen, configurable delay + duration + offset.
+
+Alle Widgets befolgen den bestehenden `AppColors` Theme-Standard (kein Hard-Coding der Brand-Farben). `flutter analyze` clean.
+
+Existing `app_gradient_mesh.dart` bleibt für statische Backdrop-Use-Cases, `app_aurora_background.dart` ergänzt für animated Heroes.
+
 ## Iteration 127 — Mobile applicant home (hero + glass stats)
 
 Höchsttrafficte authentifizierte Mobile-Screen bekommt das volle Aurora + Glass-Treatment im Hero-Bereich.
