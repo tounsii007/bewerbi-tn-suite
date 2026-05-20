@@ -2,6 +2,20 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 140 — Mobile Onboarding + Saved-Searches polish
+
+**`mobile/app/(applicant)/saved-searches.tsx`**:
+- AuroraBackground (subtle) Page-Wrapper.
+- Header: Gradient-Square (primary→info, 48×48) + `GradientText` Title + `NumberTicker` Counter "X aktive Suchen".
+- Empty-State: GlassCard mit Bookmark-Icon + Body-Hint statt flacher EmptyState.
+- SavedSearchRow: `View+border` → `GlassCard strength=default`. Internal layout preserved.
+
+**`mobile/app/(applicant)/onboarding.tsx`**:
+- Page-Wrapper: `AuroraBackground variant="vivid"` — gibt der wichtigen Conversion-Strecke einen Marketing-Look.
+- OnboardingQuiz Component selbst unverändert (528 LOC — vermeidet riskanten Refactor).
+
+Mobile tsc clean.
+
 ## Iteration 139 — Flutter home hero refactor
 
 In Iter 137 als "zu riskant" übersprungen — jetzt nachgeholt.

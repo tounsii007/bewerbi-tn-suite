@@ -13,10 +13,14 @@ import {
   Check,
 } from "lucide-react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSavedSearchStore, type SavedSearch } from "../../src/stores/savedSearchStore";
 import { useJobStore } from "../../src/stores/jobStore";
 import { useThemeStore } from "../../src/hooks/useColorScheme";
-import { EmptyState } from "../../src/components/shared/EmptyState";
+import { AuroraBackground } from "../../src/components/ui/AuroraBackground";
+import { GlassCard } from "../../src/components/ui/GlassCard";
+import { GradientText } from "../../src/components/ui/GradientText";
+import { NumberTicker } from "../../src/components/ui/NumberTicker";
 import {
   ALERT_FREQUENCY_LABELS,
   type AlertFrequency,
@@ -50,49 +54,111 @@ export default function SavedSearchesScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1" edges={["top"]}>
-      <View className="px-5 pt-4 pb-2">
-        <Text className={`text-2xl font-bold ${isDark ? "text-dark-text" : "text-gray-900"}`}>
-          {t("savedSearches.title")}
-        </Text>
-        <Text className={`text-[13px] mt-0.5 ${isDark ? "text-dark-muted" : "text-gray-500"}`}>
-          {searches.length} aktiv
-        </Text>
-      </View>
-      <FlatList
-        data={searches}
-        keyExtractor={(s) => s.id}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 }}
-        renderItem={({ item, index }) => (
-          <SavedSearchRow
-            item={item}
-            index={index}
-            jobs={jobs}
-            onRun={() => runSearch(item)}
-            onDelete={() => remove(item.id)}
-            onOpenPicker={() => setPickerFor(item.id)}
-            isDark={isDark}
-          />
-        )}
-        ListEmptyComponent={
-          <EmptyState
-            icon={<Bookmark size={48} color={isDark ? "#334155" : "#d1d5db"} />}
-            title={t("savedSearches.empty")}
-          />
-        }
-      />
+    <AuroraBackground variant="subtle" style={{ flex: 1, borderRadius: 0 }}>
+      <SafeAreaView className="flex-1" edges={["top"]}>
+        <Animated.View entering={FadeInDown.springify()} className="px-5 pt-4 pb-3">
+          <View className="flex-row items-start gap-3">
+            <LinearGradient
+              colors={["#2563EB", "#06b6d4"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 16,
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#2563EB",
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.3,
+                shadowRadius: 12,
+                elevation: 6,
+              }}
+            >
+              <Bookmark size={22} color="white" />
+            </LinearGradient>
+            <View className="flex-1">
+              <GradientText
+                variant="brand"
+                style={{ fontSize: 22, fontWeight: "800", lineHeight: 26 }}
+              >
+                {t("savedSearches.title")}
+              </GradientText>
+              <View className="flex-row items-baseline gap-1.5 mt-1">
+                <NumberTicker
+                  value={searches.length}
+                  style={{
+                    fontSize: 13,
+                    fontWeight: "700",
+                    color: "#2563EB",
+                  }}
+                />
+                <Text
+                  className={`text-[13px] ${
+                    isDark ? "text-dark-muted" : "text-gray-600"
+                  }`}
+                >
+                  {searches.length === 1 ? "aktiv" : "aktive Suchen"}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </Animated.View>
+        <FlatList
+          data={searches}
+          keyExtractor={(s) => s.id}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 }}
+          renderItem={({ item, index }) => (
+            <SavedSearchRow
+              item={item}
+              index={index}
+              jobs={jobs}
+              onRun={() => runSearch(item)}
+              onDelete={() => remove(item.id)}
+              onOpenPicker={() => setPickerFor(item.id)}
+              isDark={isDark}
+            />
+          )}
+          ListEmptyComponent={
+            <View className="px-2 pt-8">
+              <GlassCard strength="default" style={{ padding: 32, alignItems: "center" }}>
+                <View
+                  className="w-16 h-16 rounded-2xl items-center justify-center mb-4"
+                  style={{ backgroundColor: "rgba(37, 99, 235, 0.15)" }}
+                >
+                  <Bookmark size={32} color="#2563EB" />
+                </View>
+                <Text
+                  className={`text-[18px] font-extrabold text-center ${
+                    isDark ? "text-dark-text" : "text-gray-900"
+                  }`}
+                >
+                  {t("savedSearches.empty")}
+                </Text>
+                <Text
+                  className={`text-[13px] text-center mt-2 leading-5 ${
+                    isDark ? "text-dark-muted" : "text-gray-600"
+                  }`}
+                >
+                  Speichere deine Filter mit dem Bookmark-Icon in der Suche — sie landen hier mit Alerts.
+                </Text>
+              </GlassCard>
+            </View>
+          }
+        />
 
-      <FrequencyPicker
-        visible={pickerFor !== null}
-        current={searches.find((s) => s.id === pickerFor)?.alertFrequency ?? "DAILY"}
-        onPick={async (freq) => {
-          if (pickerFor) await setAlertFrequency(pickerFor, freq);
-          setPickerFor(null);
-        }}
-        onClose={() => setPickerFor(null)}
-        isDark={isDark}
-      />
-    </SafeAreaView>
+        <FrequencyPicker
+          visible={pickerFor !== null}
+          current={searches.find((s) => s.id === pickerFor)?.alertFrequency ?? "DAILY"}
+          onPick={async (freq) => {
+            if (pickerFor) await setAlertFrequency(pickerFor, freq);
+            setPickerFor(null);
+          }}
+          onClose={() => setPickerFor(null)}
+          isDark={isDark}
+        />
+      </SafeAreaView>
+    </AuroraBackground>
   );
 }
 
@@ -130,12 +196,8 @@ function SavedSearchRow({
   const off = item.alertFrequency === "OFF";
 
   return (
-    <Animated.View entering={FadeInDown.delay(index * 50).springify()}>
-      <View
-        className={`rounded-2xl p-4 mb-3 border ${
-          isDark ? "bg-dark-card border-dark-border" : "bg-white border-gray-100"
-        }`}
-      >
+    <Animated.View entering={FadeInDown.delay(index * 50).springify()} style={{ marginBottom: 12 }}>
+      <GlassCard strength="default" style={{ padding: 16 }}>
         <TouchableOpacity onPress={onRun} className="flex-row items-center">
           <View className="flex-1">
             <View className="flex-row items-center gap-2">
@@ -212,7 +274,7 @@ function SavedSearchRow({
             <Text className="text-[12px] font-semibold text-accent-500">Löschen</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </GlassCard>
     </Animated.View>
   );
 }
