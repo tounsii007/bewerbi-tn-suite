@@ -2,6 +2,24 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 143 — Storybook stories für Iter-117 Primitives
+
+6 neue Story-Files für die Iter-117 Web-Primitives (vorher: nur Button + GlassCard + BentoGrid + EmptyState dokumentiert).
+
+**`aurora-background.stories.tsx`**: 4 Stories (default / subtle / vivid / static) jede mit Hero-Content-Beispiel + GradientText.
+
+**`gradient-text.stories.tsx`**: 5 Stories für jede Variant (brand / aurora / sunrise / flame) + static no-animate fallback.
+
+**`marquee.stories.tsx`**: 4 Stories — LogoStrip (12 deutsche Arbeitgeber), Testimonials (4 Quote-Cards mit Stars), Reverse-Richtung, NoFade-Edges.
+
+**`number-ticker.stories.tsx`**: 6 Stories — Basic, Percent (94 %), Currency (€ 45.300), WithGradient (NumberTicker inside GradientText), SnappySpring (stiffness 200), SoftSpring (stiffness 40).
+
+**`shimmer-button.stories.tsx`**: 5 Stories — Large, ExtraLarge, Medium, AsLink (href), Static (no rotation).
+
+**`reveal.stories.tsx`**: 5 Stories — direction up/left/right, Staggered (5 cards mit incrementing delay), Repeating (re-plays on scroll).
+
+Web tsc clean. Storybook entdeckt die Stories automatisch via `*.stories.tsx` Pattern.
+
 ## Iteration 142 — Reduced-motion + a11y cross-platform pass
 
 Alle Iter-117/125/128 Primitives respektieren jetzt automatisch die OS-Reduce-Motion-Einstellung des Users — nicht nur per opt-in `static`-Prop.
