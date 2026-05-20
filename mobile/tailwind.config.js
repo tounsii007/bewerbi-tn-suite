@@ -66,6 +66,8 @@ module.exports = {
       },
       borderRadius: {
         'pill': '24px',
+        '2.5xl': '20px',
+        '4xl': '32px',
       },
     },
   },

@@ -88,3 +88,52 @@ export const palette = {
 
 export type SpacingKey = keyof typeof spacing;
 export type RadiusKey = keyof typeof radius;
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * Iter 125 — gradient stops for the mobile glass system.
+ * Use with <LinearGradient colors={GRADIENT_BRAND}> or the GradientText
+ * primitive. Mirrors the web `GradientText` variants exactly.
+ * ───────────────────────────────────────────────────────────────────────── */
+export const GRADIENT_BRAND = [
+  palette.primary[500],
+  "#6d4cf7",
+  palette.primary[500],
+] as const;
+
+export const GRADIENT_AURORA = [
+  palette.primary[500],
+  palette.accent[500],
+  palette.warning[500],
+  palette.success[500],
+  palette.info[500],
+] as const;
+
+export const GRADIENT_SUNRISE = [
+  palette.accent[500],
+  palette.warning[500],
+  palette.accent[500],
+] as const;
+
+export const GRADIENT_FLAME = [
+  palette.accent[500],
+  "#9c39e8",
+  palette.primary[500],
+] as const;
+
+/** Dark pill background used inside ShimmerButton's inner surface. */
+export const GRADIENT_PILL_DARK = ["#0f172a", "#1e293b"] as const;
+
+/** Translucent overlays for AuroraBackground blobs. */
+export const AURORA_BLOBS_LIGHT = [
+  "rgba(59, 130, 246, 0.45)",
+  "rgba(220, 38, 38,  0.35)",
+  "rgba(22, 163, 74,  0.35)",
+  "rgba(6, 182, 212,  0.35)",
+] as const;
+
+export const AURORA_BLOBS_DARK = [
+  "rgba(37, 81, 204,  0.45)",
+  "rgba(185, 28, 28,  0.30)",
+  "rgba(5, 150, 105,  0.30)",
+  "rgba(8, 145, 178,  0.30)",
+] as const;

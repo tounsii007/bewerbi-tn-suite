@@ -2,6 +2,37 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 125 — Mobile foundation (Expo/RN)
+
+Start der Mobile-Polish-Welle. Foundation für Bento + Glassmorphism + reichhaltige Motion auf Expo Router / NativeWind.
+
+**Neue Dependencies:**
+- `expo-blur` (frosted glass via BlurView)
+- `expo-linear-gradient` (gradients ohne SVG)
+- `@react-native-masked-view/masked-view` (für GradientText)
+Alle über `npx expo install` (SDK-versionsmatched).
+
+**`mobile/src/lib/tokens.ts`** — erweitert um Gradient-Stops:
+- `GRADIENT_BRAND` (primary → violet → primary, mirror to web)
+- `GRADIENT_AURORA` (5-color rainbow for headlines)
+- `GRADIENT_SUNRISE` (accent → warning, for "Favoriten")
+- `GRADIENT_FLAME` (accent → magenta → primary)
+- `GRADIENT_PILL_DARK` (für ShimmerButton-Inner)
+- `AURORA_BLOBS_LIGHT/DARK` (semi-transparent blob overlays)
+
+**`mobile/tailwind.config.js`** — neue Radius-Tokens (`2.5xl`, `4xl`) für die neuen Components.
+
+**Neue Primitives in `mobile/src/components/ui/`:**
+- `GradientText` — `MaskedView + LinearGradient` für gradient-clipped text. 4 Varianten matching web.
+- `GlassCard` — `BlurView + tinted overlay`, 4 strength variants, optional `glow` für brand-coloured halo. Android intensity gecapped (Plattform-Beschränkung).
+- `AuroraBackground` — 3 LinearGradient-Blobs auf Reanimated `useSharedValue` mit `withRepeat`, drift bei unterschiedlichen Tempos. Honour `static`-Prop für reduced-motion.
+- `Reveal` — Wrapper über Reanimated `FadeIn*` Entering-Animations. 4 Richtungen + delay + duration.
+- `NumberTicker` — Spring-Counter via Reanimated worklet + `useAnimatedReaction` zur JS-State-Sync. `locale`-aware Formatting.
+- `ShimmerButton` — rotating rainbow gradient ring + dark inner pill. Premium-CTA.
+- `BentoGrid` + `BentoRow` + `BentoCell` — Flexbox-basierte Bento-Layouts (CSS-Grid ist in RN limitiert). Cell mit `flex` weight als column-span analog.
+
+Alle Components match die Web-API soweit möglich (gleiche Prop-Namen, gleiche Varianten). Iter 126+ wendet sie auf alle Mobile-Screens an.
+
 ## Iteration 124 — Web wave finish: applications, favorites, saved-searches, settings, job detail
 
 Letzte web-Polish-Iteration. Drei restliche Applicant-Pages bekommen den Premium-Look, plus die meistbesuchte Job-Detail-Seite.
