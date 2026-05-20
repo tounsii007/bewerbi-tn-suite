@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import tn.bewerbi.common.security.EncryptedStringConverter;
 
 @Entity
 @Table(name = "profiles")
@@ -12,10 +13,15 @@ public class Profile extends BaseEntity {
     @Column(name = "user_id", nullable = false, unique = true) private UUID userId;
     @Column(name = "first_name") private String firstName;
     @Column(name = "last_name") private String lastName;
+    // Iter 110 — Critical #4. Stored AES-GCM-encrypted; the DB column was
+    // widened in V4 to accommodate the base64 ciphertext.
+    @Convert(converter = EncryptedStringConverter.class)
+    @Column(length = 512)
     private String phone;
     private String city;
     private String country;
-    @Column(length = 2000) private String bio;
+    @Convert(converter = EncryptedStringConverter.class)
+    @Column(length = 4096) private String bio;
     @Column(name = "photo_url") private String photoUrl;
     @Column(name = "desired_profession") private String desiredProfession;
     @Enumerated(EnumType.STRING) @Column(name = "german_level") private GermanLevel germanLevel;

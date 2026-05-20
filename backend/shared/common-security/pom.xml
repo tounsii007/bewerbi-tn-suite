@@ -30,6 +30,17 @@
             <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!--
+            Iter 110: JPA AttributeConverter API for the field-encryption
+            converters. `provided` — the runtime jar (Hibernate / EclipseLink)
+            comes from each service's data-jpa starter; common-security only
+            needs the type to compile.
+        -->
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>

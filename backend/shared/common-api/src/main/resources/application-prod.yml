@@ -49,6 +49,15 @@ bewerbi:
       # Lock the strictest CSP — services don't serve HTML in prod
       # (the gateway returns JSON only).
       csp: "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+    # Iter 110 — Critical #4. AES-256-GCM key for @Convert-annotated
+    # PII fields (profile.phone, profile.bio, visa.appointment_date,
+    # …). Must be base64-encoded 32 bytes. Generate with:
+    #     openssl rand -base64 32
+    # FieldEncryptionBootstrap refuses to start in prod when this is
+    # blank — silent fallback to a dev stub key in prod would defeat
+    # the whole control.
+    field-encryption:
+      key: ${FIELD_ENCRYPTION_KEY:}
 
 # ───────────────── Transport TLS (Iter 108, Critical #2) ─────────────────
 # Prod-only enforcement of TLS for every east-west connection. Dev /

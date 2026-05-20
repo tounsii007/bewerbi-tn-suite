@@ -24,6 +24,7 @@ import tn.bewerbi.common.events.DomainEvents;
 import tn.bewerbi.common.events.Topics;
 import tn.bewerbi.common.i18n.LocaleContext;
 import tn.bewerbi.common.i18n.MessageClient;
+import tn.bewerbi.common.security.EncryptedLocalDateConverter;
 import tn.bewerbi.common.security.JwtSecurityConfig;
 import tn.bewerbi.common.security.SecurityFilterChainRegistrar;
 
@@ -85,7 +86,11 @@ public class ImmigrationApp {
         @Column(name = "user_id", nullable = false) UUID userId;
         @Enumerated(EnumType.STRING) @Column(name = "visa_type", nullable = false) VisaType visaType;
         @Enumerated(EnumType.STRING) @Column(nullable = false) VisaStage stage = VisaStage.PREPARATION;
-        @Column(name = "appointment_date") LocalDate appointmentDate;
+        // Iter 110 — Critical #4. AES-GCM-encrypted at the app layer.
+        // V2 migration converts the DATE column to VARCHAR(120) since
+        // ciphertext is a base64 blob and won't fit a DATE.
+        @Convert(converter = EncryptedLocalDateConverter.class)
+        @Column(name = "appointment_date", length = 120) LocalDate appointmentDate;
         @Column(name = "embassy_city") String embassyCity;
         @OneToMany(mappedBy = "visaCase", cascade = CascadeType.ALL, orphanRemoval = true)
         List<VisaRequirement> requirements = new ArrayList<>();

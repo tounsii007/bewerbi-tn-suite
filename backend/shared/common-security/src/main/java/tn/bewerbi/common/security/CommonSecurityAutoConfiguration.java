@@ -31,7 +31,11 @@ import tn.bewerbi.common.security.audit.LoginAttemptTracker;
     SecurityHeadersFilter.Config.class,
     JwtSecretValidator.class,
     AuditLogger.Config.class,
-    LoginAttemptTracker.Config.class
+    LoginAttemptTracker.Config.class,
+    // Iter 110: AES-GCM key bootstrap for @Convert(EncryptedStringConverter.class)
+    // fields. Initializes the static FieldEncryption helper before any
+    // JPA converter touches it.
+    FieldEncryptionBootstrap.class
 })
 public class CommonSecurityAutoConfiguration {
 }
