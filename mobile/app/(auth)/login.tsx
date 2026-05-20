@@ -1,12 +1,24 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Alert,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react-native";
+import { Mail, Lock, Eye, EyeOff, Sparkles } from "lucide-react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Input } from "../../src/components/ui/Input";
 import { Button } from "../../src/components/ui/Button";
+import { GradientText } from "../../src/components/ui/GradientText";
+import { GlassCard } from "../../src/components/ui/GlassCard";
+import { AuroraBackground } from "../../src/components/ui/AuroraBackground";
+import { ShimmerButton } from "../../src/components/ui/ShimmerButton";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useThemeStore } from "../../src/hooks/useColorScheme";
 import { IS_MOCK_MODE } from "../../src/lib/supabase";
@@ -39,7 +51,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await signIn(email, password);
-    } catch (error: any) {
+    } catch {
       Alert.alert(t("common.error"), t("auth.loginError"));
     } finally {
       setLoading(false);
@@ -47,156 +59,218 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1" edges={["top"]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-      >
-        <ScrollView
+    <AuroraBackground variant="vivid" style={{ flex: 1, borderRadius: 0 }}>
+      <SafeAreaView className="flex-1" edges={["top"]}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
           className="flex-1"
-          contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingHorizontal: 20 }}
-          keyboardShouldPersistTaps="handled"
         >
-          {/* Logo & Branding */}
-          <Animated.View entering={FadeInDown.delay(100).springify()} className="items-center mb-10">
-            <View
-              className="w-24 h-24 bg-primary-500 rounded-3xl items-center justify-center mb-4"
-              style={Platform.select({
-                web: { boxShadow: "0 8px 30px rgba(37,99,235,0.3)" } as any,
-                default: {},
-              })}
-            >
-              <Text className="text-5xl font-bold text-white">B</Text>
-              <View className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-accent-500 rounded-full items-center justify-center">
-                <Text className="text-white text-[9px] font-bold">.tn</Text>
-              </View>
-            </View>
-            <Text className={`text-2xl font-bold ${isDark ? "text-dark-text" : "text-gray-900"}`}>
-              bewerbi.tn
-            </Text>
-            <Text className={`text-[15px] mt-1 ${isDark ? "text-dark-muted" : "text-gray-500"}`}>
-              {t("auth.subtitle")}
-            </Text>
-          </Animated.View>
-
-          {/* Form */}
-          <Animated.View entering={FadeInDown.delay(200).springify()}>
-            <Input
-              label={t("auth.email")}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="name@example.com"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              error={errors.email}
-              icon={<Mail size={20} color={isDark ? "#94a3b8" : "#6b7280"} />}
-            />
-
-            <View className="mt-4">
-              <Input
-                label={t("auth.password")}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="********"
-                secureTextEntry={!showPassword}
-                error={errors.password}
-                icon={<Lock size={20} color={isDark ? "#94a3b8" : "#6b7280"} />}
-              />
-              <TouchableOpacity
-                onPress={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-10"
-              >
-                {showPassword ? (
-                  <EyeOff size={20} color={isDark ? "#94a3b8" : "#6b7280"} />
-                ) : (
-                  <Eye size={20} color={isDark ? "#94a3b8" : "#6b7280"} />
-                )}
-              </TouchableOpacity>
-            </View>
-
-            <View className="flex-row justify-between items-center mb-6 mt-2">
-              <TouchableOpacity
-                onPress={async () => {
-                  if (!IS_API_MODE) return;
-                  if (!email) {
-                    Alert.alert(t("common.error"), "Bitte E-Mail-Adresse eingeben.");
-                    return;
-                  }
-                  try {
-                    await authApi.resendVerification(email);
-                    Alert.alert(
-                      "E-Mail unterwegs",
-                      "Wenn die Adresse registriert und noch nicht bestätigt ist, ist ein neuer Link unterwegs.",
-                    );
-                  } catch (e) {
-                    Alert.alert(
-                      t("common.error"),
-                      apiErrorMessage(e, "Senden fehlgeschlagen."),
-                    );
-                  }
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: "center",
+              paddingHorizontal: 20,
+              paddingVertical: 40,
+            }}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Brand + headline */}
+            <Animated.View entering={FadeInDown.delay(80).springify()} className="items-center mb-8">
+              <View
+                className="w-20 h-20 rounded-3xl items-center justify-center mb-5"
+                style={{
+                  backgroundColor: "#2563EB",
+                  shadowColor: "#2563EB",
+                  shadowOffset: { width: 0, height: 8 },
+                  shadowOpacity: 0.4,
+                  shadowRadius: 20,
+                  elevation: 10,
                 }}
               >
-                <Text className="text-primary-500 text-[13px] font-medium">
-                  Bestätigungs-E-Mail erneut senden
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push("/(auth)/forgot-password")}>
-                <Text className="text-primary-500 text-[13px] font-medium">
-                  {t("auth.forgotPassword")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <Button
-              title={t("auth.login")}
-              onPress={handleLogin}
-              loading={loading}
-              size="lg"
-              fullWidth={true}
-            />
-          </Animated.View>
-
-          {/* Register Link */}
-          <Animated.View entering={FadeInUp.delay(300).springify()} className="flex-row justify-center mt-8">
-            <Text className={`text-[15px] ${isDark ? "text-dark-muted" : "text-gray-500"}`}>{t("auth.noAccount")} </Text>
-            <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
-              <Text className="text-primary-500 text-[15px] font-semibold">{t("auth.register")}</Text>
-            </TouchableOpacity>
-          </Animated.View>
-
-          {/* Demo Login */}
-          {IS_MOCK_MODE && (
-            <Animated.View entering={FadeInUp.delay(400).springify()} className="mt-8 pb-8">
-              <Text className={`text-center text-[13px] font-semibold uppercase tracking-wider mb-4 ${isDark ? "text-dark-muted" : "text-gray-400"}`}>
-                Demo-Modus
-              </Text>
-              <View className="flex-row gap-3 justify-center">
-                <TouchableOpacity
-                  className="bg-blue-50 rounded-xl px-4 py-2.5"
-                  activeOpacity={0.7}
-                  onPress={() => { mockLoginAs("applicant"); router.replace("/(applicant)/(home)"); }}
-                >
-                  <Text className="text-blue-600 text-[13px] font-semibold">Bewerber</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="bg-emerald-50 rounded-xl px-4 py-2.5"
-                  activeOpacity={0.7}
-                  onPress={() => { mockLoginAs("employer"); router.replace("/(employer)/(dashboard)"); }}
-                >
-                  <Text className="text-emerald-600 text-[13px] font-semibold">Arbeitgeber</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="bg-amber-50 rounded-xl px-4 py-2.5"
-                  activeOpacity={0.7}
-                  onPress={() => { mockLoginAs("admin"); router.replace("/(admin)/users"); }}
-                >
-                  <Text className="text-amber-600 text-[13px] font-semibold">Admin</Text>
-                </TouchableOpacity>
+                <Sparkles size={36} color="white" />
               </View>
+              <Text
+                className={`text-[13px] font-semibold uppercase mb-1.5 ${
+                  isDark ? "text-primary-300" : "text-primary-600"
+                }`}
+                style={{ letterSpacing: 1.2 }}
+              >
+                Willkommen zurück
+              </Text>
+              <GradientText
+                variant="brand"
+                style={{ fontSize: 32, fontWeight: "800", lineHeight: 36 }}
+              >
+                bewerbi.tn
+              </GradientText>
+              <Text
+                className={`text-[14px] mt-2 text-center ${
+                  isDark ? "text-dark-muted" : "text-gray-600"
+                }`}
+              >
+                {t("auth.subtitle")}
+              </Text>
             </Animated.View>
-          )}
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+
+            {/* Form inside glass card */}
+            <Animated.View entering={FadeInDown.delay(160).springify()}>
+              <GlassCard strength="strong" glow style={{ padding: 24 }}>
+                <Input
+                  label={t("auth.email")}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="name@example.com"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  error={errors.email}
+                  icon={<Mail size={20} color={isDark ? "#94a3b8" : "#6b7280"} />}
+                />
+
+                <View className="mt-4">
+                  <Input
+                    label={t("auth.password")}
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder="********"
+                    secureTextEntry={!showPassword}
+                    error={errors.password}
+                    icon={<Lock size={20} color={isDark ? "#94a3b8" : "#6b7280"} />}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-10"
+                  >
+                    {showPassword ? (
+                      <EyeOff size={20} color={isDark ? "#94a3b8" : "#6b7280"} />
+                    ) : (
+                      <Eye size={20} color={isDark ? "#94a3b8" : "#6b7280"} />
+                    )}
+                  </TouchableOpacity>
+                </View>
+
+                <View className="flex-row justify-between items-center mt-3 mb-5">
+                  <TouchableOpacity
+                    onPress={async () => {
+                      if (!IS_API_MODE) return;
+                      if (!email) {
+                        Alert.alert(t("common.error"), "Bitte E-Mail-Adresse eingeben.");
+                        return;
+                      }
+                      try {
+                        await authApi.resendVerification(email);
+                        Alert.alert(
+                          "E-Mail unterwegs",
+                          "Wenn die Adresse registriert und noch nicht bestätigt ist, ist ein neuer Link unterwegs.",
+                        );
+                      } catch (e) {
+                        Alert.alert(
+                          t("common.error"),
+                          apiErrorMessage(e, "Senden fehlgeschlagen."),
+                        );
+                      }
+                    }}
+                  >
+                    <Text className="text-primary-500 text-[12px] font-semibold">
+                      Bestätigung erneut senden
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => router.push("/(auth)/forgot-password")}>
+                    <Text className="text-primary-500 text-[12px] font-semibold">
+                      {t("auth.forgotPassword")}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Primary CTA */}
+                {loading ? (
+                  <Button
+                    title={t("auth.login")}
+                    onPress={handleLogin}
+                    loading
+                    size="lg"
+                    fullWidth
+                  />
+                ) : (
+                  <ShimmerButton
+                    onPress={handleLogin}
+                    size="lg"
+                    style={{ width: "100%" }}
+                  >
+                    {t("auth.login")}
+                  </ShimmerButton>
+                )}
+              </GlassCard>
+            </Animated.View>
+
+            {/* Register link */}
+            <Animated.View
+              entering={FadeInUp.delay(280).springify()}
+              className="flex-row justify-center mt-8"
+            >
+              <Text
+                className={`text-[15px] ${isDark ? "text-dark-muted" : "text-gray-600"}`}
+              >
+                {t("auth.noAccount")}{" "}
+              </Text>
+              <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
+                <Text className="text-primary-500 text-[15px] font-bold">
+                  {t("auth.register")}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+
+            {/* Demo Login */}
+            {IS_MOCK_MODE && (
+              <Animated.View
+                entering={FadeInUp.delay(360).springify()}
+                className="mt-8 pb-8"
+              >
+                <Text
+                  className={`text-center text-[12px] font-semibold uppercase mb-3 ${
+                    isDark ? "text-dark-muted" : "text-gray-400"
+                  }`}
+                  style={{ letterSpacing: 1.5 }}
+                >
+                  Demo-Modus
+                </Text>
+                <View className="flex-row gap-3 justify-center">
+                  <TouchableOpacity
+                    className="bg-blue-50 rounded-xl px-4 py-2.5"
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      mockLoginAs("applicant");
+                      router.replace("/(applicant)/(home)");
+                    }}
+                  >
+                    <Text className="text-blue-600 text-[13px] font-semibold">Bewerber</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="bg-emerald-50 rounded-xl px-4 py-2.5"
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      mockLoginAs("employer");
+                      router.replace("/(employer)/(dashboard)");
+                    }}
+                  >
+                    <Text className="text-emerald-600 text-[13px] font-semibold">Arbeitgeber</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="bg-amber-50 rounded-xl px-4 py-2.5"
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      mockLoginAs("admin");
+                      router.replace("/(admin)/users");
+                    }}
+                  >
+                    <Text className="text-amber-600 text-[13px] font-semibold">Admin</Text>
+                  </TouchableOpacity>
+                </View>
+              </Animated.View>
+            )}
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </AuroraBackground>
   );
 }

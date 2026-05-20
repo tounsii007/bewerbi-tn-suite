@@ -2,6 +2,18 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 126 — Mobile login screen (first impression)
+
+Erstes Apply der neuen Mobile-Primitives auf die wichtigste Auth-Seite.
+
+**`mobile/app/(auth)/login.tsx`**:
+- Komplette Seite in `AuroraBackground variant="vivid"` gewrappt — animierter Multi-Blob-Hintergrund hinter dem Form-Stack.
+- Branding: Gradient-tile mit Sparkles-Icon (vorher: "B"-Buchstabe), `GradientText variant="brand"` für "bewerbi.tn"-Headline.
+- Form jetzt in `GlassCard strength="strong" glow` gewrappt — frosted backdrop, brand-coloured halo.
+- Primary-CTA als `ShimmerButton` (rotating rainbow ring + dark inner pill) — Lade-Zustand fällt auf Standard-Button zurück.
+- Smaller-Type Hint-Links ("Bestätigung erneut senden" / "Passwort vergessen?") für sauberere Hierarchie.
+- Demo-Mode (Bewerber/Arbeitgeber/Admin) unverändert für Mock-Mode.
+
 ## Iteration 125 — Mobile foundation (Expo/RN)
 
 Start der Mobile-Polish-Welle. Foundation für Bento + Glassmorphism + reichhaltige Motion auf Expo Router / NativeWind.
