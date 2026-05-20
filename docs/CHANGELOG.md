@@ -2,6 +2,24 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 129 — Web onboarding wizard redesign
+
+In Iter 122 übersprungen, jetzt komplett überarbeitet. Onboarding ist die **kritische Conversion-Strecke** zwischen Registrierung und erster Bewerbung — die Seite muss begeistern.
+
+**`web/src/app/(applicant)/onboarding/page.tsx`** — von 305 LOC auf ~430 LOC, komplett rebuilt:
+- **Page-wide `AuroraBackground`** statt flachem Background.
+- **Segmented Step-Progress** statt klassischer Progressbar — eine Pill pro Schritt (gefüllt-fertig / current-light / pending-grey), Gradient-Fill für completed.
+- **Glass-Step-Card** (strength="strong" + glow="soft") mit Step-Icon (Gradient-Tile) + Title + Tagline pro Schritt.
+- **STEP_META** Map mit Title/Tagline/Icon pro Step für saubere Struktur.
+- **Profession-Step**: Größerer Input (h-12), Suggestion-Buttons mit hover-border + press-Animation, Detected-Profession-Info-Box als Reveal-Animation mit Sparkles + Bold/Body Text.
+- **Level-Step**: 6 Aspect-Square Tiles mit `LEVEL_LABEL` Map ("A1"="Anfänger", "A2"="Grundlagen", …, "C2"="Muttersprachl.") — gradient + shadow-glow bei aktiv.
+- **Recognition-Step**: Optionen als 2-Spalten-Rows (Icon-Tile + Title + Hint) mit `Reveal` staggered. Active-State: Gradient-Icon-Tile + primary-Border.
+- **Skills-Step**: Größerer Input (h-12, Placeholder mit Enter-Hint), Vorschläge mit Profession-Bezug, aktive Skills mit Count-Label.
+- **Done-Step**: Großes Gradient-Icon-Tile mit PartyPopper-Icon (success→primary), Body-Text mit Profession/Level/Skills inline-bold.
+- **Footer**: Gradient-Primary-Button mit Loading-State + Chevron-Trailing-Icon, Ghost-Back-Button mit leading-Chevron.
+
+Build: /onboarding 10.2 kB (vorher 8.66 kB) — Mehrwert durch GlassCard, Reveal, Aurora.
+
 ## Iteration 128 — Flutter foundation (Glass + Aurora primitives)
 
 Foundation für die Flutter-App, mirroring die Web (Iter 117) und Mobile (Iter 125) Primitives.
