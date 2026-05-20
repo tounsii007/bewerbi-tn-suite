@@ -2,6 +2,26 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 124 — Web wave finish: applications, favorites, saved-searches, settings, job detail
+
+Letzte web-Polish-Iteration. Drei restliche Applicant-Pages bekommen den Premium-Look, plus die meistbesuchte Job-Detail-Seite.
+
+**`/applications`** — komplett neu: Gradient-Icon-Header mit dynamischem Counter ("X insgesamt"), Empty-State als GlassCard mit Search-CTA, alle Bewerbungs-Rows als GlassCards mit Lift-Hover + Calendar-Icon, Status-Badge, Cover-Letter line-clamp-3 mit border-top Separator.
+
+**`/favorites`** — Sunrise-Gradient-Header (accent→warning), dynamische Stelle-Count, Empty-State mit Heart-Icon und "Stellen entdecken"-CTA, JobCards weiterhin via shared component.
+
+**`/saved-searches`** — komplett überarbeitet: GradientText-Header, jede Suche als GlassCard mit Search-Icon, Alert-Toggle als Pill-Button mit primary/grau Tönen (pressed-state), Trash-Button mit accent-hover, Empty-State mit Bookmark-Icon.
+
+**`/settings`** — Header auf Gradient-Icon + GradientText umgestellt. Cards selbst bleiben grounded (passend für Forms).
+
+**`/jobs/[id]`** — Detail-Seite komplett neu:
+- AuroraBackground Hero-Card mit allen Tags (Type/Category/Deutsch/Premium), großer Titel, Meta-Liste mit Icons (MapPin/Salary/Calendar/Company).
+- Beschreibung + Anforderungen als `GlassCard strength="subtle"`.
+- Apply-Form als `GlassCard strength="strong" glow="soft"` mit Close-Button, Sparkles-Tipp ("Persönliches Anschreiben verdoppelt Antwort-Quote"), Gradient-Submit-Button mit Send-Icon.
+- **Sticky-Bottom-Action-Bar**: floating glass-strong Container mit Favorite-Button, Apply-Button (gradient, flex-1) und "Antwort in Ø 4 Tagen" Hint.
+
+Build: 29/29 Pages prerendered. /jobs/[id] 6.67 kB, /saved-searches 9.95 kB, /settings 8.04 kB.
+
 ## Iteration 123 — Employer + Admin areas
 
 Vier Pages auf Iter-117-Standard: Employer-Dashboard, Employer-Listings, Admin-Companies, Admin-Users.

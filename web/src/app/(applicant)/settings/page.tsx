@@ -16,6 +16,9 @@ import { useAuthStore } from "@/stores/auth-store";
 import { authApi } from "@/lib/api";
 import { apiErrorMessage } from "@/lib/api-errors";
 import { useTranslate } from "@/i18n/use-translate";
+import { GradientText } from "@/components/ui/gradient-text";
+import { Reveal } from "@/components/ui/reveal";
+import { Settings as SettingsIcon } from "lucide-react";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -64,7 +67,21 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h1 className="text-2xl font-extrabold text-gray-900 dark:text-dark-text">Einstellungen</h1>
+      <Reveal>
+        <header className="flex items-start gap-4">
+          <div className="grid size-12 place-items-center rounded-2xl bg-[linear-gradient(135deg,var(--color-info-500),var(--color-primary-500))] text-white shadow-[var(--shadow-glow)]">
+            <SettingsIcon className="size-6" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">
+              <GradientText variant="brand">Einstellungen</GradientText>
+            </h1>
+            <p className="mt-1 text-sm text-gray-600 dark:text-dark-muted">
+              Konto, Sicherheit, Darstellung — alles an einem Ort.
+            </p>
+          </div>
+        </header>
+      </Reveal>
 
       <Card>
         <CardHeader>
