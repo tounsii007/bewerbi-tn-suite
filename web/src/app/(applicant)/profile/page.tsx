@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProfileCompletenessCard } from "@/components/shared/profile-completeness-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GradientText } from "@/components/ui/gradient-text";
+import { Reveal } from "@/components/ui/reveal";
 import { useApiErrorToast } from "@/hooks/use-api-error-toast";
 
 const schema = z.object({
@@ -61,7 +63,16 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h1 className="text-2xl font-extrabold text-gray-900 dark:text-dark-text">Mein Profil</h1>
+      <Reveal>
+        <header>
+          <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">
+            Mein <GradientText variant="brand">Profil</GradientText>
+          </h1>
+          <p className="mt-2 text-sm text-gray-600 dark:text-dark-muted">
+            Je vollständiger dein Profil, desto bessere Matches bekommst du.
+          </p>
+        </header>
+      </Reveal>
 
       <ProfileCompletenessCard profile={q.data} />
 

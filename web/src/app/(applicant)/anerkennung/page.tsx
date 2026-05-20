@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GradientText } from "@/components/ui/gradient-text";
+import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/cn";
 
 type Regulation = "REGULATED" | "NON_REGULATED" | "UNKNOWN";
@@ -37,15 +39,21 @@ export default function AnerkennungPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex items-center gap-3">
-        <GraduationCap className="size-6 text-primary-500" />
-        <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-dark-text">Anerkennung</h1>
-          <p className="text-sm text-gray-500 dark:text-dark-muted">
-            Schritt für Schritt zum Anerkennungsbescheid.
-          </p>
-        </div>
-      </div>
+      <Reveal>
+        <header className="mb-8 flex items-start gap-4">
+          <div className="grid size-12 place-items-center rounded-2xl bg-[linear-gradient(135deg,var(--color-success-500),var(--color-primary-500))] text-white shadow-[var(--shadow-glow)]">
+            <GraduationCap className="size-6" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">
+              <GradientText variant="brand">Anerkennung</GradientText>
+            </h1>
+            <p className="mt-1 text-sm text-gray-600 dark:text-dark-muted">
+              Schritt für Schritt zur Gleichwertigkeit deiner Qualifikation.
+            </p>
+          </div>
+        </header>
+      </Reveal>
 
       {!c && (
         <Card>

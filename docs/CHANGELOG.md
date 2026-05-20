@@ -2,6 +2,33 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 122 — Profile / CV / Anerkennung / Visa polish
+
+Vier Applicant-Pages auf den Iter-117-Standard gehoben — Schwerpunkt auf den zwei visuell prägendsten Seiten (CV-Upload + Visa).
+
+**`/cv-upload`** — komplett neu:
+- Hero-Header mit zentriertem Gradient-Icon-Tile und `GradientText`-Headline.
+- **Drag-and-drop Zone** im `AnimatedGradientBorder` (rotating conic, 6s) — der visuelle Anker der Seite. Drop / Click / Keyboard-Enter alle unterstützt.
+- Pulsierender Halo hinter dem Upload-Icon im Idle-State.
+- Drag-over-State: Hintergrund tönt primary, leichte Scale.
+- Während Upload: animierter Loader + ScanLine-Icon overlay.
+- Validation: max 10 MB, nur PDF; sonst Toast mit klarer Fehlermeldung.
+- Trust-Footer-Pills: Privat / KI-Auto-Fill / Drei Sprachen.
+- Nach Upload: GlassCard Header mit Dateiname und Reset-Button, Hint-Rows als GlassCards mit "✓ Erkannt" Label.
+
+**`/visa`** — Timeline-Redesign:
+- Aurora-Hero-Card mit großem `NumberTicker` für Fortschritts-Prozent, Embassy-Stadt unten links.
+- **Visa-Typ-Auswahl**: 8 Visa-Pfade als GlassCards, Blaue-Karte als Premium mit `AnimatedGradientBorder` + Premium-Badge.
+- **Anforderungen als Timeline**: vertikale gestrichelte Border-Line, Timeline-Dots (Check / Empty), jede Requirement-Row als GlassCard. Completed-State: opacity, line-through, strikt success-grünes Dot.
+- Tap-to-toggle still funktional, mit `aria-pressed` für a11y.
+
+**`/profile`** und **`/anerkennung`** — leichte Polish:
+- Headlines auf `GradientText` umgestellt.
+- Gradient-Icon-Tile statt Solid-Color Icon.
+- `Reveal` Wrapper für Scroll-In Animation.
+
+Build: cv-upload 11.8 kB, visa 14 kB, profile 6.5 kB, anerkennung 8.1 kB — alle prerendered.
+
 ## Iteration 121 — Job search + job-card redesign
 
 Suche und Job-Cards bekommen den Iter-117-Glanz: Sticky-Sidebar, animierte Chips, polierte Cards mit Hover-Halo, premium Empty-State.
