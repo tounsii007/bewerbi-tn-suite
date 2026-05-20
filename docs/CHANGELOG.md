@@ -2,6 +2,26 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 120 — Applicant dashboard redesign (Bento)
+
+Dashboard ist jetzt **die Visitenkarte der App** — Personalisierter Hero mit Tageszeit-Salutation, BentoGrid mit 6 Status-Tiles, GlassCard-Hero-Stats mit Live-Counter.
+
+**`web/src/app/(applicant)/dashboard/page.tsx`** — komplett überarbeitet:
+- **HeroGreeting** auf `AuroraBackground variant="default"` mit Salutation-Logik (Guten Morgen / Tag / Abend / Nacht), Vorname aus Profil, `GradientText` Headline. 3 GlassCard-Stat-Counter mit `NumberTicker` (Bewerbungen / Favoriten / Offene Stellen).
+- **Bento-Status-Grid** mit 6 Tiles (asymmetrisch):
+  - **Profile Completeness** (6 cols) — bisheriges `ProfileCompletenessCard` Component eingebettet
+  - **Bewerbungen-Tile** (3 cols, gradient) — animated Counter, Hover-Arrow
+  - **Favoriten-Tile** (3 cols, accent) — same Pattern
+  - **Anerkennung-Tile** (4 cols, glass) — Status-Badge "In Bearbeitung", CTA
+  - **Visum-Tile** (4 cols, glass) — Status-Badge "Vorbereitung", CTA
+  - **KI-Match-Tile** (4 cols, dark, glow) — rotierender konischer Gradient als BG, animated Match-Score-Counter, beste Empfehlung als Subtext
+- **Kategorien** mit Lift-Hover (alt: hover-color)
+- **Empfehlungen** mit aufgewertetem Match-Badge (Gradient + TrendingUp-Icon)
+- **Neueste Angebote** mit `SectionHeader`-Component (Titel + Hint + arrow-CTA)
+- Alle Sections in `Reveal` für staggered Scroll-In
+
+Build: Dashboard 16.7 kB (vorher 10.4 kB) — Mehrwert kommt durch BentoGrid + NumberTicker + Reveal-Wrapper.
+
 ## Iteration 119 — Auth flow redesign (split-screen + glass)
 
 Alle 5 Auth-Seiten (Login / Register / Forgot / Reset / Verify) auf eine geteilte Split-Screen-Optik gebracht — Aurora-Marken-Panel links, Glass-Karte mit Formular rechts.
