@@ -112,6 +112,7 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest req) {
         String email = req.email().toLowerCase();
+        String ip = currentClientIp();
 
         // Per-account lockout — short-circuit before touching the DB / bcrypt.
         if (attempts != null && attempts.isLockedOut(email)) {
@@ -119,6 +120,18 @@ public class AuthService {
             if (audit != null) {
                 audit.log(AuditEvent.failure("AUTH_LOGIN_LOCKED", email, email,
                         "locked-out " + retryAfter + "s"));
+            }
+            throw TooManyRequestsException.of(retryAfter);
+        }
+        // Per-IP lockout (Iter 113) — catches credential-stuffing that
+        // rotates accounts but stays on the same source. Higher threshold
+        // than per-account so legit shared IPs (offices, NAT) don't
+        // lock up.
+        if (attempts != null && attempts.isIpLockedOut(ip)) {
+            long retryAfter = attempts.remainingIpLockoutSeconds(ip);
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_LOGIN_LOCKED", email, email,
+                        "ip-locked-out " + ip + " " + retryAfter + "s"));
             }
             throw TooManyRequestsException.of(retryAfter);
         }
@@ -134,6 +147,7 @@ public class AuthService {
         if (!valid) {
             if (attempts != null) {
                 attempts.recordFailure(email);
+                attempts.recordIpFailure(ip);
             }
             if (audit != null) {
                 audit.log(AuditEvent.failure("AUTH_LOGIN_FAILED", email, email,
@@ -144,6 +158,9 @@ public class AuthService {
 
         if (attempts != null) {
             attempts.reset(email);
+            // Don't reset IP on success — a stuffing attacker who
+            // eventually gets a hit on *some* account would otherwise
+            // wipe the per-IP counter and keep going.
         }
         if (audit != null) {
             audit.log(AuditEvent.success("AUTH_LOGIN_SUCCESS",
