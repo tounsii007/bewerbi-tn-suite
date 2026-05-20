@@ -2,6 +2,19 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 132 — Mobile search screen polish
+
+Suche ist nach Home der zweithäufigste Mobile-Screen. Bekommt jetzt das Glass-Treatment.
+
+**`mobile/app/(applicant)/(search)/index.tsx`**:
+- Page-Wrapper: `AuroraBackground variant="subtle"` (sanfter als die Auth-Vivid-Variante — Suche ist Daten-dicht).
+- Search-Bar in `GlassCard strength="strong"` statt flat-shadow Box.
+- **Filter-Chips**: bei aktiv jetzt Solid-Primary mit Shadow-Glow (vorher: Badge-info-variant). Bei inaktiv: subtle slate-Tinted Pill.
+- Result-Count + "Speichern" + "Alle löschen" Bar: bessere Hierarchie, RotateCcw-Icon für Clear.
+- **Empty-State**: rebuilt als GlassCard mit Inbox-Icon (primary-tinted Square), bold Headline, hint-Body, "Filter zurücksetzen" Pill-Button (wenn Filter aktiv).
+
+Bestehende JobCards + SalaryRangePicker bleiben unverändert.
+
 ## Iteration 131 — Mobile auth wave finish (Register / Forgot / Reset)
 
 Drei restliche Auth-Screens auf den Iter-126-Stil von Login angepasst.

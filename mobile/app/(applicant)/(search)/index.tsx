@@ -10,20 +10,19 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Search, SlidersHorizontal, X, BookmarkPlus } from "lucide-react-native";
+import { Search, SlidersHorizontal, X, BookmarkPlus, RotateCcw, Inbox } from "lucide-react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { JobCard } from "../../../src/components/shared/JobCard";
 import { JobCardSkeleton } from "../../../src/components/shared/JobCardSkeleton";
-import { Badge } from "../../../src/components/ui/Badge";
 import { SalaryRangePicker } from "../../../src/components/ui/SalaryRangePicker";
-import { EmptyState } from "../../../src/components/shared/EmptyState";
+import { AuroraBackground } from "../../../src/components/ui/AuroraBackground";
+import { GlassCard } from "../../../src/components/ui/GlassCard";
 import { useJobStore } from "../../../src/stores/jobStore";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { useSavedSearchStore } from "../../../src/stores/savedSearchStore";
 import { useThemeStore } from "../../../src/hooks/useColorScheme";
 import { useDebouncedValue } from "../../../src/hooks/useDebouncedValue";
-import { shadow } from "../../../src/lib/shadows";
 import { smartName } from "../../../src/lib/savedSearchHelpers";
 import { useToast } from "../../../src/components/ui/Toast";
 import type { JobCategory, JobType } from "../../../src/types";
@@ -109,143 +108,215 @@ export default function SearchScreen() {
   const showSkeletons = loading && jobs.length === 0;
 
   return (
-    <SafeAreaView className="flex-1" edges={["top"]}>
-      <Animated.View entering={FadeInDown} className="px-5 pt-4 pb-2">
-        <View
-          className={`flex-row items-center rounded-2xl px-4 ${
-            isDark ? "bg-dark-card border border-dark-border" : "bg-white"
-          }`}
-          style={isDark ? undefined : shadow("md")}
-        >
-          <Search size={20} color={isDark ? "#64748b" : "#94a3b8"} />
-          <TextInput
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholder={t("jobs.search")}
-            placeholderTextColor={isDark ? "#475569" : "#94a3b8"}
-            className={`flex-1 ${
-              Platform.OS === "web" ? "py-0" : "py-3.5"
-            } px-3 text-[15px] ${isDark ? "text-dark-text" : "text-gray-900"}`}
-            style={Platform.OS === "web" ? { height: 48 } : undefined}
-            returnKeyType="search"
-          />
-          {loading && debouncedQuery ? (
-            <ActivityIndicator size="small" color={isDark ? "#64748b" : "#94a3b8"} />
-          ) : searchQuery ? (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <X size={18} color={isDark ? "#64748b" : "#94a3b8"} />
-            </TouchableOpacity>
-          ) : null}
-          <TouchableOpacity
-            onPress={() => setShowFilters(!showFilters)}
-            className={`ml-2 w-9 h-9 rounded-xl items-center justify-center ${
-              showFilters ? "bg-primary-50" : ""
-            }`}
-          >
-            <SlidersHorizontal
-              size={18}
-              color={showFilters ? "#2563EB" : isDark ? "#64748b" : "#94a3b8"}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <View className="flex-row items-center justify-between mt-3 mb-1 px-1">
-          <Text
-            className={`text-[13px] ${
-              isDark ? "text-dark-muted" : "text-gray-400"
-            }`}
-          >
-            {jobs.length} {jobs.length === 1 ? "Ergebnis" : "Ergebnisse"} gefunden
-          </Text>
-          <View className="flex-row items-center gap-3">
-            {hasActiveFilters && (
-              <TouchableOpacity onPress={handleSaveSearch} className="flex-row items-center gap-1">
-                <BookmarkPlus size={14} color="#2563EB" />
-                <Text className="text-[13px] font-semibold text-primary-500">
-                  {t("savedSearches.save")}
-                </Text>
-              </TouchableOpacity>
-            )}
-            {hasActiveFilters && (
-              <TouchableOpacity onPress={clearAllFilters}>
-                <Text className="text-[13px] font-semibold text-primary-500">
-                  {t("common.clearAll")}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      </Animated.View>
-
-      {showFilters && (
-        <Animated.View entering={FadeInDown.springify()} className="px-5 py-3">
-          <Text
-            className={`text-[13px] font-semibold mb-2 uppercase tracking-wider ${
-              isDark ? "text-dark-muted" : "text-gray-400"
-            }`}
-          >
-            {t("jobs.category")}
-          </Text>
-          <View className="flex-row flex-wrap gap-2 mb-4">
-            {categories.map((cat) => (
+    <AuroraBackground variant="subtle" style={{ flex: 1, borderRadius: 0 }}>
+      <SafeAreaView className="flex-1" edges={["top"]}>
+        <Animated.View entering={FadeInDown} className="px-5 pt-4 pb-2">
+          {/* Glass-card search bar */}
+          <GlassCard strength="strong" style={{ padding: 0 }}>
+            <View className="flex-row items-center px-4">
+              <Search size={20} color={isDark ? "#64748b" : "#94a3b8"} />
+              <TextInput
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder={t("jobs.search")}
+                placeholderTextColor={isDark ? "#475569" : "#94a3b8"}
+                className={`flex-1 ${
+                  Platform.OS === "web" ? "py-0" : "py-3.5"
+                } px-3 text-[15px] ${isDark ? "text-dark-text" : "text-gray-900"}`}
+                style={Platform.OS === "web" ? { height: 48 } : undefined}
+                returnKeyType="search"
+              />
+              {loading && debouncedQuery ? (
+                <ActivityIndicator
+                  size="small"
+                  color={isDark ? "#64748b" : "#94a3b8"}
+                />
+              ) : searchQuery ? (
+                <TouchableOpacity
+                  onPress={() => setSearchQuery("")}
+                  accessibilityLabel="Suche löschen"
+                >
+                  <X size={18} color={isDark ? "#64748b" : "#94a3b8"} />
+                </TouchableOpacity>
+              ) : null}
               <TouchableOpacity
-                key={cat.key}
-                onPress={() =>
-                  setFilters({
-                    ...filters,
-                    category:
-                      filters.category === cat.key ? undefined : cat.key,
-                  })
-                }
+                onPress={() => setShowFilters(!showFilters)}
+                className={`ml-2 w-9 h-9 rounded-xl items-center justify-center ${
+                  showFilters ? "bg-primary-500/15" : ""
+                }`}
+                accessibilityLabel="Filter"
               >
-                <Badge
-                  label={cat.label}
-                  variant={filters.category === cat.key ? "info" : "default"}
-                  size="md"
+                <SlidersHorizontal
+                  size={18}
+                  color={showFilters ? "#2563EB" : isDark ? "#64748b" : "#94a3b8"}
                 />
               </TouchableOpacity>
-            ))}
-          </View>
+            </View>
+          </GlassCard>
 
-          <Text
-            className={`text-[13px] font-semibold mb-2 uppercase tracking-wider ${
-              isDark ? "text-dark-muted" : "text-gray-400"
-            }`}
-          >
-            {t("jobs.type")}
-          </Text>
-          <View className="flex-row flex-wrap gap-2 mb-4">
-            {types.map((type) => (
-              <TouchableOpacity
-                key={type.key}
-                onPress={() =>
-                  setFilters({
-                    ...filters,
-                    type: filters.type === type.key ? undefined : type.key,
-                  })
-                }
-              >
-                <Badge
-                  label={type.label}
-                  variant={filters.type === type.key ? "info" : "default"}
-                  size="md"
-                />
-              </TouchableOpacity>
-            ))}
+          <View className="flex-row items-center justify-between mt-3 mb-1 px-1">
+            <Text
+              className={`text-[13px] font-medium ${
+                isDark ? "text-dark-muted" : "text-gray-500"
+              }`}
+            >
+              {jobs.length} {jobs.length === 1 ? "Ergebnis" : "Ergebnisse"}
+            </Text>
+            <View className="flex-row items-center gap-3">
+              {hasActiveFilters && (
+                <TouchableOpacity
+                  onPress={handleSaveSearch}
+                  className="flex-row items-center gap-1"
+                >
+                  <BookmarkPlus size={14} color="#2563EB" />
+                  <Text className="text-[13px] font-bold text-primary-500">
+                    {t("savedSearches.save")}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {hasActiveFilters && (
+                <TouchableOpacity
+                  onPress={clearAllFilters}
+                  className="flex-row items-center gap-1"
+                >
+                  <RotateCcw size={12} color="#2563EB" />
+                  <Text className="text-[13px] font-bold text-primary-500">
+                    {t("common.clearAll")}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
-
-          <SalaryRangePicker
-            min={salaryMin}
-            max={salaryMax}
-            onChange={({ min, max }) => {
-              setSalaryMin(min);
-              setSalaryMax(max);
-            }}
-            category={filters.category}
-            jobs={jobs}
-          />
         </Animated.View>
-      )}
+
+        {showFilters && (
+          <Animated.View entering={FadeInDown.springify()} className="px-5 py-3">
+            <Text
+              className={`text-[11px] font-bold mb-2 uppercase ${
+                isDark ? "text-dark-muted" : "text-gray-500"
+              }`}
+              style={{ letterSpacing: 0.8 }}
+            >
+              {t("jobs.category")}
+            </Text>
+            <View className="flex-row flex-wrap gap-2 mb-4">
+              {categories.map((cat) => {
+                const active = filters.category === cat.key;
+                return (
+                  <TouchableOpacity
+                    key={cat.key}
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      setFilters({
+                        ...filters,
+                        category: active ? undefined : cat.key,
+                      })
+                    }
+                    className="rounded-full"
+                    style={
+                      active
+                        ? {
+                            backgroundColor: "#2563EB",
+                            paddingHorizontal: 14,
+                            paddingVertical: 7,
+                            shadowColor: "#2563EB",
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.25,
+                            shadowRadius: 8,
+                            elevation: 4,
+                          }
+                        : {
+                            backgroundColor: isDark ? "#1e293b" : "#f1f5f9",
+                            paddingHorizontal: 14,
+                            paddingVertical: 7,
+                          }
+                    }
+                  >
+                    <Text
+                      className={`text-[13px] font-bold ${
+                        active
+                          ? "text-white"
+                          : isDark
+                            ? "text-dark-text"
+                            : "text-gray-700"
+                      }`}
+                    >
+                      {cat.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <Text
+              className={`text-[11px] font-bold mb-2 uppercase ${
+                isDark ? "text-dark-muted" : "text-gray-500"
+              }`}
+              style={{ letterSpacing: 0.8 }}
+            >
+              {t("jobs.type")}
+            </Text>
+            <View className="flex-row flex-wrap gap-2 mb-4">
+              {types.map((type) => {
+                const active = filters.type === type.key;
+                return (
+                  <TouchableOpacity
+                    key={type.key}
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      setFilters({
+                        ...filters,
+                        type: active ? undefined : type.key,
+                      })
+                    }
+                    className="rounded-full"
+                    style={
+                      active
+                        ? {
+                            backgroundColor: "#2563EB",
+                            paddingHorizontal: 14,
+                            paddingVertical: 7,
+                            shadowColor: "#2563EB",
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.25,
+                            shadowRadius: 8,
+                            elevation: 4,
+                          }
+                        : {
+                            backgroundColor: isDark ? "#1e293b" : "#f1f5f9",
+                            paddingHorizontal: 14,
+                            paddingVertical: 7,
+                          }
+                    }
+                  >
+                    <Text
+                      className={`text-[13px] font-bold ${
+                        active
+                          ? "text-white"
+                          : isDark
+                            ? "text-dark-text"
+                            : "text-gray-700"
+                      }`}
+                    >
+                      {type.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <SalaryRangePicker
+              min={salaryMin}
+              max={salaryMax}
+              onChange={({ min, max }) => {
+                setSalaryMin(min);
+                setSalaryMax(max);
+              }}
+              category={filters.category}
+              jobs={jobs}
+            />
+          </Animated.View>
+        )}
 
       {showSkeletons ? (
         <View className="px-5 pt-2">
@@ -280,17 +351,49 @@ export default function SearchScreen() {
           )}
           ListEmptyComponent={
             !loading ? (
-              <EmptyState
-                icon={<Search size={48} color={isDark ? "#334155" : "#d1d5db"} />}
-                title={t("common.noResults")}
-                subtitle={t("jobs.tryDifferentSearch", {
-                  defaultValue: "Versuche andere Suchbegriffe oder Filter",
-                })}
-              />
+              <View className="px-2 pt-8">
+                <GlassCard strength="default" style={{ padding: 32, alignItems: "center" }}>
+                  <View
+                    className="w-16 h-16 rounded-2xl items-center justify-center mb-4"
+                    style={{ backgroundColor: "rgba(37, 99, 235, 0.15)" }}
+                  >
+                    <Inbox size={32} color="#2563EB" />
+                  </View>
+                  <Text
+                    className={`text-[18px] font-extrabold text-center ${
+                      isDark ? "text-dark-text" : "text-gray-900"
+                    }`}
+                  >
+                    {t("common.noResults")}
+                  </Text>
+                  <Text
+                    className={`text-[13px] text-center mt-2 leading-5 ${
+                      isDark ? "text-dark-muted" : "text-gray-600"
+                    }`}
+                  >
+                    {t("jobs.tryDifferentSearch", {
+                      defaultValue:
+                        "Versuche andere Suchbegriffe oder lockere einen Filter.",
+                    })}
+                  </Text>
+                  {hasActiveFilters && (
+                    <TouchableOpacity
+                      onPress={clearAllFilters}
+                      className="mt-5 flex-row items-center gap-1.5 px-4 py-2 rounded-full bg-primary-500/15"
+                    >
+                      <RotateCcw size={14} color="#2563EB" />
+                      <Text className="text-primary-500 text-[13px] font-bold">
+                        Filter zurücksetzen
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </GlassCard>
+              </View>
             ) : null
           }
         />
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </AuroraBackground>
   );
 }
