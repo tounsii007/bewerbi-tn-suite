@@ -2,6 +2,20 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 123 — Employer + Admin areas
+
+Vier Pages auf Iter-117-Standard: Employer-Dashboard, Employer-Listings, Admin-Companies, Admin-Users.
+
+**`/employer/dashboard`** — Bento mit Aurora-Hero, 4 KPI-Tiles (Aktive Stellen / Bewerbungen / Aufrufe / Match-Quote) jeweils mit NumberTicker, Pro-Tipp-Tile (dark + konischer Gradient + "2,4× mehr Bewerbungen wenn 3 Sprachen") und QuickLinks-Tile.
+
+**`/employer/listings`** — neuer Empty-State als GlassCard mit Briefcase-Icon und Gradient-CTA "Erste Stelle anlegen". Header mit GradientText.
+
+**`/admin/companies`** — Verifizierungs-Anträge als GlassCards mit Building2-Icon (warning-tinted für PENDING), Lift-Hover, Verifizieren-Button als Gradient, Ablehnen als Outline. Empty-State mit Inbox-Icon und success-Color für "Alle Anträge bearbeitet".
+
+**`/admin/users`** — In-Arbeit-State mit Construction-Icon und GradientText-Headline.
+
+Build: alle 4 prerendered, employer/dashboard 4.83 kB, listings 4.58 kB, admin/companies 9.91 kB, admin/users 2.81 kB.
+
 ## Iteration 122 — Profile / CV / Anerkennung / Visa polish
 
 Vier Applicant-Pages auf den Iter-117-Standard gehoben — Schwerpunkt auf den zwei visuell prägendsten Seiten (CV-Upload + Visa).
