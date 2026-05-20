@@ -4,7 +4,8 @@ Quick reference for the security controls in the suite — handy for new joiners
 
 ## Authentication
 
-- **JWTs**: HMAC-SHA256, 60-min access TTL, claims `sub, email, roles, locale, token_type=access`.
+- **JWTs**: **RSA-2048 / RS256** (Iter 107 — migrated from HS256 shared secret to address Audit Critical #1). 60-min access TTL, claims `sub, email, roles, locale, token_type=access`. The identity-service is the only signer; every other service is verify-only.
+- **JWKS endpoint**: `GET /.well-known/jwks.json` on identity-service exposes the current public key with its `kid`. External consumers / future verifiers fetch it there; internal verifiers can also load the public PEM directly via `bewerbi.security.jwt.public-key-path`.
 - **Refresh-Tokens**: Redis-keyed (`auth:refresh:<userId>:<sha256>`), TTL = refresh-TTL. Plaintext never persisted. Stored alongside `createdAt|lastUsedAt|userAgent` for the active-sessions UI.
 - **Refresh-Token reuse detection** (RFC 6819 §5.2.2.3): when `/refresh` sees a JWT whose signature is valid but whose hash is missing from Redis — i.e. has already been rotated — *every* refresh token of the user is revoked. The legitimate client and the attacker are both forced to re-authenticate.
 - **Logout**: revokes the supplied refresh token; `/logout-all` clears every refresh hash for the user (used by password reset).
@@ -15,7 +16,7 @@ Quick reference for the security controls in the suite — handy for new joiners
 - **Password strength**: backend rejects score < 2 via `PasswordStrength.evaluate()` (shared/lib/password-strength.{ts,dart} + the Java port). Web/mobile/Flutter each ship a live meter that runs the same rubric, so what scores green client-side will also pass the 422 gate.
 - **Equal-time login**: `AuthService.login()` runs bcrypt against a `DUMMY_HASH` when the account is missing, so an attacker cannot enumerate accounts via response-latency differences.
 - **Per-account lockout**: `LoginAttemptTracker` wired into `AuthService.login` — 10 failures / 10 min triggers a 15-min lockout (tunable via `bewerbi.security.login.*`). 429 with `Retry-After`.
-- **Secret validation**: `JwtSecretValidator` fails app startup if the secret is blank, < 32 bytes, or matches the well-known dev default and the `prod` profile is active.
+- **Key validation**: `RsaKeyProvider` fails app startup in the `prod` profile if `bewerbi.security.jwt.public-key-path` (verifier services) or `bewerbi.security.jwt.private-key-path` (identity-service signer) is missing. In dev, an ephemeral 2048-bit pair is auto-generated per process so local work is zero-config. The legacy `bewerbi.security.jwt.secret` property still triggers a deprecation `WARN` from `JwtSecretValidator` so it gets noticed and removed.
 
 ## Authorization
 
@@ -66,6 +67,47 @@ Quick reference for the security controls in the suite — handy for new joiners
 - Refresh tokens hashed before storage (SHA-256 of the random token).
 - Password-reset + email-verification tokens hashed before storage; plain values travel only via Kafka event → notification-service.
 - PII columns annotated in DB; export pipeline (out of scope for this doc) honours that.
+
+### Transport TLS (Iter 108 — Audit Critical #2)
+
+The `prod` Spring profile demands TLS for every east-west connection. The defaults are deliberately strict so a misconfigured prod deploy fails loud instead of silently falling back to plaintext.
+
+| Hop | Default in `prod` | Override env var |
+|-----|-------------------|------------------|
+| App ↔ Postgres | `sslmode=require` | `DB_SSL_MODE` (recommend `verify-full` + `DB_SSL_ROOT_CERT`) |
+| App ↔ Redis | TLS on, AUTH password required | `REDIS_SSL_ENABLED`, `REDIS_PASSWORD` |
+| App ↔ Kafka | `SASL_SSL` + `SCRAM-SHA-512` + `https` endpoint identification | `KAFKA_SECURITY_PROTOCOL`, `KAFKA_SASL_*`, `KAFKA_SSL_TRUSTSTORE_*` |
+
+The dev compose stack runs plaintext on the bridge network — `compose.services.yaml` carries explicit `DB_SSL_MODE=disable` / `REDIS_SSL_ENABLED=false` / `KAFKA_SECURITY_PROTOCOL=PLAINTEXT` overrides for that. Real deploys MUST drop those overrides and provide cert material instead.
+
+### Document storage (Iter 109 — Audit Critical #3)
+
+Documents are the highest-value PII the suite holds — CVs, passport scans, birth certificates. The `documents-service` writes them through a `DocumentStorage` interface with two implementations:
+
+- `FilesystemDocumentStorage` — dev / CI default. Adds a path-traversal guard on `open` and `delete` so a poisoned `storage_path` DB row can't be used to escape the upload root.
+- `S3DocumentStorage` — AWS S3 / MinIO / any v4-signature S3-compatible store. Every PUT goes out with `SSE-S3` (AES256) by default and `SSE-KMS` the moment `bewerbi.documents.s3.kms-key-id` is configured. KMS is the audit-defensible option: per-object data keys wrapped by a customer-managed master key with an explicit rotation schedule and CloudTrail audit.
+
+Switch the backend with `bewerbi.documents.storage=filesystem|s3` (env `DOCUMENTS_STORAGE`). The AWS SDK classes are only loaded when `storage=s3` is active.
+
+The `USER_DELETED` GDPR cascade now drops blobs from storage **before** the SQL delete, fixing the orphan-binary footnote from Iter 86.
+
+### Column-level field encryption (Iter 110 — Audit Critical #4)
+
+A handful of fields carry PII that must survive a DB dump or logical-replica leak:
+
+| Service | Column | Cipher |
+|---------|--------|--------|
+| identity | `profiles.phone` | AES-256-GCM via `EncryptedStringConverter` |
+| identity | `profiles.bio`   | AES-256-GCM via `EncryptedStringConverter` |
+| immigration | `visa_cases.appointment_date` | AES-256-GCM via `EncryptedLocalDateConverter` |
+
+Ciphertext format: `gcm:v1:<base64(iv ‖ ciphertext ‖ tag)>` — 12-byte random IV, 128-bit auth tag. The `v1` version prefix lets a future migration roll keys without rewriting the whole table.
+
+Configuration: `bewerbi.security.field-encryption.key` (env `FIELD_ENCRYPTION_KEY`) — base64-encoded 32 bytes. Generate with `openssl rand -base64 32`. The `application-prod.yml` profile refuses to start with a blank key; dev falls back to a deterministic stub key + a loud `WARN`.
+
+Forward-compatibility: the decryptor passes anything **without** the `gcm:v1:` prefix through unchanged. Pre-Iter-110 plaintext rows therefore stay readable; the next save re-encrypts them, so the table heals naturally over time.
+
+Trade-off: range/ordering queries on the encrypted column stop working at the SQL level (non-deterministic IV per write → repeated values produce distinct ciphertext). For the three encrypted columns this is acceptable — the app reads them back into Java and filters there. Encryption is opt-in per column (no `@Converter(autoApply = true)`) precisely so that wide-table queries on un-flagged columns stay indexable.
 
 ## Client-side hardening
 

@@ -862,3 +862,196 @@ Timestamp.
 Insgesamt seit Iter 21: **73 sicherheits- und feature-fokussierte
 Commits**, alle einzeln rollback-fähig, mit konsistenter i18n und
 Tests an den heißesten Pfaden.
+
+---
+
+## Dritte Welle — CI-Stabilisierung (Iter 95–106)
+
+Diese Welle hat fast keine Produktions-Features verändert; das war die
+Säuberungs-Phase, nachdem CI aktiviert wurde und die ersten echten
+Workflow-Läufe Lücken aufgedeckt haben.
+
+**95 — CI: Erste Workflow-Failures** — Maven-Wrapper-Lookup, Flutter-
+SDK-Version-Mismatch, Web-`pnpm`-vs-`npm`-Drift, fehlende `dispatch`-
+Trigger.
+
+**96 — Web: blockierende Lint/Typescript-Fehler** — `unused-imports`,
+`no-explicit-any` in 3 PR-Dateien, optionale Chaining-Drift seit
+Next 15.
+
+**97–98 — CI: Trivy-Tag + Maven-Wrapper** — Action-Tag muss `v0.36.0`
+heißen (nicht `0.36.0`); der `mvnw`-Stub im Repo war kaputt, jetzt
+mit `mvn -N wrapper:wrapper` regeneriert.
+
+**99 — Backend: latente Compile-Fehler** — pre-existing + Iter-76+-
+Reste, die `mvn verify` lokal nicht aufgedeckt hat (test-scope-only
+Imports im main-Tree, etc.).
+
+**100 — Dependabot: Pause** — `open-pull-requests-limit: 0` solange
+der CI-Gate noch nicht stabil läuft; verhindert daily-PR-Spam.
+
+**101 — CI: `workflow_dispatch`** auf ci-web / ci-mobile / ci-flutter
+ergänzt, damit man einzelne Workflows manuell triggern kann ohne
+Push-Loop.
+
+**102 — Backend: Test-Failures** — `PasswordStrengthTest`-Fixture
+hatte versteckte sequenzielle Run ("cde"), Flutter-SDK-Pin im
+Workflow, mehr `dispatch`-Trigger.
+
+**103 — CI: Bean-Name-Clash + Flutter-`data/`** — `requestContextFilter`
+kollidierte mit Spring-internem Bean, jetzt `bewerbiRequestContextFilter`;
+`.gitignore data/` war zu greedy und hat `flutter/lib/data` gedroppt
+— jetzt `/data/` anchored.
+
+**104 — CI: Identity-Service permitAll + Flutter-Infos** — `password/
+forgot|reset` und `verify-email/resend` waren am Gateway permitAll,
+aber nicht in identity-services eigener Chain. `flutter analyze
+--no-fatal-warnings` exited non-zero auf reinen Infos → `--no-fatal-
+infos` ergänzt.
+
+**105 — CI: Docker-Build-Args** — `SERVICE=gateway` produzierte einen
+leeren `MODULE_PATH`; jetzt `MODULE_PATH=gateway MODULE_ARTIFACT=gateway`
+explizit.
+
+**106 — Compile + Test Sweep** — alle 4 Stacks (backend / web /
+mobile / flutter) clean. `@Testcontainers(disabledWithoutDocker=true)`
+so dass die Integration-Tests in CI-Runs ohne Docker skippen statt
+zu failen.
+
+---
+
+## Vierte Welle — Audit-Kritisches (Iter 107–110)
+
+Ein Enterprise-Audit-Walkthrough hat vier konkrete Schwachstellen
+aufgedeckt, die jeder zahlende Kunde im SOC-2-/ISO-Fragebogen
+abfragen würde. Diese Welle hat alle vier kompromisslos behoben.
+
+**107 — JWT: HS256-Shared-Secret → RS256 + JWKS (Critical #1)**
+
+Vorher: identity-service signierte JWTs mit einem 32-byte-HMAC-Secret,
+das jeder Verifier-Service als Klartext-ENV-Var lesen musste.
+Konsequenz: der Compromise *eines* Verifier-Services hätte einem
+Angreifer die Token-Schmiede-Fähigkeit aller Services gegeben.
+
+- Neuer `RsaKeyProvider` lädt PEM-Keys aus inline-Property, Filepath,
+  oder `classpath:`-URI. In dev: ephemerer 2048-bit Keypair, in prod:
+  fail-fast wenn Material fehlt.
+- `JwtSecurityConfig` umgestellt auf `NimbusJwtDecoder.withPublicKey
+  (…).signatureAlgorithm(RS256)`. Verifier-Services brauchen nur den
+  Public-Key.
+- identity-service ist der einzige Signer; exponiert `/.well-known/
+  jwks.json` für Out-of-Band-Verifikation.
+- Reactive Gateway nutzt nur die statischen PEM-Helpers von
+  `RsaKeyProvider` (kein Servlet-`HttpSecurity`).
+- `JwtSecretValidator` reduziert auf Deprecation-Warnung wenn das
+  Legacy-`bewerbi.security.jwt.secret`-Property noch gesetzt ist.
+- Alle 9 Service-`application.yml` umgestellt auf `public-key-path`;
+  identity-service zusätzlich auf `private-key-path` + `key-id`.
+- `compose.services.yaml`: alle `JWT_SECRET`-Env-Entries entfernt.
+- `infra/dev-keys/` mit DEV-ONLY-Keypair + README, sowie in
+  `common-security/src/main/resources/dev-keys/` damit
+  `classpath:dev-keys/jwt-public.pem` per default funktioniert.
+
+**108 — Transport-TLS für jede East-West-Verbindung (Critical #2)**
+
+Vorher: Postgres / Redis / Kafka liefen über Plaintext-Verbindungen.
+Im Cluster-Netz wäre ein Side-Pod-Compromise ausreichend gewesen, um
+Refresh-Token-Hashes / GDPR-Daten passiv abzuhören.
+
+- `application-prod.yml` (geteilt via spring.factories, lädt nur unter
+  `prod`-Profil):
+  - JDBC: `sslmode=${DB_SSL_MODE:require}` + optionaler `sslrootcert`
+  - Redis: `ssl.enabled=${REDIS_SSL_ENABLED:true}` + AUTH-Password
+  - Kafka: `security.protocol=${KAFKA_SECURITY_PROTOCOL:SASL_SSL}`,
+    `sasl.mechanism=SCRAM-SHA-512`, Truststore-Paths, Endpoint-ID-
+    Algo `https`.
+- Defaults so streng wie möglich (`require` / `true` / `SASL_SSL`),
+  damit ein Misconfigured-Prod-Deploy fail-loud statt silent-plaintext.
+- `compose.services.yaml`: explizit `DB_SSL_MODE=disable` /
+  `REDIS_SSL_ENABLED=false` / `KAFKA_SECURITY_PROTOCOL=PLAINTEXT`
+  Overrides für die Compose-Dev-Stack, weil der lokale Docker-
+  Bridge-Network plaintext spricht.
+
+**109 — Document-Storage S3 / MinIO + SSE-KMS (Critical #3)**
+
+Vorher: CVs, Pässe, Geburtsurkunden lagen als reine Files auf dem
+documents-service-Upload-Volume. Keine Platform-Encryption-at-Rest,
+kein Audit-Log, kein Key-Rotation-Story; abhängig davon dass der
+Operator host-level dm-crypt korrekt aufgesetzt hat (für die App
+unbeobachtbar).
+
+- Neue Abstraktion `DocumentStorage` mit zwei Implementierungen:
+  - `FilesystemDocumentStorage` — Dev/CI-Default, identisch zu vorher,
+    plus path-traversal-Guard auf `open` und `delete` (Defense-in-
+    Depth gegen vergiftete `storage_path`-DB-Rows).
+  - `S3DocumentStorage` — AWS-S3 / MinIO / jeder v4-Sig-S3-kompatible
+    Store. Jeder PUT mit `SSE-S3` (AES256) per default; sobald
+    `bewerbi.documents.s3.kms-key-id` gesetzt ist, `SSE-KMS` mit
+    customer-managed master key (auditfähig, rotierende DEKs).
+  - Path-Style-Addressing aktiviert (MinIO-kompatibel), default-
+    AWS-Credentials-Chain (IRSA / ECS / env) wenn keine inline keys.
+- `DocService.upload/delete` delegiert an die Abstraktion.
+  PDF-Text-Extraktion läuft NACH dem durable PUT — Parse-Failures
+  rollen den Upload nicht mehr zurück.
+- `UserDeletedListener` (GDPR-Cascade) löscht jetzt auch die Blobs,
+  vor dem SQL-Delete — fixed das orphan-binary-TODO aus Iter 86.
+- Property-Switch: `bewerbi.documents.storage=filesystem|s3` via
+  `@ConditionalOnProperty`. Die AWS-SDK-Klassen werden nur geladen
+  wenn `storage=s3` aktiv ist.
+- Tests: 3 Unit-Tests für die FS-Implementierung (Round-Trip +
+  beide Seiten des Path-Traversal-Guards). S3 ist als MinIO-
+  Testcontainer-Integration-Test für eine Folge-Iteration geplant.
+
+**110 — Spalten-Level-PII-Encryption mit AES-256-GCM (Critical #4)**
+
+Vorher: `profile.phone`, `profile.bio`, `visa_cases.appointment_date`
+lagen plaintext in Postgres. Ein DB-Dump / Logical-Replica-Leak /
+über-privilegierter DBA hätten das auf einen Schlag exfiltrieren
+können — obwohl die App das Material selbst nie unverschlüsselt im
+Log oder Trace hat.
+
+- Neue `FieldEncryption` Helper-Klasse: AES-256-GCM, 96-bit IV, 128-
+  bit Auth-Tag. Ciphertext-Format `gcm:v1:<base64(iv|ct|tag)>` mit
+  Versions-Prefix für zukünftige Key-Rotation. Manipulierte Rows
+  schlagen mit `IllegalStateException` fehl (GCM-Auth-Tag).
+- `FieldEncryptionBootstrap` initialisiert die statische Helper vor
+  dem ersten JPA-Converter-Call. In prod refuse-to-start ohne Key,
+  in dev: deterministischer Stub-Key + lauter WARN.
+- Zwei `AttributeConverter`s in common-security:
+  - `EncryptedStringConverter` (String → String)
+  - `EncryptedLocalDateConverter` (LocalDate → String, ISO-8601 +
+    AES-GCM)
+- `@Convert`-annotierte Felder: `Profile.phone`, `Profile.bio`,
+  `VisaCase.appointmentDate`. **Nicht** `autoApply=true` — Encryption
+  blowt Storage und killt Indexe, also opt-in pro Spalte.
+- Flyway-Migrationen:
+  - `identity/V4__encrypt_profile_pii.sql` — `phone` 32→512,
+    `bio` 2000→4096 (Ciphertext + Base64-Overhead).
+  - `immigration/V2__encrypt_appointment_date.sql` — `DATE` →
+    `VARCHAR(120)` mit `USING TO_CHAR(...)`-Konversion.
+- Forward-Compatibility: Decryptor lässt Values ohne `gcm:v1:`-
+  Prefix unverändert durch — pre-Iter-110-Plaintext-Rows bleiben
+  lesbar, der nächste Save verschlüsselt sie. Tabelle heilt sich
+  über Zeit.
+- Config: `bewerbi.security.field-encryption.key` (Env
+  `FIELD_ENCRYPTION_KEY`), base64 32 bytes. In `application-prod.yml`
+  drahtfest — leerer Wert in prod → Start verweigert.
+- Tests: 12 Unit-Tests decken Round-Trip, Non-Determinism, Null,
+  Legacy-Plaintext-Pass-Through, Tamper-Detection, Prod-Fail-Fast,
+  Dev-Stub-Fallback, Key-Length-Validierung und beide Converter
+  end-to-end.
+
+---
+
+### Zusammenfassung der vierten Welle (Iter 107–110, 4 Audit-Commits)
+
+| Kritikalität | Vorher                            | Nachher                                       |
+| ------------ | --------------------------------- | --------------------------------------------- |
+| #1           | HS256-Shared-Secret in 9 Services | RS256 + JWKS, ein Signer, 8 Verifier         |
+| #2           | Plaintext Postgres/Redis/Kafka    | Prod-Profil verlangt TLS + SASL_SSL + SCRAM   |
+| #3           | CVs/Pässe als lokale Files        | S3 + SSE-KMS, Path-Traversal-Guard, GDPR-Blob-Cascade |
+| #4           | Phone/Bio/Appointment plaintext   | AES-256-GCM mit versioniertem Ciphertext      |
+
+Diese vier Iterationen schließen das, was ein Audit als "no
+compensating controls" gewertet hätte. Jede Behebung ist allein
+deploy-bar und einzeln rollback-fähig.
