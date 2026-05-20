@@ -2,6 +2,28 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 139 — Flutter home hero refactor
+
+In Iter 137 als "zu riskant" übersprungen — jetzt nachgeholt.
+
+**`flutter/lib/screens/applicant/home_screen.dart`** — `_buildHeroCard` komplett refactored:
+- Solid-Gradient-Container + Custom-Painted DotPattern → **`AppAuroraBackground variant: vivid`** mit animated Multi-Blob-Drift.
+- Wordmark "bewerbi.tn" jetzt `AppGradientText` (22pt, brand variant) statt weißem Text.
+- Greeting-Label: 12pt small-caps Letter-Spaced primary statt white.
+- Avatar/Bell-Backgrounds auf `darkCard 70%` (dark mode) bzw `white 80%` (light mode).
+- Avatar-Icon + Bell-Icon auf primary statt white.
+- Bell-Badge mit theme-aware Border-Color statt fixed primary.
+- Stats-Row: `_GlassStatBox` (white text on primary) → neuer `_AuroraStatBox` (dark text auf translucent-white). NumberTicker für animated count-up.
+- Komplette Hero-Card jetzt in `AppReveal` für fade-in-up.
+
+**`home_screen_painter.dart`**: `_DotPatternPainter` class entfernt (durch Aurora ersetzt). File-Stub mit Erklärungs-Kommentar belassen (referenced via `part of` directive).
+
+**`home_screen_widgets.dart`**: `_GlassStatBox` entfernt (nicht mehr referenziert), `_AuroraStatBox` hinzugefügt mit AppNumberTicker.
+
+`dart:math as math` Import entfernt (war nur für DotPattern arcs).
+
+`flutter analyze` clean.
+
 ## Iteration 138 — Flutter Visa + Anerkennung headers
 
 **`visa_screen.dart`**:

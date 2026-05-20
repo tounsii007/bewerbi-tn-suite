@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +11,10 @@ import 'package:bewerbi_tn_flutter/services/profile_completeness.dart';
 import 'package:bewerbi_tn_flutter/widgets/job_card.dart';
 import 'package:bewerbi_tn_flutter/widgets/skeleton_loader.dart';
 import 'package:bewerbi_tn_flutter/widgets/verify_email_banner.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_aurora_background.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_gradient_text.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_number_ticker.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_reveal.dart';
 
 part 'home/home_screen_constants.dart';
 part 'home/home_screen_painter.dart';
@@ -121,150 +123,159 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required int openJobsCount,
     required bool isDark,
   }) {
-    return Container(
-      margin: _HomeScreenUi.heroMargin,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primaryLight,
-            AppColors.primary,
-            AppColors.primaryDeep,
-          ],
+    // Iter 139 — refactored from a solid-gradient container with custom-
+    // painted dot pattern to a multi-blob AppAuroraBackground. Inner
+    // content stays the same; just the chrome changes.
+    return AppReveal(
+      direction: AppRevealDirection.up,
+      child: Container(
+        margin: _HomeScreenUi.heroMargin,
+        decoration: BoxDecoration(
+          borderRadius: AppRadii.pillRadius,
+          boxShadow: AppShadows.primaryGlow(_HomeScreenUi.heroGlowOpacity),
         ),
-        borderRadius: AppRadii.pillRadius,
-        boxShadow: AppShadows.primaryGlow(_HomeScreenUi.heroGlowOpacity),
-      ),
-      child: ClipRRect(
-        borderRadius: AppRadii.pillRadius,
-        child: Stack(
-          children: [
-            // Pattern overlay
-            Positioned.fill(child: CustomPaint(painter: _DotPatternPainter())),
-            // Content
-            Padding(
-              padding: AppSpacing.cardPadding,
-              child: SafeArea(
-                bottom: false,
-                child: Column(
-                  children: [
-                    // Top row: avatar + greeting + bell
-                    Row(
-                      children: [
-                        // Avatar
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: AppColors.white.withValues(alpha: AppAlphas.medium),
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(
-                              color: AppColors.white.withValues(alpha: AppAlphas.medium),
-                            ),
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.person,
-                              color: AppColors.white,
-                              size: 26,
-                            ),
+        child: AppAuroraBackground(
+          variant: AuroraVariant.vivid,
+          borderRadius: AppRadii.pillRadius,
+          child: Padding(
+            padding: AppSpacing.cardPadding,
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                children: [
+                  // Top row: avatar + greeting + bell
+                  Row(
+                    children: [
+                      // Avatar — small white frame on aurora
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.darkCard.withValues(alpha: 0.7)
+                              : AppColors.white.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.white,
+                            width: 1.5,
                           ),
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${_greeting()}, $firstName!',
-                                style: GoogleFonts.inter(
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'bewerbi.tn',
-                                style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.white.withValues(alpha: AppAlphas.overlay),
-                                ),
-                              ),
-                            ],
+                        child: Center(
+                          child: Icon(
+                            Icons.person,
+                            color: AppColors.primary,
+                            size: 26,
                           ),
                         ),
-                        // Notification bell with badge
-                        Stack(
-                          clipBehavior: Clip.none,
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 42,
-                              height: 42,
-                              decoration: BoxDecoration(
-                                color: AppColors.white.withValues(alpha: AppAlphas.soft),
-                                borderRadius: BorderRadius.circular(13),
-                              ),
-                              child: IconButton(
-                                onPressed: () => context.push(
-                                  '/applicant/home/notifications',
-                                ),
-                                padding: EdgeInsets.zero,
-                                icon: const Icon(
-                                  LucideIcons.bell,
-                                  color: AppColors.white,
-                                  size: 20,
-                                ),
+                            Text(
+                              '${_greeting()}, $firstName!',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.0,
+                                color: isDark
+                                    ? AppColors.gray300
+                                    : AppColors.primary,
                               ),
                             ),
-                            Positioned(
-                              top: -2,
-                              right: -2,
-                              child: Container(
-                                width: 12,
-                                height: 12,
-                                decoration: BoxDecoration(
-                                  color: AppColors.errorAccent,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: AppColors.primary,
-                                    width: 2,
-                                  ),
-                                ),
+                            const SizedBox(height: 4),
+                            AppGradientText(
+                              'bewerbi.tn',
+                              variant: GradientVariant.brand,
+                              style: GoogleFonts.inter(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 22),
+                      ),
+                      // Notification bell with badge
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? AppColors.darkCard.withValues(alpha: 0.6)
+                                  : AppColors.white.withValues(alpha: 0.75),
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                            child: IconButton(
+                              onPressed: () => context.push(
+                                '/applicant/home/notifications',
+                              ),
+                              padding: EdgeInsets.zero,
+                              icon: Icon(
+                                LucideIcons.bell,
+                                color: isDark
+                                    ? AppColors.gray300
+                                    : AppColors.primary,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: -2,
+                            right: -2,
+                            child: Container(
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                color: AppColors.errorAccent,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isDark
+                                      ? AppColors.darkCard
+                                      : AppColors.white,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
 
-                    // Stats row
-                    Row(
-                      children: [
-                        _GlassStatBox(
-                          count: applicationsCount,
-                          label: 'Bewerbungen',
-                        ),
-                        const SizedBox(width: 10),
-                        _GlassStatBox(
-                          count: favoritesCount,
-                          label: 'Favoriten',
-                        ),
-                        const SizedBox(width: 10),
-                        _GlassStatBox(
-                          count: openJobsCount,
-                          label: 'Offene Stellen',
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  // Stats row — re-themed for aurora background
+                  Row(
+                    children: [
+                      _AuroraStatBox(
+                        count: applicationsCount,
+                        label: 'Bewerbungen',
+                        isDark: isDark,
+                      ),
+                      const SizedBox(width: 10),
+                      _AuroraStatBox(
+                        count: favoritesCount,
+                        label: 'Favoriten',
+                        isDark: isDark,
+                      ),
+                      const SizedBox(width: 10),
+                      _AuroraStatBox(
+                        count: openJobsCount,
+                        label: 'Offene Stellen',
+                        isDark: isDark,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -65,30 +65,51 @@ class _CategoryItem {
   const _CategoryItem(this.label, this.icon, this.color);
 }
 
-class _GlassStatBox extends StatelessWidget {
+// Iter 139 — _GlassStatBox removed; the new home hero uses _AuroraStatBox
+// below which is re-themed for the lighter aurora background (dark text on
+// translucent white instead of white-on-primary).
+
+/// Iter 139 — re-themed stat tile for the new aurora hero. Uses dark text
+/// on translucent-white background instead of white-on-primary like the
+/// older _GlassStatBox.
+class _AuroraStatBox extends StatelessWidget {
   final int count;
   final String label;
+  final bool isDark;
 
-  const _GlassStatBox({required this.count, required this.label});
+  const _AuroraStatBox({
+    required this.count,
+    required this.label,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final bg = isDark
+        ? AppColors.darkCard.withValues(alpha: 0.7)
+        : AppColors.white.withValues(alpha: 0.8);
+    final border = isDark
+        ? AppColors.darkBorder
+        : AppColors.white;
+    final numberColor = isDark ? AppColors.white : AppColors.gray900;
+    final labelColor = isDark ? AppColors.gray400 : AppColors.gray600;
+
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: AppAlphas.muted),
+          color: bg,
           borderRadius: AppRadii.lgRadius,
-          border: Border.all(color: Colors.white.withValues(alpha: AppAlphas.medium)),
+          border: Border.all(color: border, width: 1.2),
         ),
         child: Column(
           children: [
-            Text(
-              count.toString(),
+            AppNumberTicker(
+              value: count,
               style: GoogleFonts.inter(
-                fontSize: 28,
+                fontSize: 26,
                 fontWeight: FontWeight.w800,
-                color: AppColors.white,
+                color: numberColor,
                 height: 1.1,
               ),
             ),
@@ -96,9 +117,10 @@ class _GlassStatBox extends StatelessWidget {
             Text(
               label,
               style: GoogleFonts.inter(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: AppColors.white.withValues(alpha: AppAlphas.scrim),
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+                color: labelColor,
               ),
               textAlign: TextAlign.center,
             ),
