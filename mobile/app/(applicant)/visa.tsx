@@ -2,9 +2,14 @@ import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { Check, FileCheck2, Plane, Calendar, Building2 } from "lucide-react-native";
+import { Check, FileCheck2, Plane, Calendar, Building2, ChevronRight } from "lucide-react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 import { useThemeStore } from "../../src/hooks/useColorScheme";
+import { AuroraBackground } from "../../src/components/ui/AuroraBackground";
+import { GlassCard } from "../../src/components/ui/GlassCard";
+import { GradientText } from "../../src/components/ui/GradientText";
+import { NumberTicker } from "../../src/components/ui/NumberTicker";
 import {
   visaApi,
   IS_API_MODE,
@@ -83,43 +88,64 @@ export default function VisaScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1" edges={["top"]}>
-      <View className="px-5 pt-4 pb-4">
-        <View className="flex-row items-center gap-2">
-          <Plane size={24} color="#2563EB" />
-          <Text
-            className={`text-2xl font-bold ${
-              isDark ? "text-dark-text" : "text-gray-900"
-            }`}
-          >
-            {t("visa.title")}
-          </Text>
-        </View>
-        <Text
-          className={`text-[13px] mt-1 ${
-            isDark ? "text-dark-muted" : "text-gray-500"
-          }`}
-        >
-          {t("visa.subtitle")}
-        </Text>
-      </View>
+    <AuroraBackground variant="subtle" style={{ flex: 1, borderRadius: 0 }}>
+      <SafeAreaView className="flex-1" edges={["top"]}>
+        <Animated.View entering={FadeInDown.springify()} className="px-5 pt-4 pb-3">
+          <View className="flex-row items-start gap-3">
+            <LinearGradient
+              colors={["#2563EB", "#06b6d4"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 16,
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#2563EB",
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.3,
+                shadowRadius: 12,
+                elevation: 6,
+              }}
+            >
+              <Plane size={24} color="white" />
+            </LinearGradient>
+            <View className="flex-1">
+              <GradientText
+                variant="brand"
+                style={{ fontSize: 24, fontWeight: "800", lineHeight: 28 }}
+              >
+                {t("visa.title")}
+              </GradientText>
+              <Text
+                className={`text-[13px] mt-1 ${
+                  isDark ? "text-dark-muted" : "text-gray-600"
+                }`}
+              >
+                {t("visa.subtitle")}
+              </Text>
+            </View>
+          </View>
+        </Animated.View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        {loading ? (
-          <Text
-            className={`text-center mt-10 ${
-              isDark ? "text-dark-muted" : "text-gray-400"
-            }`}
-          >
-            {t("common.loading")}
-          </Text>
-        ) : !caseData ? (
-          <VisaTypeSelector onPick={start} isDark={isDark} />
-        ) : (
-          <VisaCaseView caseData={caseData} onToggle={toggle} isDark={isDark} />
-        )}
-      </ScrollView>
-    </SafeAreaView>
+        <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+          {loading ? (
+            <Text
+              className={`text-center mt-10 ${
+                isDark ? "text-dark-muted" : "text-gray-400"
+              }`}
+            >
+              {t("common.loading")}
+            </Text>
+          ) : !caseData ? (
+            <VisaTypeSelector onPick={start} isDark={isDark} />
+          ) : (
+            <VisaCaseView caseData={caseData} onToggle={toggle} isDark={isDark} />
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </AuroraBackground>
   );
 }
 
@@ -132,30 +158,48 @@ function VisaTypeSelector({
 }) {
   const { t } = useTranslation();
   return (
-    <Animated.View entering={FadeInDown.springify()}>
+    <Animated.View entering={FadeInDown.delay(120).springify()}>
       <Text
-        className={`text-[13px] font-semibold uppercase tracking-wider mb-3 ${
-          isDark ? "text-dark-muted" : "text-gray-400"
+        className={`text-[11px] font-bold uppercase mb-3 ${
+          isDark ? "text-dark-muted" : "text-gray-500"
         }`}
+        style={{ letterSpacing: 0.8 }}
       >
         {t("visa.chooseType")}
       </Text>
-      <View className="gap-2.5 pb-8">
-        {VISA_TYPES.map((v) => (
+      <View className="gap-3 pb-8">
+        {VISA_TYPES.map((v, i) => (
           <TouchableOpacity
             key={v.key}
             onPress={() => onPick(v.key)}
-            className={`rounded-2xl px-4 py-4 border ${
-              isDark ? "border-dark-border bg-dark-card" : "border-gray-200 bg-white"
-            }`}
+            activeOpacity={0.85}
           >
-            <Text
-              className={`text-[15px] font-bold ${
-                isDark ? "text-dark-text" : "text-gray-900"
-              }`}
+            <GlassCard
+              strength="default"
+              style={{
+                padding: 16,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+              }}
             >
-              {t(v.labelKey)}
-            </Text>
+              <View
+                className="w-10 h-10 rounded-xl items-center justify-center"
+                style={{ backgroundColor: "rgba(37, 99, 235, 0.15)" }}
+              >
+                <Plane size={18} color="#2563EB" />
+              </View>
+              <View className="flex-1">
+                <Text
+                  className={`text-[15px] font-bold ${
+                    isDark ? "text-dark-text" : "text-gray-900"
+                  }`}
+                >
+                  {t(v.labelKey)}
+                </Text>
+              </View>
+              <ChevronRight size={18} color={isDark ? "#64748b" : "#9ca3af"} />
+            </GlassCard>
           </TouchableOpacity>
         ))}
       </View>
@@ -177,46 +221,71 @@ function VisaCaseView({
   const done = required.filter((r) => r.completed).length;
   return (
     <View className="pb-8">
-      <View
-        className={`rounded-2xl p-4 border ${
-          isDark ? "bg-dark-card border-dark-border" : "bg-white border-gray-100"
-        }`}
-      >
-        <Text
-          className={`text-[13px] font-semibold ${
-            isDark ? "text-dark-muted" : "text-gray-500"
-          }`}
-        >
-          {formatVisaType(caseData.visaType)}
-        </Text>
+      <GlassCard strength="strong" glow style={{ padding: 18 }}>
+        <View className="flex-row items-start justify-between gap-3">
+          <View className="flex-1">
+            <Text
+              className={`text-[11px] font-bold uppercase ${
+                isDark ? "text-primary-300" : "text-primary-600"
+              }`}
+              style={{ letterSpacing: 0.8 }}
+            >
+              Aktuell
+            </Text>
+            <Text
+              className={`text-[18px] font-extrabold mt-1 ${
+                isDark ? "text-dark-text" : "text-gray-900"
+              }`}
+            >
+              {formatVisaType(caseData.visaType)}
+            </Text>
+          </View>
+          <View className="items-end">
+            <NumberTicker
+              value={caseData.progressPercent}
+              suffix=" %"
+              style={{
+                fontSize: 28,
+                fontWeight: "800",
+                color: "#2563EB",
+                lineHeight: 32,
+              }}
+            />
+          </View>
+        </View>
         {caseData.embassyCity ? (
-          <View className="flex-row items-center gap-2 mt-2">
-            <Building2 size={14} color={isDark ? "#94a3b8" : "#6b7280"} />
-            <Text className={isDark ? "text-dark-text" : "text-gray-900"}>
-              {caseData.embassyCity}
+          <View className="flex-row items-center gap-1.5 mt-2">
+            <Building2 size={13} color={isDark ? "#94a3b8" : "#6b7280"} />
+            <Text className={`text-[13px] ${isDark ? "text-dark-muted" : "text-gray-600"}`}>
+              Botschaft {caseData.embassyCity}
             </Text>
           </View>
         ) : null}
         {caseData.appointmentDate ? (
-          <View className="flex-row items-center gap-2 mt-1">
-            <Calendar size={14} color={isDark ? "#94a3b8" : "#6b7280"} />
-            <Text className={isDark ? "text-dark-text" : "text-gray-900"}>
+          <View className="flex-row items-center gap-1.5 mt-1">
+            <Calendar size={13} color={isDark ? "#94a3b8" : "#6b7280"} />
+            <Text className={`text-[13px] ${isDark ? "text-dark-muted" : "text-gray-600"}`}>
               {caseData.appointmentDate}
             </Text>
           </View>
         ) : null}
-        <View className="mt-3">
+        <View className="mt-4">
           <View className={`h-2 rounded-full overflow-hidden ${isDark ? "bg-dark-border" : "bg-gray-200"}`}>
-            <View
-              className="h-full bg-primary-500"
-              style={{ width: `${caseData.progressPercent}%` }}
+            <LinearGradient
+              colors={["#2563EB", "#6d4cf7"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{
+                height: "100%",
+                width: `${caseData.progressPercent}%`,
+              }}
             />
           </View>
-          <Text className="text-[11px] mt-1 font-semibold text-primary-600">
+          <Text className="text-[12px] mt-2 font-bold text-primary-600">
             {t("visa.requirementsDone", { done, total: required.length })}
           </Text>
         </View>
-      </View>
+      </GlassCard>
 
       <View className="mt-5 gap-3">
         {caseData.requirements.map((r, i) => (

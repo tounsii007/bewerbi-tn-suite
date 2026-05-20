@@ -2,6 +2,31 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 133 — Mobile Visa / Anerkennung / CV Upload polish
+
+Drei Feature-Screens mit Header-Upgrade, Aurora-Backdrop und Glass-Treatment.
+
+**`mobile/app/(applicant)/cv-upload.tsx`**:
+- AuroraBackground (subtle) als Page-Wrapper.
+- Center-aligned Hero-Header: Gradient-Icon-Square (FileText, 56×56) + GradientText "CV hochladen" + Body-Tagline.
+- Upload-Zone als GlassCard mit dashed border (primary-200) + glow. Hover-Icon: Gradient-Square (Upload, 72×72) statt flacher Circle. Trust-Pills (Privat / KI-Auto-Fill / 3 Sprachen) im Idle-State.
+- Hochgeladen-State: GlassCard mit success-Tinted-Square + bold Filename.
+- HintRows als GlassCard subtle mit "✓ Erkannt" Label rechts.
+- ChipRow als GlassCard subtle.
+- Submit-Button: ShimmerButton (rotating border + dark pill) statt Solid-Primary.
+
+**`mobile/app/(applicant)/visa.tsx`**:
+- AuroraBackground (subtle) Page-Wrapper.
+- Header: 48×48 LinearGradient (primary→info) Icon-Square + GradientText.
+- **VisaTypeSelector**: Jeder der 8 Visa-Typen als GlassCard mit Icon-Tile + Title + ChevronRight (statt flacher Border-Tiles).
+- **VisaCaseView Hero-Card**: GlassCard strong + glow mit Eyebrow "Aktuell" + Title links, großer NumberTicker rechts (28pt primary), Building2 + Calendar Meta-Rows, Gradient-Progress-Bar (primary→violet) statt Solid-Primary.
+
+**`mobile/app/(applicant)/anerkennung.tsx`**:
+- AuroraBackground (subtle) Page-Wrapper.
+- Header: 48×48 LinearGradient (success→primary) Icon-Square + GradientText.
+
+Mobile tsc clean.
+
 ## Iteration 132 — Mobile search screen polish
 
 Suche ist nach Home der zweithäufigste Mobile-Screen. Bekommt jetzt das Glass-Treatment.

@@ -2,9 +2,14 @@ import { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { Upload, FileText, Check, Sparkles, Mail, Phone, Languages } from "lucide-react-native";
+import { Upload, FileText, Check, Sparkles, Mail, Phone, Languages, ShieldCheck } from "lucide-react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 import { useThemeStore } from "../../src/hooks/useColorScheme";
+import { AuroraBackground } from "../../src/components/ui/AuroraBackground";
+import { GlassCard } from "../../src/components/ui/GlassCard";
+import { GradientText } from "../../src/components/ui/GradientText";
+import { ShimmerButton } from "../../src/components/ui/ShimmerButton";
 import {
   documentsApi,
   IS_API_MODE,
@@ -74,70 +79,149 @@ export default function CvUploadScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1" edges={["top"]}>
-      <View className="px-5 pt-4 pb-4">
-        <View className="flex-row items-center gap-2">
-          <FileText size={24} color="#2563EB" />
-          <Text
-            className={`text-2xl font-bold ${
-              isDark ? "text-dark-text" : "text-gray-900"
-            }`}
-          >
-            {t("cv.upload")}
-          </Text>
-        </View>
-      </View>
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        {!document && (
-          <Animated.View entering={FadeInDown.springify()}>
-            <TouchableOpacity
-              onPress={pick}
-              disabled={uploading}
-              className={`rounded-3xl border-2 border-dashed py-10 items-center ${
-                isDark ? "border-dark-border bg-dark-card" : "border-gray-200 bg-white"
-              }`}
+    <AuroraBackground variant="subtle" style={{ flex: 1, borderRadius: 0 }}>
+      <SafeAreaView className="flex-1" edges={["top"]}>
+        <Animated.View entering={FadeInDown.springify()} className="px-5 pt-4 pb-2">
+          <View className="items-center mb-2">
+            <LinearGradient
+              colors={["#2563EB", "#6d4cf7"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 16,
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#2563EB",
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.35,
+                shadowRadius: 16,
+                elevation: 8,
+              }}
             >
-              {uploading ? (
-                <ActivityIndicator size="large" color="#2563EB" />
-              ) : (
-                <View
-                  className={`w-16 h-16 rounded-full items-center justify-center mb-3 ${
-                    isDark ? "bg-primary-500/20" : "bg-primary-50"
-                  }`}
+              <FileText size={28} color="white" />
+            </LinearGradient>
+            <View className="items-center mt-3">
+              <GradientText
+                variant="brand"
+                style={{ fontSize: 26, fontWeight: "800", lineHeight: 32 }}
+              >
+                CV hochladen
+              </GradientText>
+              <Text
+                className={`text-[13px] text-center mt-1 px-6 leading-5 ${
+                  isDark ? "text-dark-muted" : "text-gray-600"
+                }`}
+              >
+                Wir extrahieren E-Mail, Telefon, Deutsch-Niveau, Skills und
+                Sprachen automatisch.
+              </Text>
+            </View>
+          </View>
+        </Animated.View>
+
+        <ScrollView className="flex-1 px-5 pt-3" showsVerticalScrollIndicator={false}>
+          {!document && (
+            <Animated.View entering={FadeInDown.delay(120).springify()}>
+              <TouchableOpacity
+                onPress={pick}
+                disabled={uploading}
+                activeOpacity={0.85}
+              >
+                <GlassCard
+                  strength="default"
+                  glow={!uploading}
+                  style={{
+                    padding: 32,
+                    alignItems: "center",
+                    borderStyle: "dashed",
+                    borderWidth: 2,
+                    borderColor: uploading ? "#2563EB" : "#bfdbfe",
+                  }}
                 >
-                  <Upload size={28} color="#2563EB" />
+                  {uploading ? (
+                    <ActivityIndicator size="large" color="#2563EB" />
+                  ) : (
+                    <LinearGradient
+                      colors={["#2563EB", "#6d4cf7"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={{
+                        width: 72,
+                        height: 72,
+                        borderRadius: 36,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Upload size={32} color="white" />
+                    </LinearGradient>
+                  )}
+                  <Text
+                    className={`text-[16px] font-extrabold mt-4 ${
+                      isDark ? "text-dark-text" : "text-gray-900"
+                    }`}
+                  >
+                    {uploading ? "Analysiere Lebenslauf…" : "PDF auswählen"}
+                  </Text>
+                  <Text
+                    className={`text-[12px] mt-1 text-center ${
+                      isDark ? "text-dark-muted" : "text-gray-600"
+                    }`}
+                  >
+                    PDF, max. 10 MB · DSGVO-konform
+                  </Text>
+                  {!uploading && (
+                    <View className="flex-row items-center gap-3 mt-5">
+                      <View className="flex-row items-center gap-1">
+                        <ShieldCheck size={12} color="#16a34a" />
+                        <Text className="text-[11px] text-success-500 font-bold">
+                          Privat
+                        </Text>
+                      </View>
+                      <View className="flex-row items-center gap-1">
+                        <Sparkles size={12} color="#2563EB" />
+                        <Text className="text-[11px] text-primary-500 font-bold">
+                          KI-Auto-Fill
+                        </Text>
+                      </View>
+                      <View className="flex-row items-center gap-1">
+                        <Languages size={12} color="#DC2626" />
+                        <Text className="text-[11px] text-accent-500 font-bold">
+                          3 Sprachen
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                </GlassCard>
+              </TouchableOpacity>
+              {error && (
+                <View className="mt-3 rounded-xl bg-accent-500/10 px-4 py-3">
+                  <Text className="text-accent-600 text-[13px] font-semibold text-center">
+                    {error}
+                  </Text>
                 </View>
               )}
-              <Text
-                className={`text-[15px] font-bold mb-1 ${
-                  isDark ? "text-dark-text" : "text-gray-900"
-                }`}
-              >
-                {uploading ? t("cv.parsing") : "PDF auswählen"}
-              </Text>
-              <Text
-                className={`text-[12px] ${
-                  isDark ? "text-dark-muted" : "text-gray-500"
-                }`}
-              >
-                Wir extrahieren Text und füllen dein Profil vor
-              </Text>
-            </TouchableOpacity>
-            {error && (
-              <Text className="text-center mt-3 text-accent-500 text-[13px]">
-                {error}
-              </Text>
-            )}
-          </Animated.View>
-        )}
+            </Animated.View>
+          )}
 
-        {hints && <HintsView hints={hints} isDark={isDark} />}
-      </ScrollView>
-    </SafeAreaView>
+          {hints && <HintsView hints={hints} doc={document} isDark={isDark} />}
+        </ScrollView>
+      </SafeAreaView>
+    </AuroraBackground>
   );
 }
 
-function HintsView({ hints, isDark }: { hints: CvHints; isDark: boolean }) {
+function HintsView({
+  hints,
+  doc,
+  isDark,
+}: {
+  hints: CvHints;
+  doc: DocumentSummary | null;
+  isDark: boolean;
+}) {
   const { t } = useTranslation();
   const nothingFound =
     !hints.email &&
@@ -148,10 +232,31 @@ function HintsView({ hints, isDark }: { hints: CvHints; isDark: boolean }) {
 
   return (
     <Animated.View entering={FadeInDown.springify()} className="mt-2 pb-8">
+      {doc && (
+        <GlassCard strength="strong" style={{ padding: 16, marginBottom: 16 }}>
+          <View className="flex-row items-center gap-3">
+            <View
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: "rgba(22, 163, 74, 0.15)" }}
+            >
+              <Check size={20} color="#16a34a" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-[11px] font-bold uppercase text-success-500" style={{ letterSpacing: 0.6 }}>
+                Hochgeladen
+              </Text>
+              <Text className={`text-[14px] font-bold ${isDark ? "text-dark-text" : "text-gray-900"}`}>
+                {doc.name}
+              </Text>
+            </View>
+          </View>
+        </GlassCard>
+      )}
+
       <View className="flex-row items-center gap-2 mb-3">
         <Sparkles size={16} color="#2563EB" />
         <Text
-          className={`text-[15px] font-bold ${
+          className={`text-[16px] font-bold ${
             isDark ? "text-dark-text" : "text-gray-900"
           }`}
         >
@@ -159,24 +264,36 @@ function HintsView({ hints, isDark }: { hints: CvHints; isDark: boolean }) {
         </Text>
       </View>
       <Text
-        className={`text-[13px] mb-4 ${
-          isDark ? "text-dark-muted" : "text-gray-500"
+        className={`text-[13px] mb-4 leading-5 ${
+          isDark ? "text-dark-muted" : "text-gray-600"
         }`}
       >
         {t("cv.autofillDescription")}
       </Text>
 
       {nothingFound ? (
-        <Text className={isDark ? "text-dark-muted" : "text-gray-500"}>
-          {t("cv.noHints")}
-        </Text>
+        <GlassCard strength="default" style={{ padding: 24, alignItems: "center" }}>
+          <Text className={`text-center ${isDark ? "text-dark-muted" : "text-gray-500"}`}>
+            {t("cv.noHints")}
+          </Text>
+        </GlassCard>
       ) : (
         <View className="gap-3">
           {hints.email && (
-            <HintRow icon={<Mail size={16} color="#2563EB" />} label={t("cv.suggestedEmail")} value={hints.email} isDark={isDark} />
+            <HintRow
+              icon={<Mail size={16} color="#2563EB" />}
+              label={t("cv.suggestedEmail")}
+              value={hints.email}
+              isDark={isDark}
+            />
           )}
           {hints.phone && (
-            <HintRow icon={<Phone size={16} color="#2563EB" />} label={t("cv.suggestedPhone")} value={hints.phone} isDark={isDark} />
+            <HintRow
+              icon={<Phone size={16} color="#2563EB" />}
+              label={t("cv.suggestedPhone")}
+              value={hints.phone}
+              isDark={isDark}
+            />
           )}
           {hints.germanLevel && (
             <HintRow
@@ -195,54 +312,94 @@ function HintsView({ hints, isDark }: { hints: CvHints; isDark: boolean }) {
         </View>
       )}
 
-      <TouchableOpacity className="rounded-2xl py-4 items-center bg-primary-500 mt-6 flex-row justify-center gap-2">
-        <Check size={18} color="#fff" />
-        <Text className="text-white font-bold">{t("cv.applyAll")}</Text>
-      </TouchableOpacity>
+      <View className="mt-6">
+        <ShimmerButton onPress={() => undefined} size="lg" style={{ width: "100%" }}>
+          <View className="flex-row items-center gap-2">
+            <Check size={18} color="white" />
+            <Text className="text-white font-bold text-[15px]">
+              {t("cv.applyAll")}
+            </Text>
+          </View>
+        </ShimmerButton>
+      </View>
     </Animated.View>
   );
 }
 
 function HintRow({
-  icon, label, value, isDark,
-}: { icon: React.ReactNode; label: string; value: string; isDark: boolean }) {
+  icon,
+  label,
+  value,
+  isDark,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  isDark: boolean;
+}) {
   return (
-    <View
-      className={`flex-row items-center gap-3 rounded-2xl px-4 py-3 border ${
-        isDark ? "border-dark-border bg-dark-card" : "border-gray-200 bg-white"
-      }`}
-    >
-      <View className={`w-8 h-8 rounded-full items-center justify-center ${isDark ? "bg-primary-500/20" : "bg-primary-50"}`}>
-        {icon}
+    <GlassCard strength="subtle" style={{ padding: 14 }}>
+      <View className="flex-row items-center gap-3">
+        <View
+          className="w-9 h-9 rounded-xl items-center justify-center"
+          style={{ backgroundColor: "rgba(37, 99, 235, 0.15)" }}
+        >
+          {icon}
+        </View>
+        <View className="flex-1">
+          <Text
+            className={`text-[11px] font-bold uppercase ${
+              isDark ? "text-dark-muted" : "text-gray-500"
+            }`}
+            style={{ letterSpacing: 0.6 }}
+          >
+            {label}
+          </Text>
+          <Text
+            className={`text-[15px] font-semibold ${
+              isDark ? "text-dark-text" : "text-gray-900"
+            }`}
+          >
+            {value}
+          </Text>
+        </View>
+        <Text className="text-success-500 text-[11px] font-bold">✓ Erkannt</Text>
       </View>
-      <View className="flex-1">
-        <Text className={`text-[11px] font-semibold uppercase tracking-wider ${isDark ? "text-dark-muted" : "text-gray-400"}`}>
-          {label}
-        </Text>
-        <Text className={`text-[15px] font-semibold ${isDark ? "text-dark-text" : "text-gray-900"}`}>
-          {value}
-        </Text>
-      </View>
-    </View>
+    </GlassCard>
   );
 }
 
-function ChipRow({ title, items, isDark }: { title: string; items: string[]; isDark: boolean }) {
+function ChipRow({
+  title,
+  items,
+  isDark,
+}: {
+  title: string;
+  items: string[];
+  isDark: boolean;
+}) {
   return (
-    <View>
-      <Text className={`text-[11px] font-semibold uppercase tracking-wider mb-2 ${isDark ? "text-dark-muted" : "text-gray-400"}`}>
+    <GlassCard strength="subtle" style={{ padding: 14 }}>
+      <Text
+        className={`text-[11px] font-bold uppercase mb-2 ${
+          isDark ? "text-dark-muted" : "text-gray-500"
+        }`}
+        style={{ letterSpacing: 0.6 }}
+      >
         {title}
       </Text>
       <View className="flex-row flex-wrap gap-2">
         {items.map((v) => (
           <View
             key={v}
-            className={`px-3 py-1.5 rounded-full ${isDark ? "bg-primary-500/20" : "bg-primary-50"}`}
+            className={`px-3 py-1.5 rounded-full ${
+              isDark ? "bg-primary-500/20" : "bg-primary-500/10"
+            }`}
           >
-            <Text className="text-primary-700 text-[13px] font-semibold">{v}</Text>
+            <Text className="text-primary-700 text-[13px] font-bold">{v}</Text>
           </View>
         ))}
       </View>
-    </View>
+    </GlassCard>
   );
 }

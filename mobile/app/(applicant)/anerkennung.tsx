@@ -4,7 +4,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Check, Building2, GraduationCap } from "lucide-react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 import { useThemeStore } from "../../src/hooks/useColorScheme";
+import { AuroraBackground } from "../../src/components/ui/AuroraBackground";
+import { GradientText } from "../../src/components/ui/GradientText";
 import { anerkennungApi, IS_API_MODE, type AnerkennungCase } from "../../src/lib/apiClient";
 
 export default function AnerkennungScreen() {
@@ -77,57 +80,78 @@ export default function AnerkennungScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1" edges={["top"]}>
-      <Header isDark={isDark} />
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        {loading ? (
-          <Text
-            className={`text-center mt-10 ${
-              isDark ? "text-dark-muted" : "text-gray-400"
-            }`}
-          >
-            {t("common.loading")}
-          </Text>
-        ) : !caseData ? (
-          <SetupForm
-            profession={profession}
-            setProfession={setProfession}
-            regulation={regulation}
-            setRegulation={setRegulation}
-            onStart={start}
-            creating={creating}
-            isDark={isDark}
-          />
-        ) : (
-          <CaseView caseData={caseData} onToggle={toggleStep} isDark={isDark} />
-        )}
-      </ScrollView>
-    </SafeAreaView>
+    <AuroraBackground variant="subtle" style={{ flex: 1, borderRadius: 0 }}>
+      <SafeAreaView className="flex-1" edges={["top"]}>
+        <Header isDark={isDark} />
+        <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+          {loading ? (
+            <Text
+              className={`text-center mt-10 ${
+                isDark ? "text-dark-muted" : "text-gray-400"
+              }`}
+            >
+              {t("common.loading")}
+            </Text>
+          ) : !caseData ? (
+            <SetupForm
+              profession={profession}
+              setProfession={setProfession}
+              regulation={regulation}
+              setRegulation={setRegulation}
+              onStart={start}
+              creating={creating}
+              isDark={isDark}
+            />
+          ) : (
+            <CaseView caseData={caseData} onToggle={toggleStep} isDark={isDark} />
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </AuroraBackground>
   );
 }
 
 function Header({ isDark }: { isDark: boolean }) {
   const { t } = useTranslation();
   return (
-    <View className="px-5 pt-4 pb-4">
-      <View className="flex-row items-center gap-2">
-        <GraduationCap size={24} color="#2563EB" />
-        <Text
-          className={`text-2xl font-bold ${
-            isDark ? "text-dark-text" : "text-gray-900"
-          }`}
+    <Animated.View entering={FadeInDown.springify()} className="px-5 pt-4 pb-3">
+      <View className="flex-row items-start gap-3">
+        <LinearGradient
+          colors={["#16a34a", "#2563EB"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 16,
+            alignItems: "center",
+            justifyContent: "center",
+            shadowColor: "#16a34a",
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.3,
+            shadowRadius: 12,
+            elevation: 6,
+          }}
         >
-          {t("anerkennung.title")}
-        </Text>
+          <GraduationCap size={24} color="white" />
+        </LinearGradient>
+        <View className="flex-1">
+          <GradientText
+            variant="brand"
+            style={{ fontSize: 24, fontWeight: "800", lineHeight: 28 }}
+          >
+            {t("anerkennung.title")}
+          </GradientText>
+          <Text
+            className={`text-[13px] mt-1 ${
+              isDark ? "text-dark-muted" : "text-gray-600"
+            }`}
+          >
+            {t("anerkennung.subtitle")}
+          </Text>
+        </View>
       </View>
-      <Text
-        className={`text-[13px] mt-1 ${
-          isDark ? "text-dark-muted" : "text-gray-500"
-        }`}
-      >
-        {t("anerkennung.subtitle")}
-      </Text>
-    </View>
+    </Animated.View>
   );
 }
 
