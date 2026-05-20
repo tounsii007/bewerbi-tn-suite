@@ -58,6 +58,12 @@ bewerbi:
     # the whole control.
     field-encryption:
       key: ${FIELD_ENCRYPTION_KEY:}
+    # Iter 112 — Audit follow-up. Pepper for HMAC-SHA-256 fingerprints
+    # of refresh tokens, password-reset tokens, email-verification
+    # tokens, and known-device (IP, UA) pairs. base64 32+ bytes;
+    # different key material from field-encryption above — both can
+    # rotate independently. Generate with `openssl rand -base64 32`.
+    token-pepper: ${TOKEN_PEPPER:}
 
 # ───────────────── Transport TLS (Iter 108, Critical #2) ─────────────────
 # Prod-only enforcement of TLS for every east-west connection. Dev /

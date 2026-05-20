@@ -35,7 +35,11 @@ import tn.bewerbi.common.security.audit.LoginAttemptTracker;
     // Iter 110: AES-GCM key bootstrap for @Convert(EncryptedStringConverter.class)
     // fields. Initializes the static FieldEncryption helper before any
     // JPA converter touches it.
-    FieldEncryptionBootstrap.class
+    FieldEncryptionBootstrap.class,
+    // Iter 112: HMAC pepper bootstrap for TokenHasher. Must run before
+    // RefreshTokenStore / AuthService / KnownDeviceTracker call into
+    // it from any request thread.
+    TokenHasherBootstrap.class
 })
 public class CommonSecurityAutoConfiguration {
 }

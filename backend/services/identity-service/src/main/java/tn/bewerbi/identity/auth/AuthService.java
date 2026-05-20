@@ -1,8 +1,5 @@
 package tn.bewerbi.identity.auth;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
@@ -413,7 +410,13 @@ public class AuthService {
         if (token == null || token.isBlank()) {
             throw new BadCredentialsException("Invalid reset token");
         }
+        // Iter 112 migration: probe HMAC first, fall back to legacy
+        // SHA-256 so reset emails sent before the pepper rolled still
+        // resolve. The 30-min TTL on reset tokens makes this fallback
+        // self-clearing within half an hour of the pepper deploy.
         var user = users.findByPasswordResetTokenHash(sha256(token))
+                .or(() -> users.findByPasswordResetTokenHash(
+                        tn.bewerbi.common.security.TokenHasher.legacySha256(token)))
                 .orElseThrow(() -> new BadCredentialsException("Invalid reset token"));
         if (user.getPasswordResetExpiresAt() == null
                 || user.getPasswordResetExpiresAt().isBefore(Instant.now())) {
@@ -474,14 +477,13 @@ public class AuthService {
         }
     }
 
+    /**
+     * Iter 112: token storage hash. Writes use the new peppered HMAC;
+     * reads should use {@link #lookupBothHashes} so pre-Iter-112 rows
+     * still resolve until they expire.
+     */
     private static String sha256(String input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] digest = md.digest(input.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(digest);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 unavailable", e);
-        }
+        return tn.bewerbi.common.security.TokenHasher.hash(input);
     }
 
     /**
@@ -552,7 +554,11 @@ public class AuthService {
         // lookup; their users can re-register or trigger a re-issue. We
         // audit the failure mode separately so SOC can spot a sudden spike
         // of "invalid token" hits — likely a token-spraying attempt.
+        // Iter 112 migration: HMAC-first lookup with SHA-256 fallback
+        // so emails dispatched pre-pepper-rollout still verify.
         var user = users.findByEmailVerificationToken(sha256(token))
+                .or(() -> users.findByEmailVerificationToken(
+                        tn.bewerbi.common.security.TokenHasher.legacySha256(token)))
                 .orElse(null);
         if (user == null) {
             if (audit != null) {

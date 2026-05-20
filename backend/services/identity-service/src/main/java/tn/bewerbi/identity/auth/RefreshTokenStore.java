@@ -1,29 +1,33 @@
 package tn.bewerbi.identity.auth;
 
-import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import tn.bewerbi.common.security.TokenHasher;
 
 /**
  * Redis-backed registry of valid refresh-token hashes.
  *
- * We never store tokens in plaintext — only SHA-256 fingerprints — so a
- * Redis dump doesn't leak credentials. Each hash is saved with a TTL matching
- * the refresh-token lifetime, which gives us automatic expiry without a
- * background sweeper.
+ * <p>Tokens are never persisted in plaintext. Since Iter 112 the
+ * fingerprint is HMAC-SHA-256 keyed by a server-side pepper (see
+ * {@link TokenHasher}); a Redis dump alone is therefore useless even
+ * if the token-domain entropy assumption were ever wrong. Each hash
+ * is stored with a TTL matching the refresh-token lifetime, which
+ * gives us automatic expiry without a background sweeper.
  *
- * Rotation: every successful refresh rotates the token (the old hash is
- * deleted, a new one issued). Attempted reuse of a rotated token means
- * the hash is already absent → the call is rejected.
+ * <p>Rotation: every successful refresh rotates the token (the old hash
+ * is deleted, a new one issued). Attempted reuse of a rotated token
+ * means the hash is already absent → the call is rejected. The
+ * lookup path tries both the new HMAC and the legacy SHA-256 hash
+ * during the migration window so pre-Iter-112 Redis rows keep
+ * validating until they expire / rotate.
  */
 @Component
 public class RefreshTokenStore {
@@ -103,11 +107,18 @@ public class RefreshTokenStore {
     }
 
     public boolean isKnown(UUID userId, String token) {
-        return Boolean.TRUE.equals(redis.hasKey(key(userId, token)));
+        if (Boolean.TRUE.equals(redis.hasKey(key(userId, token)))) return true;
+        // Iter 112 migration window: legacy Redis rows keyed by the
+        // pre-pepper SHA-256 still validate until they naturally expire.
+        // The pepper alone is enough audit-wise — once existing sessions
+        // have rotated (30-day TTL on refresh tokens), all live rows
+        // are HMAC-keyed and this fallback becomes dead code.
+        return Boolean.TRUE.equals(redis.hasKey(legacyKey(userId, token)));
     }
 
     public void revoke(UUID userId, String token) {
         redis.delete(key(userId, token));
+        redis.delete(legacyKey(userId, token));
     }
 
     /** Revoke by the *hash* of the token, used by the session-listing UI
@@ -212,12 +223,20 @@ public class RefreshTokenStore {
         return KEY_PREFIX + userId + ":" + hash(token);
     }
 
+    /** Pre-Iter-112 key shape — plain SHA-256, no pepper. Used only on
+     *  the read path during the migration window so existing live
+     *  sessions keep working until they rotate. */
+    private static String legacyKey(UUID userId, String token) {
+        return KEY_PREFIX + userId + ":" + TokenHasher.legacySha256(token);
+    }
+
+    /**
+     * Public hash entry point — Iter 112 routes through the peppered
+     * HMAC-SHA-256. Same 64-hex-char output shape as the previous
+     * SHA-256, so the session-handle UX (DELETE /sessions/{hash}) and
+     * Iter 88 GDPR cascade keep working unchanged.
+     */
     static String hash(String token) {
-        try {
-            var md = MessageDigest.getInstance("SHA-256");
-            return HexFormat.of().formatHex(md.digest(token.getBytes()));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
+        return TokenHasher.hash(token);
     }
 }

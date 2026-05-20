@@ -1,9 +1,6 @@
 package tn.bewerbi.identity.auth;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.time.Duration;
-import java.util.HexFormat;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -93,14 +90,18 @@ public class KnownDeviceTracker {
         if (!batch.isEmpty()) redis.delete(batch);
     }
 
+    /**
+     * Iter 112 — keyed-fingerprint. The (IP, UA) pair isn't a secret per
+     * se, but Redis still holds a fingerprint domain that's easy to
+     * enumerate over a dump. The peppered HMAC means a dump alone
+     * cannot be cross-referenced against a known (IP, UA) list to
+     * recover device identity. Same 64-hex-char output shape — no
+     * Redis-side migration needed; pre-Iter-112 fingerprints just
+     * read as "unknown device" once and emit a benign new-device
+     * mail before being forgotten.
+     */
     private static String fingerprint(String ip, String userAgent) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] digest = md.digest((ip + "|" + userAgent).getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(digest);
-        } catch (Exception e) {
-            throw new IllegalStateException("SHA-256 unavailable", e);
-        }
+        return tn.bewerbi.common.security.TokenHasher.hash(ip + "|" + userAgent);
     }
 
     @Configuration(proxyBeanMethods = false)
