@@ -2,6 +2,32 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 131 — Mobile auth wave finish (Register / Forgot / Reset)
+
+Drei restliche Auth-Screens auf den Iter-126-Stil von Login angepasst.
+
+**`mobile/app/(auth)/register.tsx`** — komplett überarbeitet:
+- AuroraBackground (default) als Page-Wrapper.
+- Header mit Back-Button (ArrowLeft + label), small-caps Eyebrow "Neues Konto", GradientText "Willkommen!", Body-Tagline.
+- Role-Selection: 2 große rounded-2xl Tiles mit Active-Border + Shadow-Glow (vorher: kleinere flachere Tiles).
+- Form in `GlassCard strength="strong" glow`. PasswordMeter direkt unter Passwort-Feld.
+- Primary-CTA: `ShimmerButton` mit Sparkles-Icon + Label (fallback auf normalen Button bei loading).
+
+**`mobile/app/(auth)/forgot-password.tsx`** — komplett überarbeitet:
+- AuroraBackground als Page-Wrapper, ScrollView mit center-justified Content.
+- 2 States als separate GlassCards:
+  - **Form-State**: Eyebrow + GradientText "Kein Problem!" + Body-Tagline. GlassCard mit Email-Input + ShimmerButton (Mail-Icon).
+  - **Sent-State**: Großer Success-Icon (CheckCircle2 grün auf success-tinted Square), "E-Mail unterwegs" GradientText, 30-min-Hint, Bold-30-Minuten, ShimmerButton "Zurück zum Login", Spam-Tipp.
+
+**`mobile/app/(auth)/reset-password.tsx`** — komplett überarbeitet:
+- AuroraBackground + ScrollView wie oben.
+- 3 States als separate GlassCards:
+  - **Invalid-Token**: XCircle rot, "Link unvollständig", ShimmerButton "Neuen Link anfordern".
+  - **Form**: Eyebrow + GradientText "Neues Passwort wählen", GlassCard mit Password + Confirm + PasswordMeter + ShimmerButton.
+  - **Done**: CheckCircle2 grün, "Passwort aktualisiert", success-Footer "Alle Sessions wurden beendet" mit ShieldCheck-Icon.
+
+Mobile Tsc clean.
+
 ## Iteration 130 — Web UI primitives polish
 
 Vier zentrale Primitives auf Iter-117-Niveau angehoben.
