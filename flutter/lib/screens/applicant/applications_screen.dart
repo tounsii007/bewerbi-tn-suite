@@ -8,6 +8,8 @@ import 'package:bewerbi_tn_flutter/app/theme.dart';
 import 'package:bewerbi_tn_flutter/providers/auth_provider.dart';
 import 'package:bewerbi_tn_flutter/providers/job_provider.dart';
 import 'package:bewerbi_tn_flutter/models/application.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_gradient_text.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_reveal.dart';
 
 class ApplicationsScreen extends ConsumerStatefulWidget {
   const ApplicationsScreen({super.key});
@@ -47,28 +49,63 @@ class _ApplicationsScreenState extends ConsumerState<ApplicationsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
-              child: Text(
-                'Meine Bewerbungen',
-                style: GoogleFonts.inter(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: isDark ? AppColors.white : AppColors.gray900,
+            // Header with gradient icon + GradientText
+            AppReveal(
+              direction: AppRevealDirection.up,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppColors.primary, Color(0xFF6D4CF7)],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            offset: const Offset(0, 6),
+                            blurRadius: 12,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(LucideIcons.fileText, size: 24, color: Colors.white),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AppGradientText(
+                            'Meine Bewerbungen',
+                            variant: GradientVariant.brand,
+                            style: GoogleFonts.inter(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${applications.length} Bewerbung${applications.length != 1 ? 'en' : ''}',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: AppColors.gray500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-              child: Text(
-                '${applications.length} Bewerbung${applications.length != 1 ? 'en' : ''}',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: AppColors.gray500,
-                ),
-              ),
-            ),
+            const SizedBox(height: 8),
 
             // List
             Expanded(

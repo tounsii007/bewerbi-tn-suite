@@ -7,6 +7,10 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:bewerbi_tn_flutter/app/theme.dart';
 import 'package:bewerbi_tn_flutter/services/api_client.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_aurora_background.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_glass_card.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_gradient_text.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_reveal.dart';
 
 class CvHints {
   final String? email;
@@ -98,20 +102,99 @@ class _CvUploadScreenState extends State<CvUploadScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lebenslauf hochladen', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (_hints == null) _buildDropZone(isDark),
-            if (_error != null) ...[
+      extendBodyBehindAppBar: true,
+      body: AppAuroraBackground(
+        variant: AuroraVariant.subtle,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
+
+              // Hero header — gradient icon + GradientText
+              AppReveal(
+                direction: AppRevealDirection.up,
+                child: Center(
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppColors.primary, Color(0xFF6D4CF7)],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          offset: const Offset(0, 8),
+                          blurRadius: 20,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(LucideIcons.fileText, size: 28, color: Colors.white),
+                  ),
+                ),
+              ),
               const SizedBox(height: AppSpacing.md),
-              Text(_error!, style: GoogleFonts.inter(color: AppColors.error, fontSize: 13)),
+              AppReveal(
+                direction: AppRevealDirection.up,
+                delay: const Duration(milliseconds: 100),
+                child: Center(
+                  child: AppGradientText(
+                    'CV hochladen',
+                    variant: GradientVariant.brand,
+                    style: GoogleFonts.inter(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    'Wir extrahieren E-Mail, Telefon, Deutsch-Niveau, Skills und Sprachen automatisch.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: isDark ? AppColors.gray400 : AppColors.gray600,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              if (_hints == null) _buildDropZone(isDark),
+              if (_error != null) ...[
+                const SizedBox(height: AppSpacing.md),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    _error!,
+                    style: GoogleFonts.inter(
+                      color: AppColors.error,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+              if (_hints != null) _buildHints(_hints!, isDark),
             ],
-            if (_hints != null) _buildHints(_hints!, isDark),
-          ],
+          ),
         ),
       ),
     );
@@ -120,18 +203,10 @@ class _CvUploadScreenState extends State<CvUploadScreen> {
   Widget _buildDropZone(bool isDark) {
     return GestureDetector(
       onTap: _uploading ? null : _pickAndUpload,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 48),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkCard : AppColors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: isDark ? AppColors.darkBorder : AppColors.gray200,
-            width: 2,
-            style: BorderStyle.solid,
-          ),
-        ),
+      child: AppGlassCard(
+        strength: GlassStrength.defaultStrength,
+        glow: !_uploading,
+        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
         child: Column(
           children: [
             if (_uploading)
@@ -142,29 +217,35 @@ class _CvUploadScreenState extends State<CvUploadScreen> {
               )
             else
               Container(
-                width: 64,
-                height: 64,
+                width: 72,
+                height: 72,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: AppAlphas.faint),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.primary, Color(0xFF6D4CF7)],
+                  ),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(LucideIcons.upload, size: 28, color: AppColors.primary),
+                child: const Icon(LucideIcons.upload, size: 32, color: Colors.white),
               ),
             const SizedBox(height: AppSpacing.md),
             Text(
               _uploading ? 'Analysiere Lebenslauf…' : 'PDF auswählen',
               style: GoogleFonts.inter(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
                 color: isDark ? AppColors.white : AppColors.gray900,
               ),
             ),
             const SizedBox(height: 4),
-            Text('Wir extrahieren Text und füllen dein Profil vor',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: isDark ? AppColors.gray400 : AppColors.gray500,
-                )),
+            Text(
+              'PDF, max. 10 MB · DSGVO-konform',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: isDark ? AppColors.gray400 : AppColors.gray500,
+              ),
+            ),
           ],
         ),
       ),

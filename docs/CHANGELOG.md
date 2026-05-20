@@ -2,6 +2,24 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 137 — Flutter applicant CV upload + Applications
+
+Zwei wichtige Applicant-Screens auf Iter-128 Primitives umgestellt.
+Home-Screen (mit elaborate custom-painted Hero) wurde bewusst übersprungen — zu riskant für lokales Refactor.
+
+**`cv_upload_screen.dart`** — komplett überarbeitet:
+- Transparente AppBar + extendBodyBehindAppBar.
+- Body in `AppAuroraBackground variant: subtle` gewrappt.
+- Center-aligned Hero-Header: Gradient-Square (FileText, 56×56) + `AppGradientText` "CV hochladen" (26pt) + center-aligned Body-Tagline. Alle in `AppReveal` staggered (0/100ms).
+- Drop-Zone rebuilt: Container → `AppGlassCard` strength default + glow. Icon: 64×64 Circle → 72×72 Gradient-Circle (primary→violet).
+- Error-State: rotes Error-Container mit alpha-overlay statt plain text.
+
+**`applications_screen.dart`** — Header upgrade:
+- Plain "Meine Bewerbungen" Text → Row mit Gradient-Square (FileText, 48×48 mit shadow-glow) + `AppGradientText` (22pt) + Count-Subtitle.
+- Header in `AppReveal` für fade-in-up.
+
+`flutter analyze` clean.
+
 ## Iteration 136 — Flutter auth wave finish (Register + Forgot + Reset)
 
 Drei restliche Flutter-Auth-Screens auf Iter-128 Primitives umgestellt.
