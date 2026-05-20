@@ -2,6 +2,30 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 136 — Flutter auth wave finish (Register + Forgot + Reset)
+
+Drei restliche Flutter-Auth-Screens auf Iter-128 Primitives umgestellt.
+
+**`register_screen.dart`**:
+- AppBar mit transparentem Background + extendBodyBehindAppBar = true.
+- Body in `AppAuroraBackground` (default) gewrappt.
+- Hero-Section: Eyebrow "Neues Konto" (1.2 letter-spacing), `AppGradientText` "Willkommen!" (32pt brand variant), Body-Tagline.
+- Alle 3 Hero-Elemente in `AppReveal` staggered (0/80/140ms).
+
+**`forgot_password_screen.dart`**:
+- AppBar transparent + extendBodyBehindAppBar.
+- Body in `AppAuroraBackground` (default).
+- _buildForm: Container-Icon zu Gradient-Square (primary→violet) mit shadow-glow, `AppGradientText "Kein Problem!"` (28pt) statt plain Text. Beide in `AppReveal`.
+- Form in `SingleChildScrollView` (vorher: nicht-scrollbar bei kleiner Höhe).
+
+**`reset_password_screen.dart`**:
+- AppBar transparent + extendBodyBehindAppBar.
+- Body in `AppAuroraBackground` (default).
+- _buildForm: Container-Icon zu Gradient-Square + shadow-glow, `AppGradientText "Neues Passwort"` (28pt) statt plain Text. AppReveal staggered.
+- Form in SingleChildScrollView.
+
+`flutter analyze` clean.
+
 ## Iteration 135 — Flutter login screen with Iter 128 primitives
 
 Erstes Apply der Iter-128 Flutter-Widgets auf den Auth-Pfad.

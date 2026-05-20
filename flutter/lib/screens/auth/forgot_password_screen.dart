@@ -5,6 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:bewerbi_tn_flutter/app/theme.dart';
 import 'package:bewerbi_tn_flutter/services/api_client.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_aurora_background.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_gradient_text.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_reveal.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -68,56 +71,81 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/login'),
         ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: _isSubmitted ? _buildSuccess(isDark) : _buildForm(isDark),
+      extendBodyBehindAppBar: true,
+      body: AppAuroraBackground(
+        variant: AuroraVariant.defaultStrength,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: _isSubmitted ? _buildSuccess(isDark) : _buildForm(isDark),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildForm(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 16),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
 
-        // Icon
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(16),
+          // Icon
+          AppReveal(
+            direction: AppRevealDirection.up,
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.primary, Color(0xFF6D4CF7)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    offset: const Offset(0, 8),
+                    blurRadius: 20,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.lock_reset_outlined,
+                size: 32,
+                color: Colors.white,
+              ),
+            ),
           ),
-          child: const Icon(
-            Icons.lock_reset_outlined,
-            size: 32,
-            color: AppColors.primary,
-          ),
-        ),
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-        // Title
-        Text(
-          'Passwort zurücksetzen',
-          style: GoogleFonts.inter(
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            color: isDark ? AppColors.white : AppColors.gray900,
+          // Title — gradient
+          AppReveal(
+            direction: AppRevealDirection.up,
+            delay: const Duration(milliseconds: 100),
+            child: AppGradientText(
+              'Kein Problem!',
+              variant: GradientVariant.brand,
+              style: GoogleFonts.inter(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.',
-          style: GoogleFonts.inter(
-            fontSize: 14,
+          const SizedBox(height: 8),
+          Text(
+            'Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.',
+            style: GoogleFonts.inter(
+              fontSize: 14,
             color: AppColors.gray500,
             height: 1.5,
           ),
@@ -162,6 +190,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           ),
         ),
       ],
+      ),
     );
   }
 

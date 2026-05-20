@@ -6,6 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:bewerbi_tn_flutter/app/theme.dart';
 import 'package:bewerbi_tn_flutter/models/profile.dart';
 import 'package:bewerbi_tn_flutter/widgets/password_strength_bar.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_aurora_background.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_gradient_text.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_reveal.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -96,37 +99,63 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/login'),
         ),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 8),
+      extendBodyBehindAppBar: true,
+      body: AppAuroraBackground(
+        variant: AuroraVariant.defaultStrength,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
 
-              // Title
-              Text(
-                'Registrieren',
-                style: GoogleFonts.inter(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: isDark ? AppColors.white : AppColors.gray900,
+                // Eyebrow + Title
+                AppReveal(
+                  direction: AppRevealDirection.up,
+                  child: Text(
+                    'Neues Konto',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Erstellen Sie Ihr bewerbi.tn Konto',
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  color: AppColors.gray500,
+                const SizedBox(height: 4),
+                AppReveal(
+                  direction: AppRevealDirection.up,
+                  delay: const Duration(milliseconds: 80),
+                  child: AppGradientText(
+                    'Willkommen!',
+                    variant: GradientVariant.brand,
+                    style: GoogleFonts.inter(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 32),
+                const SizedBox(height: 8),
+                AppReveal(
+                  direction: AppRevealDirection.up,
+                  delay: const Duration(milliseconds: 140),
+                  child: Text(
+                    'In 60 Sekunden startklar — keine Kreditkarte nötig.',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: isDark ? AppColors.gray300 : AppColors.gray600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
 
               // First Name
               TextField(
@@ -314,6 +343,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

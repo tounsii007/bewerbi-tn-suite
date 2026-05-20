@@ -6,6 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:bewerbi_tn_flutter/app/theme.dart';
 import 'package:bewerbi_tn_flutter/services/api_client.dart';
 import 'package:bewerbi_tn_flutter/widgets/password_strength_bar.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_aurora_background.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_gradient_text.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_reveal.dart';
 
 /// Deep-link target for the password-reset email. The reset email built by
 /// notification-service points at `https://bewerbi.tn/reset-password?token=…`,
@@ -87,49 +90,74 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/login'),
         ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: _done ? _buildSuccess(isDark) : _buildForm(isDark),
+      extendBodyBehindAppBar: true,
+      body: AppAuroraBackground(
+        variant: AuroraVariant.defaultStrength,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: _done ? _buildSuccess(isDark) : _buildForm(isDark),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildForm(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 16),
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(16),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          AppReveal(
+            direction: AppRevealDirection.up,
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.primary, Color(0xFF6D4CF7)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    offset: const Offset(0, 8),
+                    blurRadius: 20,
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.lock_outline, size: 32, color: Colors.white),
+            ),
           ),
-          child: const Icon(Icons.lock_outline, size: 32, color: AppColors.primary),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'Neues Passwort',
-          style: GoogleFonts.inter(
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            color: isDark ? AppColors.white : AppColors.gray900,
+          const SizedBox(height: 24),
+          AppReveal(
+            direction: AppRevealDirection.up,
+            delay: const Duration(milliseconds: 100),
+            child: AppGradientText(
+              'Neues Passwort',
+              variant: GradientVariant.brand,
+              style: GoogleFonts.inter(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Du wirst nach dem Setzen auf allen Geräten abgemeldet.',
-          style: GoogleFonts.inter(fontSize: 14, color: AppColors.gray500, height: 1.5),
-        ),
-        const SizedBox(height: 24),
+          const SizedBox(height: 8),
+          Text(
+            'Du wirst nach dem Setzen auf allen Geräten abgemeldet.',
+            style: GoogleFonts.inter(fontSize: 14, color: AppColors.gray500, height: 1.5),
+          ),
+          const SizedBox(height: 24),
         TextField(
           controller: _passwordCtrl,
           obscureText: true,
@@ -181,6 +209,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           ),
         ),
       ],
+      ),
     );
   }
 
