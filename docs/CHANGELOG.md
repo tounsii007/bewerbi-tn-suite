@@ -2,6 +2,19 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 138 — Flutter Visa + Anerkennung headers
+
+**`visa_screen.dart`**:
+- Transparente AppBar + extendBodyBehindAppBar + `AppAuroraBackground (subtle)` Body.
+- Neuer `_buildHeader` Widget mit Gradient-Square (primary→info, 48×48) + AppGradientText "Visum-Tracker" + Body-Tagline, in AppReveal.
+- TypeSelector erweitert um Header + Eyebrow.
+
+**`anerkennung_screen.dart`**:
+- Gleiche AppBar + AppAuroraBackground Behandlung.
+- Hero-Row mit Gradient-Square (success→primary) + AppGradientText "Anerkennung" + Body-Tagline.
+
+`flutter analyze` clean.
+
 ## Iteration 137 — Flutter applicant CV upload + Applications
 
 Zwei wichtige Applicant-Screens auf Iter-128 Primitives umgestellt.

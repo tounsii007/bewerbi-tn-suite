@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:bewerbi_tn_flutter/app/theme.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_aurora_background.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_gradient_text.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_reveal.dart';
 
 enum RegulationType {
   regulated('Reglementierter Beruf', 'z. B. Pflege, Ärzte, Lehrer'),
@@ -131,25 +134,90 @@ class _AnerkennungScreenState extends State<AnerkennungScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Anerkennung', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: _case == null ? _buildSetup(isDark) : _buildCase(_case!, isDark),
+      extendBodyBehindAppBar: true,
+      body: AppAuroraBackground(
+        variant: AuroraVariant.subtle,
+        child: _case == null ? _buildSetup(isDark) : _buildCase(_case!, isDark),
+      ),
     );
   }
 
   Widget _buildSetup(bool isDark) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        40,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          AppReveal(
+            direction: AppRevealDirection.up,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppColors.success, AppColors.primary],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.success.withValues(alpha: 0.3),
+                        offset: const Offset(0, 6),
+                        blurRadius: 12,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(LucideIcons.graduationCap, size: 24, color: Colors.white),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppGradientText(
+                        'Anerkennung',
+                        variant: GradientVariant.brand,
+                        style: GoogleFonts.inter(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Schritt für Schritt zum Anerkennungsbescheid',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: isDark ? AppColors.gray400 : AppColors.gray600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          // Legacy intro row preserved below for spacing parity, hidden via empty Sized box
+          const SizedBox.shrink(),
           Row(
             children: [
-              const Icon(LucideIcons.graduationCap, color: AppColors.primary, size: 22),
+              const Icon(LucideIcons.graduationCap, color: Colors.transparent, size: 22),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  'Schritt für Schritt zum Anerkennungsbescheid',
+                  '',
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: isDark ? AppColors.gray400 : AppColors.gray600,

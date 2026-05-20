@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import 'package:bewerbi_tn_flutter/app/theme.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_aurora_background.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_gradient_text.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_reveal.dart';
 
 enum VisaType {
   blueCard('Blaue Karte EU (§18b)'),
@@ -127,30 +130,98 @@ class _VisaScreenState extends State<VisaScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Visum-Tracker', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: _case == null ? _buildTypeSelector(isDark) : _buildCase(_case!, isDark),
+      extendBodyBehindAppBar: true,
+      body: AppAuroraBackground(
+        variant: AuroraVariant.subtle,
+        child: _case == null
+            ? _buildTypeSelector(isDark)
+            : _buildCase(_case!, isDark),
+      ),
+    );
+  }
+
+  Widget _buildHeader(bool isDark) {
+    return AppReveal(
+      direction: AppRevealDirection.up,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 40, 20, 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.primary, Color(0xFF06B6D4)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    offset: const Offset(0, 6),
+                    blurRadius: 12,
+                  ),
+                ],
+              ),
+              child: const Icon(LucideIcons.plane, size: 24, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppGradientText(
+                    'Visum-Tracker',
+                    variant: GradientVariant.brand,
+                    style: GoogleFonts.inter(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Dein Visumsprozess auf einen Blick',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: isDark ? AppColors.gray400 : AppColors.gray600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildTypeSelector(bool isDark) {
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, AppSpacing.lg),
       children: [
-        Row(
-          children: [
-            const Icon(LucideIcons.plane, color: AppColors.primary, size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text('Welches Visum brauchst du?',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: isDark ? AppColors.gray400 : AppColors.gray600,
-                  )),
+        _buildHeader(isDark),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+          child: Text(
+            'Welches Visum brauchst du?',
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+              color: isDark ? AppColors.gray400 : AppColors.gray500,
             ),
-          ],
+          ),
         ),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.md),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Column(children: [
         for (final t in VisaType.values) ...[
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -181,6 +252,8 @@ class _VisaScreenState extends State<VisaScreen> {
             ),
           ),
         ],
+          ]),
+        ),
       ],
     );
   }
