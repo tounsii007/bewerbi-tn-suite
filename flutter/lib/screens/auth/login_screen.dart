@@ -8,6 +8,10 @@ import 'package:bewerbi_tn_flutter/app/theme.dart';
 import 'package:bewerbi_tn_flutter/providers/auth_provider.dart';
 import 'package:bewerbi_tn_flutter/models/profile.dart';
 import 'package:bewerbi_tn_flutter/services/api_client.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_aurora_background.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_glass_card.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_gradient_text.dart';
+import 'package:bewerbi_tn_flutter/widgets/app_reveal.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -74,38 +78,61 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const SizedBox(height: 48),
+      body: AppAuroraBackground(
+        variant: AuroraVariant.vivid,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                const SizedBox(height: 48),
 
-              // Logo
-              _buildLogo(),
-              const SizedBox(height: 16),
-
-              // Title
-              Text(
-                'bewerbi.tn',
-                style: GoogleFonts.inter(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.primary,
+                // Logo
+                AppReveal(
+                  direction: AppRevealDirection.up,
+                  child: _buildLogo(),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Deine Brücke nach Deutschland',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: AppColors.gray500,
+                const SizedBox(height: 16),
+
+                // Title — gradient-clipped
+                AppReveal(
+                  direction: AppRevealDirection.up,
+                  delay: const Duration(milliseconds: 100),
+                  child: AppGradientText(
+                    'bewerbi.tn',
+                    variant: GradientVariant.brand,
+                    style: GoogleFonts.inter(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 6),
+                AppReveal(
+                  direction: AppRevealDirection.up,
+                  delay: const Duration(milliseconds: 160),
+                  child: Text(
+                    'Deine Brücke nach Deutschland',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: isDark ? AppColors.gray300 : AppColors.gray600,
+                    ),
+                  ),
+                ),
 
-              const SizedBox(height: 40),
+                const SizedBox(height: 32),
 
-              // Email input
+                // Form wrapped in a glass card
+                AppReveal(
+                  direction: AppRevealDirection.up,
+                  delay: const Duration(milliseconds: 220),
+                  child: AppGlassCard(
+                    strength: GlassStrength.strong,
+                    glow: true,
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                // Email input
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -229,6 +256,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                 ),
               ),
+                      ],
+                    ),
+                  ),
+                ),
               const SizedBox(height: 24),
               Row(
                 children: [
@@ -315,6 +346,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

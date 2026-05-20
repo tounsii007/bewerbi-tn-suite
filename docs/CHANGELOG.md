@@ -2,6 +2,22 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 135 — Flutter login screen with Iter 128 primitives
+
+Erstes Apply der Iter-128 Flutter-Widgets auf den Auth-Pfad.
+
+**`flutter/lib/screens/auth/login_screen.dart`** — Hero section überarbeitet:
+- Page-Body in `AppAuroraBackground variant: vivid` gewrappt (animated multi-blob backdrop).
+- Logo: `AppReveal` mit FadeInUp Animation.
+- Title: plain Text("bewerbi.tn") → `AppGradientText` mit GradientVariant.brand (32pt, 800-Weight). FadeIn delay 100ms.
+- Subtitle "Deine Brücke nach Deutschland": gleiche AppReveal-Behandlung mit delay 160ms.
+- Form (Email + Password + Login-Button) jetzt in `AppGlassCard strength: strong, glow: true` mit padding 20.
+- Google/Facebook/Register-Links bleiben unverändert (außerhalb der Glass-Karte für klare Hierarchie).
+
+Bestehende Demo-Section + Logo-Builder + _DemoChip widget unverändert.
+
+`flutter analyze` clean (No issues found).
+
 ## Iteration 134 — Mobile Profile + Settings polish
 
 Beide Account-Screens auf den Iter-127-Standard gehoben.
