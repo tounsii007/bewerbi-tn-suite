@@ -10,6 +10,15 @@ x-otel-env: &otel-env
   OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
   TRACING_SAMPLE: "1.0"
   SPRING_PROFILES_ACTIVE: prod
+  # Iter 108 made the `prod` profile demand TLS for Postgres/Redis/Kafka,
+  # which is correct for real deployments but the compose stack here
+  # runs plaintext infra inside the bridge network. These overrides keep
+  # the compose stack working while preserving the strict prod defaults
+  # for actual production. A real deploy MUST drop them and provide the
+  # cert material instead.
+  DB_SSL_MODE: disable
+  REDIS_SSL_ENABLED: "false"
+  KAFKA_SECURITY_PROTOCOL: PLAINTEXT
 x-healthcheck: &healthcheck
   # $$SERVER_PORT is escaped to prevent Compose from expanding it — it is
   # evaluated by the container shell at check time.
@@ -147,6 +156,16 @@ services:
       DB_USER: bewerbi
       DB_PASSWORD: bewerbi_dev
       UPLOAD_ROOT: /data/uploads
+      # Iter 109 — blob storage backend. The compose stack stays on the
+      # filesystem backend; a real prod deploy sets DOCUMENTS_STORAGE=s3
+      # and provides the bucket/region/KMS key via its secret manager.
+      DOCUMENTS_STORAGE: ${DOCUMENTS_STORAGE:-filesystem}
+      DOCUMENTS_S3_BUCKET: ${DOCUMENTS_S3_BUCKET:-}
+      DOCUMENTS_S3_REGION: ${DOCUMENTS_S3_REGION:-eu-central-1}
+      DOCUMENTS_S3_ENDPOINT: ${DOCUMENTS_S3_ENDPOINT:-}
+      DOCUMENTS_S3_ACCESS_KEY: ${DOCUMENTS_S3_ACCESS_KEY:-}
+      DOCUMENTS_S3_SECRET_KEY: ${DOCUMENTS_S3_SECRET_KEY:-}
+      DOCUMENTS_S3_KMS_KEY_ID: ${DOCUMENTS_S3_KMS_KEY_ID:-}
       SERVER_PORT: "8086"
       <<: *otel-env
     healthcheck: *healthcheck

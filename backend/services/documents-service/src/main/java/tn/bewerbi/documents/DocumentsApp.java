@@ -2,13 +2,11 @@ package tn.bewerbi.documents;
 
 import jakarta.persistence.*;
 import java.io.IOException;
-import java.nio.file.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.regex.*;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +16,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -36,6 +33,7 @@ import tn.bewerbi.common.api.exception.BadRequestException;
 import tn.bewerbi.common.events.DomainEvents;
 import tn.bewerbi.common.events.Topics;
 import tn.bewerbi.common.security.JwtSecurityConfig;
+import tn.bewerbi.documents.storage.DocumentStorage;
 
 @SpringBootApplication
 @Import({GlobalExceptionHandler.class, JwtSecurityConfig.class})
@@ -122,9 +120,12 @@ public class DocumentsApp {
     @Service @Transactional
     public static class DocService {
         private final DocumentRepo repo;
-        @Value("${bewerbi.upload.root}") private String uploadRoot;
+        private final DocumentStorage storage;
 
-        public DocService(DocumentRepo repo) { this.repo = repo; }
+        public DocService(DocumentRepo repo, DocumentStorage storage) {
+            this.repo = repo;
+            this.storage = storage;
+        }
 
         @Transactional(readOnly = true)
         public List<DocumentResponse> list(UUID userId) {
@@ -133,23 +134,27 @@ public class DocumentsApp {
 
         public DocumentResponse upload(UUID userId, MultipartFile file, DocumentType type) throws IOException {
             if (file.isEmpty()) throw new BadRequestException("Empty file", "error.documents.empty");
-            Path root = Path.of(uploadRoot).resolve(userId.toString());
-            Files.createDirectories(root);
             String safe = file.getOriginalFilename() == null ? "file"
                     : file.getOriginalFilename().replaceAll("[^A-Za-z0-9._-]", "_");
             UUID docId = UUID.randomUUID();
-            Path target = root.resolve(docId + "_" + safe);
-            file.transferTo(target);
+            // The storage layer owns the actual put — S3 / FS / future
+            // blob stores are all interchangeable behind DocumentStorage.
+            String storageKey;
+            try (var in = file.getInputStream()) {
+                storageKey = storage.store(userId, docId, safe,
+                        file.getContentType(), file.getSize(), in);
+            }
 
             var d = new Document();
             d.id = docId; d.ownerUserId = userId; d.type = type;
-            d.name = safe; d.storagePath = target.toString();
+            d.name = safe; d.storagePath = storageKey;
             d.contentType = file.getContentType(); d.sizeBytes = file.getSize();
             if (type == DocumentType.CV && isPdf(file.getContentType(), safe)) {
-                try {
-                    try (var pdf = Loader.loadPDF(target.toFile())) {
-                        d.parsedText = new PDFTextStripper().getText(pdf);
-                    }
+                // PDF text-extraction happens after the blob is durably
+                // stored — failures here must not roll the upload back.
+                try (var in = storage.open(storageKey);
+                     var pdf = Loader.loadPDF(in.readAllBytes())) {
+                    d.parsedText = new PDFTextStripper().getText(pdf);
                 } catch (Exception ignored) {}
             }
             return to(repo.save(d));
@@ -165,7 +170,7 @@ public class DocumentsApp {
         public void delete(UUID userId, UUID id) {
             var d = repo.findById(id).orElse(null);
             if (d == null || !d.ownerUserId.equals(userId)) return;
-            try { Files.deleteIfExists(Path.of(d.storagePath)); } catch (IOException ignored) {}
+            try { storage.delete(d.storagePath); } catch (IOException ignored) {}
             repo.delete(d);
         }
 
@@ -244,10 +249,10 @@ public class DocumentsApp {
      * account going away. Listens to {@link Topics#USER_DELETED}; the
      * payload carries the userId of the now-deleted account.
      *
-     * <p>If the project later moves blobs to object storage (S3, MinIO),
-     * extend this listener to also issue a {@code DeleteObject} per row
-     * before the SQL delete — the metadata-row cascade alone leaves the
-     * binary in the bucket.
+     * <p>Iter 109: the listener now drops the blob from storage too,
+     * before deleting the metadata row. Without this, the SQL cascade
+     * left orphaned CV / passport blobs in S3 (or on disk for the FS
+     * backend), which is exactly the situation Art. 17 forbids.
      */
     @org.springframework.stereotype.Component
     public static class UserDeletedListener {
@@ -255,11 +260,14 @@ public class DocumentsApp {
                 org.slf4j.LoggerFactory.getLogger(UserDeletedListener.class);
 
         private final DocumentRepo docs;
+        private final DocumentStorage storage;
         private final com.fasterxml.jackson.databind.ObjectMapper mapper;
 
         public UserDeletedListener(DocumentRepo docs,
+                                   DocumentStorage storage,
                                    com.fasterxml.jackson.databind.ObjectMapper mapper) {
             this.docs = docs;
+            this.storage = storage;
             this.mapper = mapper;
         }
 
@@ -268,8 +276,21 @@ public class DocumentsApp {
         public void onUserDeleted(String payload) {
             try {
                 var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
+                // Pre-flight: collect storage keys before the metadata
+                // rows go away. Doing the blob delete inside the same
+                // tx as the SQL delete is safe because storage.delete()
+                // is idempotent and best-effort by contract.
+                var rows = docs.findByOwnerUserId(event.userId());
+                for (var row : rows) {
+                    try {
+                        storage.delete(row.storagePath);
+                    } catch (Exception ex) {
+                        log.warn("UserDeleted: blob delete failed for doc={} key={}: {}",
+                                row.id, row.storagePath, ex.getMessage());
+                    }
+                }
                 long removed = docs.deleteByOwnerUserId(event.userId());
-                log.info("UserDeleted: removed {} documents for user={}",
+                log.info("UserDeleted: removed {} documents (blobs+rows) for user={}",
                         removed, event.userId());
             } catch (Exception e) {
                 log.warn("Failed to process UserDeleted: {}", e.getMessage());

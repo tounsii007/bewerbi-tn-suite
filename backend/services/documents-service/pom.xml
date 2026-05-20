@@ -27,6 +27,35 @@
         <dependency><groupId>org.apache.pdfbox</groupId><artifactId>pdfbox</artifactId></dependency>
         <dependency><groupId>org.springdoc</groupId><artifactId>springdoc-openapi-starter-webmvc-ui</artifactId></dependency>
 
+        <!-- Iter 109: S3-compatible object storage with SSE-S3 / SSE-KMS for
+             CVs, passport scans, certs. Works against AWS S3, MinIO, Wasabi
+             and every other v4-signature S3-compatible store. In dev the
+             FilesystemDocumentStorage implementation is selected, so the
+             S3 client is never instantiated and the extra ~6 MB of classes
+             stay dormant. -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.30.30</version>
+            <exclusions>
+                <!-- Avoid pulling Netty / Apache HTTP duplicates; the URL
+                     connection client is enough for blob put/get. -->
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>netty-nio-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>apache-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>url-connection-client</artifactId>
+            <version>2.30.30</version>
+        </dependency>
+
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
     </dependencies>
 
