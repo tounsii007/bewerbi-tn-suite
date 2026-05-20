@@ -18,6 +18,9 @@ import { apiErrorMessage } from "../../../src/lib/apiError";
 import { sha256Hex } from "../../../src/lib/sha256";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { useThemeStore } from "../../../src/hooks/useColorScheme";
+import { LinearGradient } from "expo-linear-gradient";
+import { AuroraBackground } from "../../../src/components/ui/AuroraBackground";
+import { GradientText } from "../../../src/components/ui/GradientText";
 
 type Session = {
   tokenHash: string;
@@ -172,24 +175,63 @@ export default function SessionsScreen() {
     : (items ?? []).length;
 
   return (
-    <SafeAreaView className="flex-1" edges={["top"]}>
-      <View className="flex-row items-center justify-between gap-3 px-5 pt-4 pb-3">
-        <View className="flex-row items-center gap-3 flex-1">
-          <TouchableOpacity onPress={() => router.back()}>
-            <ArrowLeft size={20} color={isDark ? "#e2e8f0" : "#374151"} />
-          </TouchableOpacity>
-          <Text
-            className={`text-xl font-bold ${isDark ? "text-dark-text" : "text-gray-900"}`}
+    <AuroraBackground variant="subtle" style={{ flex: 1, borderRadius: 0 }}>
+      <SafeAreaView className="flex-1" edges={["top"]}>
+        <Animated.View entering={FadeIn} className="px-5 pt-4 pb-3">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="flex-row items-center gap-1 mb-4 self-start"
           >
-            Aktive Sitzungen
-          </Text>
-        </View>
-        {otherCount > 0 && (
-          <TouchableOpacity onPress={revokeOthers}>
-            <Text className="text-sm font-semibold text-rose-600">Andere beenden</Text>
+            <ArrowLeft size={16} color="#2563EB" />
+            <Text className="text-primary-500 text-[14px] font-semibold">
+              {t("common.back")}
+            </Text>
           </TouchableOpacity>
-        )}
-      </View>
+          <View className="flex-row items-start gap-3">
+            <LinearGradient
+              colors={["#06b6d4", "#2563EB"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 14,
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#06b6d4",
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.3,
+                shadowRadius: 12,
+                elevation: 6,
+              }}
+            >
+              <Smartphone size={22} color="white" />
+            </LinearGradient>
+            <View className="flex-1">
+              <GradientText
+                variant="brand"
+                style={{ fontSize: 22, fontWeight: "800", lineHeight: 26 }}
+              >
+                Aktive Sitzungen
+              </GradientText>
+              <Text
+                className={`text-[12px] mt-1 ${
+                  isDark ? "text-dark-muted" : "text-gray-600"
+                }`}
+              >
+                Sieh wo dein Konto eingeloggt ist und beende Sessions.
+              </Text>
+            </View>
+            {otherCount > 0 && (
+              <TouchableOpacity
+                onPress={revokeOthers}
+                className="px-3 py-1.5 rounded-full bg-accent-500/15"
+              >
+                <Text className="text-[12px] font-bold text-accent-500">Andere beenden</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </Animated.View>
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
@@ -264,6 +306,7 @@ export default function SessionsScreen() {
           }}
         />
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </AuroraBackground>
   );
 }

@@ -2,6 +2,30 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 141 — Mobile Settings-Subscreens polish
+
+Drei Sicherheits-Subscreens auf Iter-125-Standard.
+
+**`mobile/app/(applicant)/(settings)/change-password.tsx`** — komplett überarbeitet:
+- AuroraBackground (subtle) + ScrollView Page-Wrapper.
+- Back-Button als Arrow + Primary-Label.
+- Header: Eyebrow "Sicherheit" + `GradientText` "Passwort ändern".
+- Form in `GlassCard strong + glow`. ShimmerButton statt Standard-Button.
+- Success-State: GlassCard mit Success-Icon-Tile + ShieldCheck "Alle Sessions wurden beendet" Hint.
+
+**`mobile/app/(applicant)/(settings)/sessions.tsx`**:
+- AuroraBackground (subtle) Page-Wrapper.
+- Header: Back-Button + Gradient-Square (info→primary, 44×44) + `GradientText` "Aktive Sitzungen" + Body-Tagline.
+- "Andere beenden" jetzt als accent-tinted Pill statt plain Text.
+
+**`mobile/app/(applicant)/(settings)/delete-account.tsx`** — komplett überarbeitet:
+- AuroraBackground (subtle) + ScrollView.
+- Header: Accent-Gradient-Square (DC2626→9F1239) + Eyebrow "Gefahrenzone" + Title.
+- Warning-Box als `GlassCard` mit accent-Border.
+- Form in `GlassCard strong`.
+
+Mobile tsc clean.
+
 ## Iteration 140 — Mobile Onboarding + Saved-Searches polish
 
 **`mobile/app/(applicant)/saved-searches.tsx`**:
