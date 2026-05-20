@@ -2,6 +2,17 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 114 — Kafka dead-letter queue (DLQ)
+
+**Security finding (Audit High)**: all `@KafkaListener` methods swallowed exceptions — malformed `USER_DELETED` payloads caused the GDPR cascade to silently do nothing.
+
+**`common-events`**
+- New `KafkaConsumerConfig` `@AutoConfiguration`: registers a `DefaultErrorHandler` with `DeadLetterPublishingRecoverer` (exponential back-off 1 s → 2 s → 4 s, 30 s budget; then → `<topic>.DLT`). Activated for every service that has `common-events` on its classpath.
+- `Topics.USER_DELETED_DLT` constant added (`bewerbi.users.deleted.DLT`). A record on this topic means the GDPR Art. 17 cascade did not complete — treat as P1.
+- `KafkaConsumerConfigTest` (6 tests): DLT naming convention, partition preservation, back-off constant sanity checks.
+
+**All 6 services** (applications, companies, documents, immigration, jobs, notification): removed outer `try/catch` from all 10 `@KafkaListener` methods. Exceptions propagate so the error handler can retry and, on exhaustion, route to DLT. The inner `try/catch` in documents-service (best-effort blob deletion) is preserved.
+
 ## Iteration 1 — Suite-Setup
 - Vier Projekte (backend, web, mobile, flutter) in einen Monorepo-Workspace überführt.
 - Gemeinsames `README`, `.gitignore`, `CHANGELOG`, `docs/` und `shared/` angelegt.

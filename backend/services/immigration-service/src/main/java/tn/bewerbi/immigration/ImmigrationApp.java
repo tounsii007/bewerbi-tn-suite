@@ -385,16 +385,12 @@ public class ImmigrationApp {
 
         @org.springframework.transaction.annotation.Transactional
         @org.springframework.kafka.annotation.KafkaListener(topics = Topics.USER_DELETED)
-        public void onUserDeleted(String payload) {
-            try {
-                var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
-                long aer = anerkennung.deleteByUserId(event.userId());
-                long vsa = visa.deleteByUserId(event.userId());
-                log.info("UserDeleted: removed user={} anerkennung={} visa={}",
-                        event.userId(), aer, vsa);
-            } catch (Exception e) {
-                log.warn("Failed to process UserDeleted: {}", e.getMessage());
-            }
+        public void onUserDeleted(String payload) throws Exception {
+            var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
+            long aer = anerkennung.deleteByUserId(event.userId());
+            long vsa = visa.deleteByUserId(event.userId());
+            log.info("UserDeleted: removed user={} anerkennung={} visa={}",
+                    event.userId(), aer, vsa);
         }
     }
 }

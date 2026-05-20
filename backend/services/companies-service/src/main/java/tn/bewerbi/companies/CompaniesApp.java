@@ -289,15 +289,11 @@ public class CompaniesApp {
 
         @org.springframework.transaction.annotation.Transactional
         @org.springframework.kafka.annotation.KafkaListener(topics = Topics.USER_DELETED)
-        public void onUserDeleted(String payload) {
-            try {
-                var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
-                int anonymised = reviews.anonymizeByAuthor(event.userId(), DELETED_USER);
-                log.info("UserDeleted: anonymised {} reviews for user={}",
-                        anonymised, event.userId());
-            } catch (Exception e) {
-                log.warn("Failed to process UserDeleted: {}", e.getMessage());
-            }
+        public void onUserDeleted(String payload) throws Exception {
+            var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
+            int anonymised = reviews.anonymizeByAuthor(event.userId(), DELETED_USER);
+            log.info("UserDeleted: anonymised {} reviews for user={}",
+                    anonymised, event.userId());
         }
     }
 }

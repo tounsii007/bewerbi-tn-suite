@@ -29,4 +29,14 @@ public final class Topics {
      * Downstream services hard-delete or anonymise per-user data on
      * receipt (GDPR Art. 17 — right to erasure). */
     public static final String USER_DELETED = "bewerbi.users.deleted";
+
+    // ── Dead-letter topics (Iter 114) ─────────────────────────────────────────
+    // Every consumer's DefaultErrorHandler routes unrecoverable failures here
+    // after the exponential back-off budget is exhausted.  Monitor these topics
+    // and replay from them once the root cause is fixed.
+
+    /** Dead-letter topic for {@link #USER_DELETED} processing failures.
+     *  A record here means the GDPR cascade did NOT complete for that user —
+     *  treat it as a P1 incident and replay after fixing the root cause. */
+    public static final String USER_DELETED_DLT = USER_DELETED + ".DLT";
 }

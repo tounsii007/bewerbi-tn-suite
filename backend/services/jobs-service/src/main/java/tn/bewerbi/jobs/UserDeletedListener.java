@@ -34,14 +34,10 @@ public class UserDeletedListener {
 
     @Transactional
     @KafkaListener(topics = Topics.USER_DELETED)
-    public void onUserDeleted(String payload) {
-        try {
-            var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
-            long removed = savedSearches.deleteByUserId(event.userId());
-            log.info("UserDeleted: removed {} saved-searches for user={}",
-                    removed, event.userId());
-        } catch (Exception e) {
-            log.warn("Failed to process UserDeleted: {}", e.getMessage());
-        }
+    public void onUserDeleted(String payload) throws Exception {
+        var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
+        long removed = savedSearches.deleteByUserId(event.userId());
+        log.info("UserDeleted: removed {} saved-searches for user={}",
+                removed, event.userId());
     }
 }

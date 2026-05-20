@@ -273,28 +273,25 @@ public class DocumentsApp {
 
         @org.springframework.transaction.annotation.Transactional
         @org.springframework.kafka.annotation.KafkaListener(topics = Topics.USER_DELETED)
-        public void onUserDeleted(String payload) {
-            try {
-                var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
-                // Pre-flight: collect storage keys before the metadata
-                // rows go away. Doing the blob delete inside the same
-                // tx as the SQL delete is safe because storage.delete()
-                // is idempotent and best-effort by contract.
-                var rows = docs.findByOwnerUserId(event.userId());
-                for (var row : rows) {
-                    try {
-                        storage.delete(row.storagePath);
-                    } catch (Exception ex) {
-                        log.warn("UserDeleted: blob delete failed for doc={} key={}: {}",
-                                row.id, row.storagePath, ex.getMessage());
-                    }
+        public void onUserDeleted(String payload) throws Exception {
+            var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
+            // Pre-flight: collect storage keys before the metadata rows go
+            // away.  Blob deletion is best-effort and must not block the SQL
+            // delete — so it keeps its own inner try/catch.  Any blob that
+            // can't be deleted here will be orphaned; an S3 lifecycle policy
+            // or a separate cleanup job should catch it.
+            var rows = docs.findByOwnerUserId(event.userId());
+            for (var row : rows) {
+                try {
+                    storage.delete(row.storagePath);
+                } catch (Exception ex) {
+                    log.warn("UserDeleted: blob delete failed for doc={} key={}: {}",
+                            row.id, row.storagePath, ex.getMessage());
                 }
-                long removed = docs.deleteByOwnerUserId(event.userId());
-                log.info("UserDeleted: removed {} documents (blobs+rows) for user={}",
-                        removed, event.userId());
-            } catch (Exception e) {
-                log.warn("Failed to process UserDeleted: {}", e.getMessage());
             }
+            long removed = docs.deleteByOwnerUserId(event.userId());
+            log.info("UserDeleted: removed {} documents (blobs+rows) for user={}",
+                    removed, event.userId());
         }
     }
 }

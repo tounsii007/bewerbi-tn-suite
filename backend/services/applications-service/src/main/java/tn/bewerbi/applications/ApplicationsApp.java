@@ -191,19 +191,12 @@ public class ApplicationsApp {
 
         @Transactional
         @org.springframework.kafka.annotation.KafkaListener(topics = Topics.USER_DELETED)
-        public void onUserDeleted(String payload) {
-            try {
-                var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
-                long apps = applications.deleteByApplicantUserId(event.userId());
-                long favs = favorites.deleteByUserId(event.userId());
-                log.info("UserDeleted: cleaned user={} applications={} favorites={}",
-                        event.userId(), apps, favs);
-            } catch (Exception e) {
-                // Log + swallow: the topic is at-least-once, retries can
-                // re-deliver. Throwing here would put the consumer in
-                // an endless retry loop on a malformed payload.
-                log.warn("Failed to process UserDeleted: {}", e.getMessage());
-            }
+        public void onUserDeleted(String payload) throws Exception {
+            var event = mapper.readValue(payload, DomainEvents.UserDeleted.class);
+            long apps = applications.deleteByApplicantUserId(event.userId());
+            long favs = favorites.deleteByUserId(event.userId());
+            log.info("UserDeleted: cleaned user={} applications={} favorites={}",
+                    event.userId(), apps, favs);
         }
     }
 }

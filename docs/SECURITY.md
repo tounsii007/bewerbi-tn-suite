@@ -52,6 +52,16 @@ Quick reference for the security controls in the suite — handy for new joiners
 | Cross-Origin-Resource-Policy | `same-site` |
 | Content-Security-Policy | configurable per service via `bewerbi.security.headers.csp` |
 
+## Kafka consumer reliability (Iter 114)
+
+All `@KafkaListener` methods across the platform now propagate exceptions rather than silently swallowing them. A shared `DefaultErrorHandler` in `common-events` catches propagated exceptions, retries with exponential back-off (1 s → 2 s → 4 s → … capped at 10 s, budget 30 s), and after the budget is exhausted forwards the record to `<source-topic>.DLT`.
+
+| DLT topic | Source | Meaning of a record here |
+|-----------|--------|--------------------------|
+| `bewerbi.users.deleted.DLT` | `bewerbi.users.deleted` | GDPR cascade **did not complete** — treat as P1. Fix root cause, replay from DLT. |
+
+**Operational note**: `bewerbi.users.deleted.DLT` must be monitored by an alert. A record there means Art. 17 compliance is at risk for that user until the cascade is replayed.
+
 ## Logging & audit
 
 - All log lines tagged with `traceId`, `spanId`, `correlationId`, `path`, `method`, `userId` via MDC.
