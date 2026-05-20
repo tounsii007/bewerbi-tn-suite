@@ -2,6 +2,30 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 121 — Job search + job-card redesign
+
+Suche und Job-Cards bekommen den Iter-117-Glanz: Sticky-Sidebar, animierte Chips, polierte Cards mit Hover-Halo, premium Empty-State.
+
+**`web/src/components/shared/job-card.tsx`** — neu gestylt:
+- Type-spezifische Gradient-Top-Bar (`from-primary-400 via-primary-500 to-primary-600`) statt Solid-Color.
+- Hover-State: `-translate-y-0.5`, `shadow-xl`, Border färbt sich primary, dazu eine radiale Color-Wash im Hintergrund.
+- Salary-Pill: success-tinted Badge `text-success-700 bg-success-500/10`.
+- Premium-Badge mit Sparkles-Icon.
+- Favorite-Button: press-Animation, scale-110 on active, accent-color-on-hover.
+- Optional Company-Line mit Building2-Icon (wenn `companyName` im Job-Type).
+- JobCardSkeleton matches new layout (3 chip placeholders statt 2).
+
+**`web/src/app/(applicant)/search/page.tsx`** — komplett überarbeitet:
+- **Hero-Header** mit `GradientText` Headline, dynamische Ergebnis-Anzahl, größerer Search-Input (h-12).
+- **Sticky-Filter-Sidebar** (lg+, 3 cols): Filter-Header mit aktiver Count-Badge, "Zurücksetzen" Link, 5 Filter-Groups (Kategorie/Art/Standort/Deutsch-Niveau/Gehalt).
+- **Mobile**: Filter werden zum Bottom-Drawer mit Glass-Backdrop + "X Ergebnisse anzeigen" Submit-Button.
+- **Results-Area** (9 cols): Status-Bar mit Count + "Suche speichern" + "Alle löschen", aktive Filter als **FilterChips** mit X-Button.
+- **Chip-Buttons**: gradient bei aktiv (`primary→violet`) mit `shadow-glow`, neutral bei inaktiv.
+- **Niveau-Buttons** (A1–C2): 6-col grid mit gleicher Aktiv-Gradient-Behandlung.
+- **Empty-State**: Glass-Card mit Inbox-Icon, 2 CTAs (Filter zurücksetzen + Empfehlungen ansehen).
+
+Build: /search 8.98 kB (vorher 5.59 kB) — Mehrwert durch GlassCard + Reveal + FilterChips.
+
 ## Iteration 120 — Applicant dashboard redesign (Bento)
 
 Dashboard ist jetzt **die Visitenkarte der App** — Personalisierter Hero mit Tageszeit-Salutation, BentoGrid mit 6 Status-Tiles, GlassCard-Hero-Stats mit Live-Counter.
