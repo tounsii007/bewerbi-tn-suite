@@ -35,12 +35,28 @@ class _AppRevealState extends State<AppReveal>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<double> _curve;
+  bool _started = false;
 
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController(vsync: this, duration: widget.duration);
     _curve = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    // Iter 142 — respect the user's reduce-motion preference. We still
+    // run the animation but at near-zero duration so the final visible
+    // state matches the animated one (no missing fade-in fallout).
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+    if (disableAnimations) {
+      _ctrl.value = 1.0;
+      return;
+    }
     Future.delayed(widget.delay, () {
       if (mounted) _ctrl.forward();
     });

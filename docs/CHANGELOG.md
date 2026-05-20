@@ -2,6 +2,28 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 142 — Reduced-motion + a11y cross-platform pass
+
+Alle Iter-117/125/128 Primitives respektieren jetzt automatisch die OS-Reduce-Motion-Einstellung des Users — nicht nur per opt-in `static`-Prop.
+
+**Web** — `web/src/components/providers.tsx`:
+- `<MotionConfig reducedMotion="user">` als globaler Wrapper. Framer-Motion-Animationen werden automatisch übersprungen wenn `prefers-reduced-motion: reduce` gesetzt ist. Ergänzt die existierende CSS-Regel in globals.css (die nur CSS-Animations betraf, nicht framer-motion JS-driven motion).
+
+**Mobile** — neuer Hook `mobile/src/hooks/useReducedMotion.ts`:
+- Wrappt `AccessibilityInfo.isReduceMotionEnabled()` + Event-Listener für Runtime-Änderungen.
+- Returns boolean — `true` wenn iOS "Reduce Motion" oder Android "Remove animations" aktiv ist.
+
+**Mobile Primitives** wired up:
+- `AuroraBackground`: nutzt `useReducedMotion()` zusätzlich zum explicit `static`-Prop. `shouldAnimate = !isStatic && !reduceMotion`. Blobs froren ein bei reduce-motion.
+- `ShimmerButton`: gleiche Behandlung — rotating rainbow border pauses.
+
+**Flutter Primitives** wired up:
+- `AppAuroraBackground`: nutzt `MediaQuery.disableAnimationsOf(context)` (Flutter standard für reduce-motion). Animation-Start in `didChangeDependencies` statt `initState` damit MediaQuery verfügbar ist.
+- `AppReveal`: bei reduce-motion direkt auf `_ctrl.value = 1.0` (final state) statt animation.
+- `AppNumberTicker`: `actualDuration = disableAnimations ? Duration.zero : duration` — value erscheint sofort.
+
+Build green auf allen drei Plattformen.
+
 ## Iteration 141 — Mobile Settings-Subscreens polish
 
 Drei Sicherheits-Subscreens auf Iter-125-Standard.

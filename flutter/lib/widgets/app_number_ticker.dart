@@ -35,9 +35,14 @@ class AppNumberTicker extends StatelessWidget {
       ..minimumFractionDigits = decimals
       ..maximumFractionDigits = decimals;
 
+    // Iter 142 — when the OS-level reduce-motion flag is on, render the
+    // final value immediately (zero-duration tween).
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+    final actualDuration = disableAnimations ? Duration.zero : duration;
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: value.toDouble()),
-      duration: duration,
+      duration: actualDuration,
       curve: Curves.easeOutCubic,
       builder: (context, val, _) {
         return Text(

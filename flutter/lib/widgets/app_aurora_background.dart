@@ -47,9 +47,21 @@ class _AppAuroraBackgroundState extends State<AppAuroraBackground>
       vsync: this,
       duration: const Duration(seconds: 28),
     );
-    if (!widget.static) {
-      _c1.repeat(reverse: true);
-      _c2.repeat(reverse: true);
+    // Iter 142 — animations start in didChangeDependencies once we can
+    // read MediaQuery.disableAnimationsOf(context).
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+    final shouldAnimate = !widget.static && !disableAnimations;
+    if (shouldAnimate) {
+      if (!_c1.isAnimating) _c1.repeat(reverse: true);
+      if (!_c2.isAnimating) _c2.repeat(reverse: true);
+    } else {
+      _c1.stop();
+      _c2.stop();
     }
   }
 

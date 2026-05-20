@@ -9,6 +9,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { useThemeStore } from "../../hooks/useColorScheme";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 
 /**
  * Iter 125 — animated multi-blob backdrop for mobile heroes.
@@ -46,7 +47,13 @@ export function AuroraBackground({
   children,
 }: AuroraBackgroundProps) {
   const { isDark } = useThemeStore();
+  const reduceMotion = useReducedMotion();
   const op = opacityFor[variant];
+
+  // Iter 142 — automatically freeze blob drift when the user has
+  // "reduce motion" enabled. The explicit `static` prop still wins so
+  // a caller can force-disable on hot screens.
+  const shouldAnimate = !isStatic && !reduceMotion;
 
   // Two independent drift animations — one slow, one faster, so the
   // composite never visibly loops.
@@ -54,7 +61,7 @@ export function AuroraBackground({
   const t2 = useSharedValue(0);
 
   useEffect(() => {
-    if (isStatic) return;
+    if (!shouldAnimate) return;
     t1.value = withRepeat(
       withTiming(1, { duration: 18000, easing: Easing.inOut(Easing.sin) }),
       -1,
@@ -65,7 +72,7 @@ export function AuroraBackground({
       -1,
       true,
     );
-  }, [isStatic, t1, t2]);
+  }, [shouldAnimate, t1, t2]);
 
   const blobA = useAnimatedStyle(() => ({
     transform: [

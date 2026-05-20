@@ -17,6 +17,7 @@ import Animated, {
   interpolate,
 } from "react-native-reanimated";
 import { GRADIENT_PILL_DARK } from "../../lib/tokens";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 
 /**
  * Iter 125 — premium "shimmer" CTA for mobile.
@@ -70,16 +71,18 @@ export function ShimmerButton({
   accessibilityLabel,
 }: ShimmerButtonProps) {
   const cfg = sizeConfig[size];
+  const reduceMotion = useReducedMotion();
+  const shouldAnimate = !isStatic && !reduceMotion;
   const t = useSharedValue(0);
 
   useEffect(() => {
-    if (isStatic) return;
+    if (!shouldAnimate) return;
     t.value = withRepeat(
       withTiming(1, { duration: 4000, easing: Easing.linear }),
       -1,
       false,
     );
-  }, [isStatic, t]);
+  }, [shouldAnimate, t]);
 
   // Rotate gradient direction over time so the rainbow appears to spin
   // around the pill.
