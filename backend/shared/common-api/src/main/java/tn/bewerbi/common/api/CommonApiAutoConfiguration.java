@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Import;
     tn.bewerbi.common.api.observability.SlowRequestLogger.Config.class,
     tn.bewerbi.common.api.observability.HttpRequestMetricsFilter.Config.class,
     tn.bewerbi.common.api.idempotency.IdempotencyFilter.Config.class,
+    // Iter 116: request body size limit for non-multipart endpoints.
+    ContentSizeFilter.Config.class,
 })
 public class CommonApiAutoConfiguration {
 }

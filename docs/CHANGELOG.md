@@ -2,6 +2,20 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 116 — Request body size limits for JSON endpoints
+
+**Security finding (Audit Medium)**: JSON endpoints had no request-body size limit. An attacker could send arbitrarily large bodies to exhaust heap memory or degrade availability. Only `multipart/form-data` uploads (documents-service) had limits.
+
+**`common-api`**
+- New `ContentSizeFilter` (`@Order(HIGHEST_PRECEDENCE + 2)`):
+  - **Fast path**: checks `Content-Length` header; returns `413 Payload Too Large` immediately before the body is read into memory.
+  - **Slow path**: wraps the `InputStream` with a `LimitingStream` so chunked transfers without `Content-Length` are also caught mid-read.
+  - **Multipart excluded**: `multipart/*` requests pass through, gated by `spring.servlet.multipart.max-request-size` per service.
+  - Default limit: **2 MB** (`bewerbi.security.request.max-body-bytes`). Override per service in `application.yml`.
+  - Registered via `CommonApiAutoConfiguration` — applies to every service automatically.
+- `ContentSizeFilterTest`: 6 tests (fast path, slow path, multipart pass-through, exact limit, GET pass-through).
+- `application-prod.yml`: added `server.tomcat.max-swallow-size: 2097152` as Tomcat-level backstop for oversized bodies in chunked transfers that bypass the header check.
+
 ## Iteration 115 — Actuator endpoint security
 
 **Security findings**: (1) i18n-service had `/actuator/prometheus` in its `permitAll()` list — open to the world. (2) Companies, documents, identity, and jobs services required only a valid JWT (not `ROLE_ADMIN`) for prometheus and other sensitive actuator endpoints, because each custom `SecurityFilterChain` forgot to re-declare the `hasRole("ADMIN")` rule.

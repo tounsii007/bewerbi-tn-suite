@@ -4,6 +4,14 @@
 # the base application.yml of each service.
 
 server:
+  tomcat:
+    # Iter 116 — backstop for chunked/streaming request bodies that skip the
+    # Content-Length fast-path in ContentSizeFilter.  Tomcat will stop reading
+    # the request body and reset the connection after this many bytes.
+    # ContentSizeFilter handles the clean 413 for clients that declare a
+    # Content-Length; this catches clients that don't.
+    # Default Tomcat value is 2 MB; we make it explicit.
+    max-swallow-size: 2097152
   # Don't echo stack traces or framework error messages to the client.
   # Even with the GlobalExceptionHandler in place, a misconfigured route
   # (no handler, wrong content-type) can still reach Spring's default

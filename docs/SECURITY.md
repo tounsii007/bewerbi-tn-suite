@@ -25,6 +25,16 @@ Quick reference for the security controls in the suite — handy for new joiners
 - Method-level: `@PreAuthorize("hasRole('ADMIN')")` and friends — `@EnableMethodSecurity` is on in `JwtSecurityConfig`.
 - **Actuator** (Iter 115): a dedicated `ActuatorSecurityConfig` `@Order(1)` chain scoped to `/actuator/**` enforces access at the application layer for every service, regardless of what that service's per-route chain declares. Health/info probes are public; everything else (`/actuator/prometheus`, `/actuator/metrics/**`, etc.) requires `ROLE_ADMIN`. The cluster ingress should additionally block all `/actuator/**` traffic from external networks as a defense-in-depth layer.
 
+## Request body size limits (Iter 116)
+
+`ContentSizeFilter` (`@Order(HIGHEST_PRECEDENCE + 2)`) applies to every non-multipart request:
+
+- **Fast path** — `Content-Length` declared and > limit → `413` before the body is read.
+- **Slow path** — chunked body without `Content-Length` → `InputStream` wrapper throws when limit is exceeded.
+- **Default limit**: 2 MB (`bewerbi.security.request.max-body-bytes`). Override per service.
+- **Backstop**: `server.tomcat.max-swallow-size: 2097152` in `application-prod.yml` limits how much Tomcat swallows on connection close.
+- **Multipart excluded**: gated per service by `spring.servlet.multipart.max-request-size`.
+
 ## Rate limiting
 
 - Gateway global: 60 rps burst 120 per user (Redis-backed Spring Cloud Gateway limiter).
