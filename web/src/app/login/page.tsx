@@ -7,11 +7,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { ArrowRight, Mail, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { useAuthStore } from "@/stores/auth-store";
-import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { safeRedirectPath } from "@/lib/security";
 import { apiErrorMessage } from "@/lib/api-errors";
 import { useTranslate } from "@/i18n/use-translate";
@@ -23,8 +23,6 @@ const schema = z.object({
 
 type LoginValues = z.infer<typeof schema>;
 
-// Wrap the form in Suspense so Next's static page generation
-// (`next build`) doesn't bail out on useSearchParams.
 export default function LoginPage() {
   return (
     <Suspense fallback={null}>
@@ -49,7 +47,6 @@ function LoginForm() {
     setSubmitting(true);
     try {
       await signIn(values.email, values.password);
-      // Reject open-redirects to off-site URLs (?redirect=//evil.example).
       const redirect = safeRedirectPath(search.get("redirect"), "/dashboard");
       router.replace(redirect);
     } catch (e) {
@@ -60,67 +57,119 @@ function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-primary-50 to-white px-4 dark:from-dark-bg dark:to-dark-bg">
-      <div className="absolute right-6 top-6">
-        <LanguageSwitcher />
+    <AuthShell title="Anmelden">
+      <div className="mb-6">
+        <h2 className="text-3xl font-extrabold tracking-tight">Willkommen zurück</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-dark-muted">
+          Schön, dass du da bist. Melde dich an, um weiterzumachen.
+        </p>
       </div>
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Willkommen zurück</CardTitle>
-          <CardDescription>Melde dich mit deiner E-Mail an.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <div>
-              <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">
-                E-Mail
-              </label>
-              <Input
-                type="email"
-                autoComplete="email"
-                autoFocus
-                invalid={!!form.formState.errors.email}
-                {...form.register("email")}
-                placeholder="du@example.tn"
-              />
-              {form.formState.errors.email && (
-                <p className="mt-1 text-xs text-accent-600">{form.formState.errors.email.message}</p>
-              )}
-            </div>
 
-            <div>
-              <div className="flex items-center justify-between">
-                <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">
-                  Passwort
-                </label>
-                <Link href="/forgot-password" className="text-xs font-semibold text-primary-600 hover:underline">
-                  Vergessen?
-                </Link>
-              </div>
-              <Input
-                type="password"
-                autoComplete="current-password"
-                invalid={!!form.formState.errors.password}
-                {...form.register("password")}
-              />
-              {form.formState.errors.password && (
-                <p className="mt-1 text-xs text-accent-600">{form.formState.errors.password.message}</p>
-              )}
-            </div>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
+        <Field
+          icon={<Mail className="size-4" />}
+          label="E-Mail"
+          error={form.formState.errors.email?.message}
+        >
+          <Input
+            type="email"
+            autoComplete="email"
+            autoFocus
+            invalid={!!form.formState.errors.email}
+            placeholder="du@example.tn"
+            className="pl-10"
+            {...form.register("email")}
+          />
+        </Field>
 
-            <Button type="submit" size="lg" disabled={submitting}>
-              {submitting ? "Anmelden…" : "Anmelden"}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-gray-500 dark:text-dark-muted">
-            Noch kein Konto?{" "}
-            <Link href="/register" className="font-semibold text-primary-600 hover:underline">
-              Jetzt registrieren
+        <Field
+          icon={<KeyRound className="size-4" />}
+          label="Passwort"
+          labelEnd={
+            <Link
+              href="/forgot-password"
+              className="text-xs font-semibold text-primary-600 hover:underline dark:text-primary-300"
+            >
+              Vergessen?
             </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </main>
+          }
+          error={form.formState.errors.password?.message}
+        >
+          <Input
+            type="password"
+            autoComplete="current-password"
+            invalid={!!form.formState.errors.password}
+            placeholder="••••••••"
+            className="pl-10"
+            {...form.register("password")}
+          />
+        </Field>
+
+        <Button
+          type="submit"
+          size="lg"
+          variant="gradient"
+          loading={submitting}
+          trailingIcon={<ArrowRight className="size-4" />}
+        >
+          {submitting ? "Anmelden…" : "Anmelden"}
+        </Button>
+      </form>
+
+      <div className="my-7 flex items-center gap-3 text-xs text-gray-400">
+        <span className="h-px flex-1 bg-gray-200 dark:bg-dark-border" />
+        oder
+        <span className="h-px flex-1 bg-gray-200 dark:bg-dark-border" />
+      </div>
+
+      <p className="text-center text-sm text-gray-600 dark:text-dark-muted">
+        Noch kein Konto?{" "}
+        <Link
+          href="/register"
+          className="font-semibold text-primary-600 hover:underline dark:text-primary-300"
+        >
+          Jetzt registrieren
+        </Link>
+      </p>
+    </AuthShell>
+  );
+}
+
+/**
+ * Shared field wrapper for auth forms — icon-prefixed label, optional
+ * right-aligned action, inline error.
+ */
+function Field({
+  icon,
+  label,
+  labelEnd,
+  error,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  labelEnd?: React.ReactNode;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center justify-between">
+        <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 dark:text-dark-text">
+          <span className="text-gray-400 dark:text-dark-muted">{icon}</span>
+          {label}
+        </label>
+        {labelEnd}
+      </div>
+      <div className="relative">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-muted">
+          {icon}
+        </span>
+        {children}
+      </div>
+      {error && (
+        <p className="mt-1.5 text-xs font-medium text-accent-600">{error}</p>
+      )}
+    </div>
   );
 }

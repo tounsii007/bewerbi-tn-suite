@@ -2,6 +2,28 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 119 — Auth flow redesign (split-screen + glass)
+
+Alle 5 Auth-Seiten (Login / Register / Forgot / Reset / Verify) auf eine geteilte Split-Screen-Optik gebracht — Aurora-Marken-Panel links, Glass-Karte mit Formular rechts.
+
+**Neues Shared-Component `web/src/components/auth/auth-shell.tsx`:**
+- `<AuthShell>` Wrapper: 12-Spalten-Grid, links 5/12 Brand-Panel (lg+), rechts 7/12 Formular-Bereich.
+- Brand-Panel: `AuroraBackground variant="vivid"`, Logo oben, große `GradientText`-Headline mit Reveal-Animation, 2 floating GlassCards (Match-Score + Visum), Trust-Badges (DSGVO/EU/3 Sprachen) unten.
+- Form-Panel: `LanguageSwitcher` top-right, zentrierte Glass-Card (`strength="strong" glow="soft"`), `formMaxWidth: sm | md | lg`-Prop.
+- Mobile (md und kleiner): nur Form-Panel mit Brand-Logo oben, Brand-Panel komplett ausgeblendet.
+
+**`/login`** — komplett neu: Icon-präfixierte Inputs (Mail/KeyRound), Vergessen-Link in Label-Position, Gradient-Button mit Trailing-Arrow, OR-Trenner, Register-Link.
+
+**`/register`** — komplett neu: Role-Picker als 2 große Tiles (Bewerber/Arbeitgeber) mit aktivem Gradient-Border und Caption-Subtext, Icon-präfixierte Inputs für alle Felder, PasswordMeter direkt unter Passwort-Input, AGB-Hinweis.
+
+**`/forgot-password`** — Initial-State und Success-State beide auf neuer Shell. Success-State zeigt 30-Min-Hinweis und Spam-Tipp.
+
+**`/reset-password`** — 3 States (No-Token Error / Form / Done) jede mit eigener großer Icon + Headline. Done-State zeigt explizit "alle Sessions beendet" Hinweis.
+
+**`/verify`** — 3 States (idle/ok/error). Idle: animated Loader. OK: Success-Icon + Gradient-CTA. Error: Resend-Form inline mit eigener Icon-Input.
+
+**Build-Impact**: AuthShell als shared chunk → einzelne Auth-Pages ~50% kleiner pro Bundle (Login: 3.4→1.5 kB, Verify: 3.5→1.95). First-Load steigt leicht (gesharte chunks größer durch Aurora/GlassCard), aber nur 1× geladen.
+
 ## Iteration 118 — Landing page redesign
 
 Apple-keynote feel mit Bento + Glassmorphism + reichhaltiger Motion.

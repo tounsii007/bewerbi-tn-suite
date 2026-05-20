@@ -7,12 +7,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Briefcase, UserPlus } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  Mail,
+  User,
+  KeyRound,
+  UserPlus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { useAuthStore } from "@/stores/auth-store";
-import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { PasswordMeter } from "@/components/auth/password-meter";
 import { cn } from "@/lib/cn";
 import { apiErrorMessage } from "@/lib/api-errors";
@@ -36,7 +42,13 @@ export default function RegisterPage() {
 
   const form = useForm<RegisterValues>({
     resolver: zodResolver(schema),
-    defaultValues: { firstName: "", lastName: "", email: "", password: "", role: "APPLICANT" },
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      role: "APPLICANT",
+    },
   });
 
   const role = form.watch("role");
@@ -47,7 +59,9 @@ export default function RegisterPage() {
     try {
       await signUp(values);
       toast.success("Willkommen! Bitte bestätige deine E-Mail.");
-      router.replace(values.role === "EMPLOYER" ? "/employer/dashboard" : "/onboarding");
+      router.replace(
+        values.role === "EMPLOYER" ? "/employer/dashboard" : "/onboarding",
+      );
     } catch (e) {
       toast.error(apiErrorMessage(t, e, "Registrierung fehlgeschlagen"));
     } finally {
@@ -56,88 +70,160 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-primary-50 to-white px-4 py-10 dark:from-dark-bg dark:to-dark-bg">
-      <div className="absolute right-6 top-6">
-        <LanguageSwitcher />
+    <AuthShell title="Konto erstellen" formMaxWidth="lg">
+      <div className="mb-6">
+        <h2 className="text-3xl font-extrabold tracking-tight">Konto erstellen</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-dark-muted">
+          In 60 Sekunden startklar. Keine Kreditkarte, keine versteckten Gebühren.
+        </p>
       </div>
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Konto erstellen</CardTitle>
-          <CardDescription>Starte in 60 Sekunden deine Reise nach Deutschland.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700 dark:text-dark-text">
-                Ich bin
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <RoleChoice
-                  icon={<UserPlus className="size-5" />}
-                  label="Bewerber/in"
-                  active={role === "APPLICANT"}
-                  onClick={() => form.setValue("role", "APPLICANT", { shouldValidate: true })}
-                />
-                <RoleChoice
-                  icon={<Briefcase className="size-5" />}
-                  label="Arbeitgeber"
-                  active={role === "EMPLOYER"}
-                  onClick={() => form.setValue("role", "EMPLOYER", { shouldValidate: true })}
-                />
-              </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <LabeledInput label="Vorname" invalid={!!form.formState.errors.firstName} error={form.formState.errors.firstName?.message} {...form.register("firstName")} />
-              <LabeledInput label="Nachname" invalid={!!form.formState.errors.lastName} error={form.formState.errors.lastName?.message} {...form.register("lastName")} />
-            </div>
-
-            <LabeledInput
-              label="E-Mail"
-              type="email"
-              autoComplete="email"
-              invalid={!!form.formState.errors.email}
-              error={form.formState.errors.email?.message}
-              {...form.register("email")}
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-5"
+      >
+        {/* Role toggle — segmented control */}
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-gray-700 dark:text-dark-text">
+            Ich bin
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <RoleChoice
+              icon={<UserPlus className="size-5" />}
+              label="Bewerber/in"
+              description="Job suchen"
+              active={role === "APPLICANT"}
+              onClick={() =>
+                form.setValue("role", "APPLICANT", { shouldValidate: true })
+              }
             />
+            <RoleChoice
+              icon={<Briefcase className="size-5" />}
+              label="Arbeitgeber"
+              description="Talente finden"
+              active={role === "EMPLOYER"}
+              onClick={() =>
+                form.setValue("role", "EMPLOYER", { shouldValidate: true })
+              }
+            />
+          </div>
+        </div>
 
-            <div>
-              <LabeledInput
-                label="Passwort"
-                type="password"
-                autoComplete="new-password"
-                invalid={!!form.formState.errors.password}
-                error={form.formState.errors.password?.message}
-                {...form.register("password")}
-              />
-              <PasswordMeter value={password} />
-            </div>
+        <div className="grid grid-cols-2 gap-3">
+          <PrefixedField
+            icon={<User className="size-4" />}
+            label="Vorname"
+            error={form.formState.errors.firstName?.message}
+          >
+            <Input
+              invalid={!!form.formState.errors.firstName}
+              className="pl-10"
+              placeholder="Yasmine"
+              {...form.register("firstName")}
+            />
+          </PrefixedField>
+          <PrefixedField
+            icon={<User className="size-4" />}
+            label="Nachname"
+            error={form.formState.errors.lastName?.message}
+          >
+            <Input
+              invalid={!!form.formState.errors.lastName}
+              className="pl-10"
+              placeholder="Ben Ali"
+              {...form.register("lastName")}
+            />
+          </PrefixedField>
+        </div>
 
-            <Button type="submit" size="lg" disabled={submitting}>
-              {submitting ? "Erstelle Konto…" : "Registrieren"}
-            </Button>
-          </form>
+        <PrefixedField
+          icon={<Mail className="size-4" />}
+          label="E-Mail"
+          error={form.formState.errors.email?.message}
+        >
+          <Input
+            type="email"
+            autoComplete="email"
+            invalid={!!form.formState.errors.email}
+            className="pl-10"
+            placeholder="du@example.tn"
+            {...form.register("email")}
+          />
+        </PrefixedField>
 
-          <p className="mt-6 text-center text-sm text-gray-500 dark:text-dark-muted">
-            Bereits ein Konto?{" "}
-            <Link href="/login" className="font-semibold text-primary-600 hover:underline">
-              Anmelden
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </main>
+        <div>
+          <PrefixedField
+            icon={<KeyRound className="size-4" />}
+            label="Passwort"
+            error={form.formState.errors.password?.message}
+          >
+            <Input
+              type="password"
+              autoComplete="new-password"
+              invalid={!!form.formState.errors.password}
+              className="pl-10"
+              placeholder="Mindestens 8 Zeichen"
+              {...form.register("password")}
+            />
+          </PrefixedField>
+          <PasswordMeter value={password} />
+        </div>
+
+        <Button
+          type="submit"
+          size="lg"
+          variant="gradient"
+          loading={submitting}
+          trailingIcon={<ArrowRight className="size-4" />}
+        >
+          {submitting ? "Erstelle Konto…" : "Konto erstellen"}
+        </Button>
+
+        <p className="text-center text-xs text-gray-500 dark:text-dark-muted">
+          Mit der Registrierung akzeptierst du unsere{" "}
+          <Link href="/terms" className="font-semibold text-primary-600 hover:underline">
+            AGB
+          </Link>{" "}
+          und die{" "}
+          <Link href="/privacy" className="font-semibold text-primary-600 hover:underline">
+            Datenschutz&shy;erklärung
+          </Link>
+          .
+        </p>
+      </form>
+
+      <div className="my-6 flex items-center gap-3 text-xs text-gray-400">
+        <span className="h-px flex-1 bg-gray-200 dark:bg-dark-border" />
+        oder
+        <span className="h-px flex-1 bg-gray-200 dark:bg-dark-border" />
+      </div>
+
+      <p className="text-center text-sm text-gray-600 dark:text-dark-muted">
+        Bereits ein Konto?{" "}
+        <Link
+          href="/login"
+          className="font-semibold text-primary-600 hover:underline dark:text-primary-300"
+        >
+          Anmelden
+        </Link>
+      </p>
+    </AuthShell>
   );
 }
 
+/**
+ * Role-picker tile — large icon, label + caption, animated active border.
+ */
 function RoleChoice({
   icon,
   label,
+  description,
   active,
   onClick,
 }: {
   icon: React.ReactNode;
   label: string;
+  description: string;
   active: boolean;
   onClick: () => void;
 }) {
@@ -145,27 +231,68 @@ function RoleChoice({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
-        "flex items-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-colors",
+        "group relative flex items-start gap-3 rounded-2xl border-2 p-4 text-left transition-all",
         active
-          ? "border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
-          : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-dark-border dark:bg-dark-card dark:text-dark-text",
+          ? "border-primary-500 bg-primary-50/80 shadow-[var(--shadow-glow)] dark:bg-primary-500/15"
+          : "border-gray-200 bg-white hover:border-primary-300 hover:bg-primary-50/30 dark:border-dark-border dark:bg-dark-card dark:hover:border-primary-500/40",
       )}
     >
-      {icon}
-      {label}
+      <span
+        className={cn(
+          "grid size-10 shrink-0 place-items-center rounded-xl transition-colors",
+          active
+            ? "bg-[linear-gradient(135deg,var(--color-primary-500),oklch(0.611_0.18_280))] text-white"
+            : "bg-gray-100 text-gray-600 dark:bg-dark-bg-alt dark:text-dark-muted",
+        )}
+      >
+        {icon}
+      </span>
+      <span className="flex flex-col">
+        <span
+          className={cn(
+            "text-sm font-bold",
+            active
+              ? "text-primary-700 dark:text-primary-200"
+              : "text-gray-900 dark:text-dark-text",
+          )}
+        >
+          {label}
+        </span>
+        <span className="text-xs text-gray-500 dark:text-dark-muted">
+          {description}
+        </span>
+      </span>
     </button>
   );
 }
 
-const LabeledInput = ({
+function PrefixedField({
+  icon,
   label,
   error,
-  ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { label: string; invalid?: boolean; error?: string }) => (
-  <div>
-    <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">{label}</label>
-    <Input {...props} />
-    {error && <p className="mt-1 text-xs text-accent-600">{error}</p>}
-  </div>
-);
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">
+        {label}
+      </label>
+      <div className="relative">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-muted">
+          {icon}
+        </span>
+        {children}
+      </div>
+      {error && (
+        <p className="mt-1.5 text-xs font-medium text-accent-600">{error}</p>
+      )}
+    </div>
+  );
+}

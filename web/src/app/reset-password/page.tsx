@@ -7,12 +7,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, KeyRound, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { authApi } from "@/lib/api";
-import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { PasswordMeter } from "@/components/auth/password-meter";
 import { apiErrorMessage } from "@/lib/api-errors";
 import { useTranslate } from "@/i18n/use-translate";
@@ -32,6 +31,14 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>;
 
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResetForm />
+    </Suspense>
+  );
+}
+
 function ResetForm() {
   const router = useRouter();
   const search = useSearchParams();
@@ -48,18 +55,28 @@ function ResetForm() {
 
   if (!token) {
     return (
-      <Card className="w-full max-w-md">
-        <CardContent className="flex flex-col items-center gap-4 p-10 text-center">
-          <XCircle className="size-10 text-accent-600" />
-          <h1 className="text-xl font-extrabold">Kein Token</h1>
-          <p className="text-sm text-gray-500 dark:text-dark-muted">
-            Der Link ist unvollständig. Bitte fordere einen neuen Reset-Link an.
+      <AuthShell title="Kein Token">
+        <div className="text-center">
+          <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-accent-500/15 text-accent-600">
+            <XCircle className="size-8" />
+          </div>
+          <h2 className="mt-5 text-2xl font-extrabold tracking-tight">
+            Link unvollständig
+          </h2>
+          <p className="mt-3 text-sm text-gray-600 dark:text-dark-muted">
+            Dieser Link enthält kein gültiges Token. Bitte fordere einen neuen
+            Reset-Link an.
           </p>
-          <Button asChild variant="outline" className="mt-2">
+          <Button
+            asChild
+            variant="gradient"
+            size="lg"
+            className="mt-6 w-full"
+          >
             <Link href="/forgot-password">Neuen Link anfordern</Link>
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </AuthShell>
     );
   }
 
@@ -68,7 +85,6 @@ function ResetForm() {
     try {
       await authApi.resetPassword(token, values.newPassword);
       setDone(true);
-      // Stay on this page briefly so the success message is seen, then route.
       setTimeout(() => router.replace("/login"), 1500);
     } catch (e) {
       toast.error(apiErrorMessage(t, e, "Link ungültig oder abgelaufen."));
@@ -79,82 +95,100 @@ function ResetForm() {
 
   if (done) {
     return (
-      <Card className="w-full max-w-md">
-        <CardContent className="flex flex-col items-center gap-4 p-10 text-center">
-          <CheckCircle2 className="size-10 text-success-600" />
-          <h1 className="text-xl font-extrabold">Passwort aktualisiert</h1>
-          <p className="text-sm text-gray-500 dark:text-dark-muted">
+      <AuthShell title="Passwort aktualisiert">
+        <div className="text-center">
+          <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-success-500/15 text-success-600">
+            <CheckCircle2 className="size-8" />
+          </div>
+          <h2 className="mt-5 text-2xl font-extrabold tracking-tight">
+            Passwort aktualisiert
+          </h2>
+          <p className="mt-3 text-sm text-gray-600 dark:text-dark-muted">
             Du wirst gleich zum Login weitergeleitet…
           </p>
-        </CardContent>
-      </Card>
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-success-700 dark:text-success-500">
+            <ShieldCheck className="size-4" />
+            Alle bestehenden Sessions wurden beendet.
+          </div>
+        </div>
+      </AuthShell>
     );
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Neues Passwort wählen</CardTitle>
-        <CardDescription>
-          Gib dein neues Passwort ein. Du wirst danach auf allen Geräten abgemeldet.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <div>
-            <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">
-              Neues Passwort
-            </label>
+    <AuthShell title="Passwort zurücksetzen">
+      <div className="mb-6">
+        <h2 className="text-3xl font-extrabold tracking-tight">
+          Neues Passwort wählen
+        </h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-dark-muted">
+          Achte auf ein starkes Passwort — die Stärke wird live geprüft.
+        </p>
+      </div>
+
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-5"
+      >
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">
+            Neues Passwort
+          </label>
+          <div className="relative">
+            <KeyRound className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400 dark:text-dark-muted" />
             <Input
               type="password"
               autoComplete="new-password"
               autoFocus
               invalid={!!form.formState.errors.newPassword}
+              className="pl-10"
+              placeholder="Mindestens 8 Zeichen"
               {...form.register("newPassword")}
             />
-            {form.formState.errors.newPassword && (
-              <p className="mt-1 text-xs text-accent-600">
-                {form.formState.errors.newPassword.message}
-              </p>
-            )}
-            <PasswordMeter value={newPassword} />
           </div>
+          {form.formState.errors.newPassword && (
+            <p className="mt-1.5 text-xs font-medium text-accent-600">
+              {form.formState.errors.newPassword.message}
+            </p>
+          )}
+          <PasswordMeter value={newPassword} />
+        </div>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">
-              Passwort bestätigen
-            </label>
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-dark-text">
+            Passwort bestätigen
+          </label>
+          <div className="relative">
+            <KeyRound className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400 dark:text-dark-muted" />
             <Input
               type="password"
               autoComplete="new-password"
               invalid={!!form.formState.errors.confirm}
+              className="pl-10"
+              placeholder="Wiederholen"
               {...form.register("confirm")}
             />
-            {form.formState.errors.confirm && (
-              <p className="mt-1 text-xs text-accent-600">
-                {form.formState.errors.confirm.message}
-              </p>
-            )}
           </div>
+          {form.formState.errors.confirm && (
+            <p className="mt-1.5 text-xs font-medium text-accent-600">
+              {form.formState.errors.confirm.message}
+            </p>
+          )}
+        </div>
 
-          <Button type="submit" size="lg" disabled={submitting}>
-            {submitting ? "Speichern…" : "Passwort speichern"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
-  );
-}
+        <Button
+          type="submit"
+          size="lg"
+          variant="gradient"
+          loading={submitting}
+        >
+          {submitting ? "Speichern…" : "Passwort speichern"}
+        </Button>
 
-export default function ResetPasswordPage() {
-  return (
-    <main className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-primary-50 to-white px-4 dark:from-dark-bg dark:to-dark-bg">
-      <div className="absolute right-6 top-6">
-        <LanguageSwitcher />
-      </div>
-      <Suspense fallback={null}>
-        <ResetForm />
-      </Suspense>
-    </main>
+        <p className="text-center text-xs text-gray-500 dark:text-dark-muted">
+          Nach dem Speichern werden alle aktiven Sessions abgemeldet.
+        </p>
+      </form>
+    </AuthShell>
   );
 }
