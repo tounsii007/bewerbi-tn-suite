@@ -2,6 +2,21 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 154 — Onboarding wizard i18n wiring
+
+Die Iter-146 onboarding.* Keys werden jetzt aktiv genutzt.
+
+**`web/src/app/(applicant)/onboarding/page.tsx`**:
+- `STEP_META` (statisches Module-Level-Objekt) → `buildStepMeta(t)` Factory die `t()` aufruft. Wird einmal pro Render aufgerufen.
+- 5 step-meta-Objekte (profession/level/recognition/skills/done) nutzen je `t("onboarding.X.title")` + `t("onboarding.X.tagline")`.
+- Step-Indicator "Schritt {stepLabel} / {total}" → `t("onboarding.step", { n: stepLabel, total })` mit Placeholder-Substitution.
+- "X % fertig" → `t("onboarding.stepProgress", { percent: ... })` — funktioniert in DE/FR/AR.
+- Icons (Briefcase / GraduationCap / etc.) bleiben statisch (kein translation needed).
+
+User die FR/AR ausgewählt haben sehen den kompletten Onboarding-Wizard jetzt in ihrer Sprache (vorher: hartcodiertes Deutsch).
+
+Build: /onboarding 9.76 kB (vorher 10.2 kB — sogar leicht kleiner durch dead-code-elimination der inline strings).
+
 ## Iteration 153 — Konkrete Performance + a11y wins
 
 Vier kleine, gezielte Optimierungen statt Lighthouse-Lifecycle (kann nicht ohne Browser laufen).

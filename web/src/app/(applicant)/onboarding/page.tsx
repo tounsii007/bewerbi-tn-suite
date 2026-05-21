@@ -25,6 +25,7 @@ import { GradientText } from "@/components/ui/gradient-text";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { Reveal } from "@/components/ui/reveal";
 import { useLocaleStore } from "@/stores/locale-store";
+import { useTranslate } from "@/i18n/use-translate";
 import type {
   GermanLevel,
   ProfessionSearchResult,
@@ -81,41 +82,52 @@ const RECOG_OPTIONS: {
 
 type Step = "profession" | "level" | "recognition" | "skills" | "done";
 
-const STEP_META: Record<
+/**
+ * Iter 154 — step meta moved to a per-render factory so titles + taglines
+ * can be pulled from the i18n dictionary. Icons stay static (don't need
+ * translation). Called once per render inside the page component.
+ */
+function buildStepMeta(
+  t: (key: string, vars?: Record<string, string | number>, fallback?: string) => string,
+): Record<
   Step,
   { title: string; tagline: string; icon: React.ComponentType<{ className?: string }> }
-> = {
-  profession: {
-    title: "Welchen Beruf möchtest du ausüben?",
-    tagline: "Wir matchen Stellen, die zu deinem Berufswunsch passen.",
-    icon: Briefcase,
-  },
-  level: {
-    title: "Wie gut ist dein Deutsch?",
-    tagline: "Wir zeigen dir nur Stellen, deren Sprachniveau du erfüllst.",
-    icon: GraduationCap,
-  },
-  recognition: {
-    title: "Wie ist der Stand deiner Anerkennung?",
-    tagline: "Wichtig vor allem für reglementierte Berufe.",
-    icon: ShieldCheck,
-  },
-  skills: {
-    title: "Deine wichtigsten Kompetenzen",
-    tagline: "Skills schärfen das Matching — 3–8 reichen.",
-    icon: Lightbulb,
-  },
-  done: {
-    title: "Alles bereit!",
-    tagline: "Wir öffnen dein personalisiertes Dashboard.",
-    icon: PartyPopper,
-  },
-};
+> {
+  return {
+    profession: {
+      title: t("onboarding.profession.title"),
+      tagline: t("onboarding.profession.tagline"),
+      icon: Briefcase,
+    },
+    level: {
+      title: t("onboarding.level.title"),
+      tagline: t("onboarding.level.tagline"),
+      icon: GraduationCap,
+    },
+    recognition: {
+      title: t("onboarding.recognition.title"),
+      tagline: t("onboarding.recognition.tagline"),
+      icon: ShieldCheck,
+    },
+    skills: {
+      title: t("onboarding.skills.title"),
+      tagline: t("onboarding.skills.tagline"),
+      icon: Lightbulb,
+    },
+    done: {
+      title: t("onboarding.done.title"),
+      tagline: t("onboarding.done.tagline"),
+      icon: PartyPopper,
+    },
+  };
+}
 
 export default function OnboardingPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const locale = useLocaleStore((s) => s.locale);
+  const t = useTranslate();
+  const stepMeta = buildStepMeta(t);
 
   const [stepIndex, setStepIndex] = useState(0);
   const [profession, setProfession] = useState("");
@@ -133,7 +145,7 @@ export default function OnboardingPage() {
       : ["profession", "level", "recognition", "skills", "done"];
   const current = steps[Math.min(stepIndex, steps.length - 1)]!;
   const total = steps.length - 1;
-  const meta = STEP_META[current];
+  const meta = stepMeta[current];
   const Icon = meta.icon;
 
   const canNext =
@@ -206,10 +218,10 @@ export default function OnboardingPage() {
           <div className="mb-8">
             <div className="flex items-baseline justify-between">
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary-700 dark:text-primary-300">
-                Schritt {stepLabel} / {total}
+                {t("onboarding.step", { n: stepLabel, total })}
               </span>
               <span className="text-xs font-semibold text-gray-500 dark:text-dark-muted">
-                {Math.round(progressPct)} % fertig
+                {t("onboarding.stepProgress", { percent: Math.round(progressPct) })}
               </span>
             </div>
             {/* Segmented progress bar — one pill per step */}
