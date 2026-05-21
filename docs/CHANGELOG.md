@@ -2,6 +2,34 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 159 — DB foundation für OAuth + Login-History
+
+Vorbereitung für Iter 160 (Google Sign-In) + Iter 161 (Login-Recorder). Reiner Schema- + Entity-Pass — keine Behavior-Änderung.
+
+**Neue Domain-Klassen:**
+- `AuthProvider` enum: `EMAIL` (default für alle existing users) / `GOOGLE`. Verwendet auf `User.authProvider`.
+- `LoginMethod` enum: `PASSWORD` / `GOOGLE` / `REFRESH`. Verwendet auf `LoginAttempt.method` (eine Userin kann theoretisch über mehrere methods loggen).
+- `LoginAttempt` Entity: id (UUID), userId (nullable FK with `ON DELETE SET NULL`), email (always recorded — auch für unknown-email probes), method, success, failureReason (60-char code), ip, userAgent, occurredAt. Mit Factory-Methods `success()` / `failure()` + `anonymiseOnUserDeletion()` für GDPR-Cascade.
+
+**User Entity:**
+- Neue Felder: `authProvider` (NOT NULL, default EMAIL), `googleSubject` (unique, nullable).
+- `passwordHash` jetzt nullable — Google-Users haben keinen lokalen Hash.
+- Neue Factory `User.fromGoogle(email, sub, role)` — emailVerified=true (Google verifiziert email vor Token-Ausgabe).
+- Helper `isOauthOnly()` — Schutz für password operations (forgot/change/delete-account müssen 409 returnen für GOOGLE users statt 500 zu leaken).
+
+**UserRepository**: `findByGoogleSubject(String)` — lookup über Google's stable sub claim (resilient gegen email-changes bei Google).
+
+**`LoginAttemptRepository`**:
+- `findByUserIdOrderByOccurredAtDesc(uid, pageable)` — UI "meine Aktivität"
+- `findByEmailAndSuccessFalseAndOccurredAtAfter(...)` — ops anti-credential-stuffing scans
+- `@Modifying anonymiseForUser(uid)` — GDPR cascade (sets user_id=NULL, email='[deleted]', userAgent=NULL).
+
+**SQL-Migrations:**
+- `V5__auth_provider.sql`: ADD COLUMNS auth_provider + google_subject, ALTER password_hash DROP NOT NULL, partial unique index on google_subject WHERE NOT NULL, btree index on auth_provider.
+- `V6__login_attempts.sql`: CREATE TABLE login_attempts mit 4 Indexes (user+time DESC partial, email+time DESC, ip+time DESC partial, occurred_at für retention job).
+
+Backend kompiliert clean. common-security tests 44/44 grün. identity-service IntegrationTest war + ist broken durch pre-existing common-security classpath issue (separate concern).
+
 ## Iteration 158 — Playwright critical-path coverage (auth + 404)
 
 **4 neue Tests in 2 Files** (additional zu den 6 Landing-Tests aus Iter 157):

@@ -8,7 +8,11 @@ import java.time.Instant;
 public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true) private String email;
-    @Column(name = "password_hash", nullable = false) private String passwordHash;
+
+    /** Iter 159 — nullable since GOOGLE-provider users have no local password.
+     *  EMAIL-provider users (the default) always have a bcrypt hash here. */
+    @Column(name = "password_hash") private String passwordHash;
+
     @Enumerated(EnumType.STRING) @Column(nullable = false) private UserRole role = UserRole.APPLICANT;
     @Column(name = "email_verified", nullable = false) private boolean emailVerified;
     @Column(name = "email_verification_token") private String emailVerificationToken;
@@ -18,12 +22,40 @@ public class User extends BaseEntity {
     @Column(name = "password_reset_token_hash") private String passwordResetTokenHash;
     @Column(name = "password_reset_expires_at") private Instant passwordResetExpiresAt;
 
+    /** Iter 159 — which identity provider this user signed up with. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false, length = 16)
+    private AuthProvider authProvider = AuthProvider.EMAIL;
+
+    /** Iter 159 — Google's stable `sub` claim from the OIDC ID token.
+     *  Unique when set so two users can't link to the same Google account.
+     *  Null for EMAIL-provider users. */
+    @Column(name = "google_subject", unique = true, length = 64)
+    private String googleSubject;
+
     protected User() {}
 
+    /** Email + password signup. */
     public User(String email, String passwordHash, UserRole role) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
+        this.authProvider = AuthProvider.EMAIL;
+    }
+
+    /**
+     * Iter 159 — Google signup. No local password; Google already verified
+     * the email so we trust it as verified.
+     */
+    public static User fromGoogle(String email, String googleSubject, UserRole role) {
+        User u = new User();
+        u.email = email;
+        u.passwordHash = null;
+        u.role = role;
+        u.authProvider = AuthProvider.GOOGLE;
+        u.googleSubject = googleSubject;
+        u.emailVerified = true; // Google verifies the email before issuing the token
+        return u;
     }
 
     public String getEmail() { return email; }
@@ -56,5 +88,17 @@ public class User extends BaseEntity {
     public void clearPasswordReset() {
         this.passwordResetTokenHash = null;
         this.passwordResetExpiresAt = null;
+    }
+
+    public AuthProvider getAuthProvider() { return authProvider; }
+    public String getGoogleSubject() { return googleSubject; }
+
+    /**
+     * Iter 159 — true for non-EMAIL users (Google etc). Use this everywhere
+     * password operations could otherwise leak a 500 from a null bcrypt hash:
+     * forgot-password, change-password, delete-account (password-confirm).
+     */
+    public boolean isOauthOnly() {
+        return authProvider != AuthProvider.EMAIL;
     }
 }
