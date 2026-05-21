@@ -2,6 +2,24 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 151 — Route Error-Boundaries + 404 Page
+
+**Lücke**: bisher keine `error.tsx` / `not-found.tsx` / `global-error.tsx` — runtime errors landeten auf Next.js' Default-Fallback-Page (graphisch fremd, kein Brand).
+
+**5 neue Files**:
+
+- **`web/src/app/not-found.tsx`**: 404 für alle unmatched routes. AuroraBackground vivid + GlassCard strong + glow ring + GradientText "Hier endet die Karte". 2 CTAs: Startseite + Stellen suchen. `robots: noindex`.
+
+- **`web/src/app/global-error.tsx`**: catastrophic root-layout failure. Vollständig **dependency-free** (kein Tailwind / kein Theme-Store / keine Providers — die könnten ja selbst kaputt sein). Eigene `<html>` + `<body>` Tags mit inline-styled Glass-Surface (radial-gradient + backdrop-blur). Inline gradient button "Erneut versuchen". Logs error + zeigt digest-Ref.
+
+- **`web/src/app/(applicant)/error.tsx`**: catches errors innerhalb `/(applicant)/*`. Layout (AppShell + Sidebar) bleibt erhalten — User kann zur nächsten Tab navigieren. Nutzt das ErrorState-Primitive (`tone="glass"`) mit onRetry-Button. In dev: zeigt error.message + stack. In prod: friendly message.
+
+- **`web/src/app/(employer)/error.tsx`** — gleich für employer-Bereich.
+
+- **`web/src/app/(admin)/error.tsx`** — gleich für admin-Bereich.
+
+Build clean. Alle 4 error.tsx + not-found.tsx + global-error.tsx werden von Next.js' build-pipeline automatisch erkannt.
+
 ## Iteration 150 — Mobile Test-Infrastruktur (Jest + RN Testing Library)
 
 Mobile war bisher komplett ungetestet (nur Backend + Flutter hatten Tests + nun Web seit Iter 145). Jetzt auch Mobile.
