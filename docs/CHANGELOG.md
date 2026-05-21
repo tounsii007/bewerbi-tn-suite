@@ -2,6 +2,29 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 146 — i18n seeds erweitert für Iter-117/118 Strings
+
+Die mit Iter 117–143 eingeführten hart-codierten deutschen UI-Strings (Landing-Hero, Onboarding-Steps, Settings-Sections, Empty-States) sind jetzt in den 3 Seed-Files (`shared/i18n/{de,fr,ar}.json`) als Keys hinterlegt — bereit zum Upload an i18n-service.
+
+**4 neue Namespaces** in allen 3 Sprachen:
+
+- **`landing.*`** (25 keys): Hero-Tagline, Trust-Pills, Features-Section, Stats-Counters, How-it-works, Visa-Section, Voices-Section, Final-CTA.
+
+- **`settings.*`** (9 keys): Section-Headers (Konto/App/Rechtliches/Gefahrenzone/Sicherheit), Sessions-Subscreen (Title/Tagline/RevokeOthers/Current).
+
+- **`onboarding.*`** (12 keys): Step-Indicator mit `{{n}}/{{total}}` Variables, Step-Progress mit `{{percent}}`, je Title + Tagline für 5 Steps (profession/level/recognition/skills/done).
+
+- **`empty.*`** (6 keys): noResults / noApps / noFav je mit Title + Body.
+
+**Übersetzungs-Notes:**
+- DE: Quell-Strings unverändert von UI übernommen.
+- FR: Natürliches Französisch ("Votre pont vers l'Allemagne"), formelles Sie/Vous, "Conforme RGPD" statt "DSGVO-konform".
+- AR: RTL-friendly Strings mit korrekten Sonderzeichen (← → ←), modernes Standard-Arabisch, Begrüßung im informellen Du ("ابدأ" / "ابدأ مجانًا").
+
+Alle 3 JSON-Files validiert via Node `JSON.parse`.
+
+Die Web/Mobile/Flutter Components selbst nutzen noch die hart-codierten Strings — separate Refactor-Welle (Iter 148+) wird die Components auf `useTranslate()` umstellen.
+
 ## Iteration 145 — Web Vitest setup + Iter 117 primitive tests
 
 Erste Web-Test-Infrastruktur. Bisher hatten wir nur Backend (JUnit) und Flutter (widget tests) Tests — Web war komplett ungetestet.
