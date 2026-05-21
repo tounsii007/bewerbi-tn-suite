@@ -119,6 +119,41 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "error.auth.password.weak.breached": "Dieses Passwort taucht in bekannten Datenlecks auf. Bitte wähle ein anderes.",
     "error.auth.password.reused": "Das neue Passwort muss sich vom aktuellen unterscheiden.",
 
+    // Iter 161 — Google sign-in.
+    "auth.google.signIn":      "Mit Google anmelden",
+    "auth.google.signUp":      "Mit Google registrieren",
+    "auth.google.signingIn":   "Anmelden bei Google…",
+    "error.auth.google.disabled":              "Google-Anmeldung ist gerade nicht verfügbar.",
+    "error.auth.google.emailExistsAsPassword": "Diese E-Mail ist mit einem Passwort registriert. Bitte melde dich mit deinem Passwort an.",
+    "error.auth.google.noPassword":            "Dieses Konto wird von Google verwaltet — es gibt kein Passwort zu ändern.",
+
+    // Iter 161 — "Letzte Aktivität" panel in /settings.
+    "settings.activity.title":     "Letzte Aktivität",
+    "settings.activity.tagline":   "Die letzten 20 Anmeldeversuche. Etwas Verdächtiges? Sofort Passwort ändern und Sitzungen beenden.",
+    "settings.activity.empty":     "Noch keine Anmeldeversuche.",
+    "settings.activity.success":   "Erfolgreich",
+    "settings.activity.failure":   "Fehlgeschlagen",
+    "settings.activity.loadError": "Aktivität konnte nicht geladen werden.",
+
+    // Login-method labels (used in the activity panel + audit views).
+    "auth.method.PASSWORD": "Passwort",
+    "auth.method.GOOGLE":   "Google",
+    "auth.method.REFRESH":  "Token-Refresh",
+
+    // Stable failure-reason codes emitted by AuthService (Iter 160).
+    "error.auth.activity.RATE_LIMITED_ACCOUNT":             "Konto kurzzeitig gesperrt",
+    "error.auth.activity.RATE_LIMITED_IP":                  "IP kurzzeitig gesperrt",
+    "error.auth.activity.USER_NOT_FOUND":                   "Unbekanntes Konto",
+    "error.auth.activity.INVALID_PASSWORD":                 "Falsches Passwort",
+    "error.auth.activity.OAUTH_ACCOUNT_USE_GOOGLE":         "Bitte mit Google anmelden",
+    "error.auth.activity.OAUTH_EMAIL_COLLISION_PASSWORD_USER": "Konto bereits mit Passwort registriert",
+    "error.auth.activity.OAUTH_TOKEN_MISSING":              "Google-Token fehlt",
+    "error.auth.activity.OAUTH_TOKEN_MALFORMED":            "Google-Token ungültig",
+    "error.auth.activity.OAUTH_TOKEN_INVALID":              "Google-Token ungültig",
+    "error.auth.activity.OAUTH_AUDIENCE_MISMATCH":          "Google-Token für andere App",
+    "error.auth.activity.OAUTH_EMAIL_UNVERIFIED":           "Google-E-Mail nicht verifiziert",
+    "error.auth.activity.OAUTH_CLAIMS_INCOMPLETE":          "Google-Token unvollständig",
+
     "account.delete.title": "Konto löschen",
     "account.delete.confirmPhrase": "LÖSCHEN",
     "account.delete.warning": "Diese Aktion kann nicht rückgängig gemacht werden. Profil, Bewerbungen, Favoriten und Anerkennungs-Cases werden entfernt.",
@@ -303,6 +338,39 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "error.auth.password.weak.breached": "Ce mot de passe figure dans des fuites de données connues. Choisissez-en un autre.",
     "error.auth.password.reused": "Le nouveau mot de passe doit être différent de l'actuel.",
 
+    // Iter 161 — Connexion Google.
+    "auth.google.signIn":      "Se connecter avec Google",
+    "auth.google.signUp":      "S'inscrire avec Google",
+    "auth.google.signingIn":   "Connexion à Google…",
+    "error.auth.google.disabled":              "La connexion Google est indisponible pour le moment.",
+    "error.auth.google.emailExistsAsPassword": "Cette adresse e-mail est enregistrée avec un mot de passe. Veuillez vous connecter avec votre mot de passe.",
+    "error.auth.google.noPassword":            "Ce compte est géré par Google — aucun mot de passe à modifier.",
+
+    // Iter 161 — Panneau « Activité récente » dans /settings.
+    "settings.activity.title":     "Activité récente",
+    "settings.activity.tagline":   "Les 20 dernières tentatives de connexion. Quelque chose de suspect ? Changez le mot de passe et révoquez les sessions.",
+    "settings.activity.empty":     "Aucune tentative de connexion pour l'instant.",
+    "settings.activity.success":   "Réussie",
+    "settings.activity.failure":   "Échouée",
+    "settings.activity.loadError": "Impossible de charger l'activité.",
+
+    "auth.method.PASSWORD": "Mot de passe",
+    "auth.method.GOOGLE":   "Google",
+    "auth.method.REFRESH":  "Rafraîchissement",
+
+    "error.auth.activity.RATE_LIMITED_ACCOUNT":             "Compte temporairement verrouillé",
+    "error.auth.activity.RATE_LIMITED_IP":                  "IP temporairement verrouillée",
+    "error.auth.activity.USER_NOT_FOUND":                   "Compte inconnu",
+    "error.auth.activity.INVALID_PASSWORD":                 "Mot de passe incorrect",
+    "error.auth.activity.OAUTH_ACCOUNT_USE_GOOGLE":         "Veuillez vous connecter avec Google",
+    "error.auth.activity.OAUTH_EMAIL_COLLISION_PASSWORD_USER": "Compte déjà enregistré avec un mot de passe",
+    "error.auth.activity.OAUTH_TOKEN_MISSING":              "Jeton Google manquant",
+    "error.auth.activity.OAUTH_TOKEN_MALFORMED":            "Jeton Google invalide",
+    "error.auth.activity.OAUTH_TOKEN_INVALID":              "Jeton Google invalide",
+    "error.auth.activity.OAUTH_AUDIENCE_MISMATCH":          "Jeton Google pour une autre application",
+    "error.auth.activity.OAUTH_EMAIL_UNVERIFIED":           "E-mail Google non vérifié",
+    "error.auth.activity.OAUTH_CLAIMS_INCOMPLETE":          "Jeton Google incomplet",
+
     "account.delete.title": "Supprimer le compte",
     "account.delete.confirmPhrase": "SUPPRIMER",
     "account.delete.warning": "Cette action est irréversible. Profil, candidatures, favoris et dossiers de reconnaissance seront supprimés.",
@@ -483,6 +551,39 @@ export const dictionaries: Record<SupportedLocale, Record<string, string>> = {
     "error.auth.password.weak.weak": "كلمة المرور ضعيفة جدًا.",
     "error.auth.password.weak.breached": "كلمة المرور هذه ظهرت في تسريبات بيانات معروفة. الرجاء اختيار كلمة مرور أخرى.",
     "error.auth.password.reused": "يجب أن تكون كلمة المرور الجديدة مختلفة عن الحالية.",
+
+    // Iter 161 — تسجيل الدخول عبر Google.
+    "auth.google.signIn":      "تسجيل الدخول عبر Google",
+    "auth.google.signUp":      "إنشاء حساب عبر Google",
+    "auth.google.signingIn":   "جاري تسجيل الدخول إلى Google…",
+    "error.auth.google.disabled":              "تسجيل الدخول عبر Google غير متاح حالياً.",
+    "error.auth.google.emailExistsAsPassword": "هذا البريد الإلكتروني مسجَّل بكلمة مرور. الرجاء تسجيل الدخول باستخدام كلمة المرور.",
+    "error.auth.google.noPassword":            "هذا الحساب مُدار عبر Google — لا توجد كلمة مرور لتغييرها.",
+
+    // Iter 161 — لوحة « النشاط الأخير » في /settings.
+    "settings.activity.title":     "النشاط الأخير",
+    "settings.activity.tagline":   "آخر 20 محاولة تسجيل دخول. هل ترى شيئاً مريباً؟ غيّر كلمة المرور وأنهِ الجلسات فوراً.",
+    "settings.activity.empty":     "لا توجد محاولات تسجيل دخول بعد.",
+    "settings.activity.success":   "ناجحة",
+    "settings.activity.failure":   "فاشلة",
+    "settings.activity.loadError": "تعذّر تحميل النشاط.",
+
+    "auth.method.PASSWORD": "كلمة المرور",
+    "auth.method.GOOGLE":   "Google",
+    "auth.method.REFRESH":  "تحديث الرمز",
+
+    "error.auth.activity.RATE_LIMITED_ACCOUNT":             "الحساب مقفل مؤقتاً",
+    "error.auth.activity.RATE_LIMITED_IP":                  "عنوان IP مقفل مؤقتاً",
+    "error.auth.activity.USER_NOT_FOUND":                   "حساب غير معروف",
+    "error.auth.activity.INVALID_PASSWORD":                 "كلمة مرور خاطئة",
+    "error.auth.activity.OAUTH_ACCOUNT_USE_GOOGLE":         "الرجاء تسجيل الدخول عبر Google",
+    "error.auth.activity.OAUTH_EMAIL_COLLISION_PASSWORD_USER": "الحساب مسجَّل مسبقاً بكلمة مرور",
+    "error.auth.activity.OAUTH_TOKEN_MISSING":              "رمز Google مفقود",
+    "error.auth.activity.OAUTH_TOKEN_MALFORMED":            "رمز Google غير صالح",
+    "error.auth.activity.OAUTH_TOKEN_INVALID":              "رمز Google غير صالح",
+    "error.auth.activity.OAUTH_AUDIENCE_MISMATCH":          "رمز Google لتطبيق آخر",
+    "error.auth.activity.OAUTH_EMAIL_UNVERIFIED":           "بريد Google غير مُتحقَّق منه",
+    "error.auth.activity.OAUTH_CLAIMS_INCOMPLETE":          "رمز Google ناقص",
 
     "account.delete.title": "حذف الحساب",
     "account.delete.confirmPhrase": "حذف",

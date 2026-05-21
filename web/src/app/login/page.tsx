@@ -11,6 +11,8 @@ import { ArrowRight, Mail, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
+import { googleOAuthEnabled } from "@/components/auth/google-oauth-provider";
 import { useAuthStore } from "@/stores/auth-store";
 import { safeRedirectPath } from "@/lib/security";
 import { apiErrorMessage } from "@/lib/api-errors";
@@ -116,11 +118,26 @@ function LoginForm() {
         </Button>
       </form>
 
+      {/* Iter 161 — Google sign-in slots between the password form and
+          the register-link footer. The "oder" divider is shared with
+          the footer block below — we render it once and let the Google
+          button conditionally appear above it. */}
       <div className="my-7 flex items-center gap-3 text-xs text-gray-400">
         <span className="h-px flex-1 bg-gray-200 dark:bg-dark-border" />
         oder
         <span className="h-px flex-1 bg-gray-200 dark:bg-dark-border" />
       </div>
+
+      {googleOAuthEnabled() && (
+        <div className="mb-6">
+          <GoogleSignInButton
+            onSuccess={() => {
+              const redirect = safeRedirectPath(search.get("redirect"), "/dashboard");
+              router.replace(redirect);
+            }}
+          />
+        </div>
+      )}
 
       <p className="text-center text-sm text-gray-600 dark:text-dark-muted">
         Noch kein Konto?{" "}

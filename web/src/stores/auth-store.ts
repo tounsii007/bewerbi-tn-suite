@@ -23,6 +23,12 @@ interface AuthState {
     lastName: string;
     role: UserRole;
   }) => Promise<void>;
+  /**
+   * Iter 161 — exchange a Google ID token (obtained client-side from
+   * Google's OAuth pop-up) for our JWT pair. `role` is only honoured
+   * on signup — for existing users it's ignored.
+   */
+  signInWithGoogle: (idToken: string, role?: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
   hydrate: () => void;
   setUser: (user: AuthUser | null) => void;
@@ -63,6 +69,22 @@ export const useAuthStore = create<AuthState>()((set, get) => {
       } catch (e) {
         const err = e as { message?: string };
         set({ status: "anonymous", error: err.message ?? "Registrierung fehlgeschlagen" });
+        throw e;
+      }
+    },
+
+    signInWithGoogle: async (idToken, role) => {
+      set({ status: "authenticating", error: null });
+      try {
+        const resp = await authApi.google({ idToken, role });
+        onLoginSuccess(resp);
+        set({ user: resp.user, status: "authenticated" });
+      } catch (e) {
+        const err = e as { message?: string };
+        set({
+          status: "anonymous",
+          error: err.message ?? "Google-Anmeldung fehlgeschlagen",
+        });
         throw e;
       }
     },

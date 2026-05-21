@@ -41,6 +41,12 @@ export const authApi = {
   }) => api.public<AuthResponse>("/api/v1/auth/register", { method: "POST", body }),
   login: (body: { email: string; password: string }) =>
     api.public<AuthResponse>("/api/v1/auth/login", { method: "POST", body }),
+  // Iter 161 — exchange a Google ID token for our JWT pair. The backend
+  // verifies the token server-side against Google's JWKS, then either
+  // matches an existing GOOGLE user, returns 409 if an EMAIL user
+  // already owns the email (no silent takeover), or creates a new user.
+  google: (body: { idToken: string; role?: UserRole }) =>
+    api.public<AuthResponse>("/api/v1/auth/google", { method: "POST", body }),
   logout: (refreshToken: string) =>
     api.post<void>("/api/v1/auth/logout", { refreshToken }),
   logoutAll: () => api.post<void>("/api/v1/auth/logout-all"),
@@ -74,7 +80,27 @@ export const authApi = {
   },
   deleteAccount: (password: string) =>
     api.post<void>("/api/v1/auth/me/delete", { password }),
+  // Iter 161 — recent login attempts (success + failure) for the current
+  // user. Powers the "Letzte Aktivität" panel in /settings so the user
+  // can spot sign-ins they didn't make.
+  activity: (limit = 20) =>
+    api.get<LoginAttemptEntry[]>(
+      `/api/v1/auth/me/activity?limit=${Math.max(1, Math.min(100, limit))}`,
+    ),
 };
+
+/** Iter 161 — mirrors `tn.bewerbi.identity.domain.LoginAttempt`. */
+export interface LoginAttemptEntry {
+  id: string;
+  userId: string | null;
+  email: string;
+  method: "PASSWORD" | "GOOGLE" | "REFRESH";
+  success: boolean;
+  failureReason: string | null;
+  ip: string | null;
+  userAgent: string | null;
+  occurredAt: string;
+}
 
 // ─── Profile ───────────────────────────────────────────────────────────
 export const profileApi = {

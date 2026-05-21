@@ -2,6 +2,50 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 161 — Web frontend: Google sign-in + recent activity
+
+Web-Hälfte zum OAuth-Feature aus Iter 160. Schließt die Loop (User → Google-Popup → ID-Token → Backend-Verify → JWT-Pair).
+
+**Neue dep**: `@react-oauth/google` (1 package, 0 vulns). Wrappt Google Identity Services so dass die `<GoogleLogin>` component direkt ein ID-Token via `credential` callback liefert — genau was unser `GoogleIdTokenVerifier` erwartet.
+
+**Env-gated provider (`components/auth/google-oauth-provider.tsx`):**
+- `googleClientId()` + `googleOAuthEnabled()` helpers — single source of truth ob OAuth in der current env aktiv ist.
+- `<GoogleOAuthBoundary>` rendert children direkt wenn `NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID` leer ist (dev default) — kein GIS-script injection, kein console-noise. In prod (env-var gesetzt): GoogleOAuthProvider wrappt die Tree.
+- Verdrahtet in `providers.tsx` zwischen `<MotionConfig>` und `{children}`.
+
+**Sign-in button (`components/auth/google-sign-in-button.tsx`):**
+- `<GoogleSignInButton {role?, onSuccess?, text?}>` — Wrapper um `<GoogleLogin>` mit success-handler der `useAuthStore.signInWithGoogle(credential, role)` aufruft.
+- Komplett hidden via `googleOAuthEnabled()` check wenn keine client-id gesetzt — kein dead button im dev.
+- `text="signin_with"` auf /login (default), `text="signup_with"` auf /register.
+- Branded Google-Button (outline theme, large size, 320px width) — kein custom styling damit users die Google-OAuth-Indikator sofort erkennen.
+
+**Auth-Store extension (`stores/auth-store.ts`):**
+- Neue `signInWithGoogle(idToken, role?)` method — symmetrisch zu `signIn()` / `signUp()`. Calls `authApi.google()`, on success: `onLoginSuccess(resp)` + state hydration. On error: status → "anonymous", error-message persisted, re-throw für caller.
+
+**API client (`lib/api.ts`):**
+- `authApi.google({idToken, role})` → POST `/api/v1/auth/google`.
+- `authApi.activity(limit)` → GET `/api/v1/auth/me/activity?limit=N` returning `LoginAttemptEntry[]` (mirrors backend domain class).
+
+**/login page**: GoogleSignInButton zwischen submit-button und "Noch kein Konto?" footer. Routet auf `safeRedirectPath(?redirect, "/dashboard")` post-login, same wie password-flow.
+
+**/register page**: GoogleSignInButton mit dem currently-selected role (live-watched aus form state). Routet auf `/onboarding` (APPLICANT) oder `/employer/dashboard` (EMPLOYER) post-signup.
+
+**/settings page — neue Card "Letzte Aktivität" (`components/auth/recent-activity.tsx`):**
+- `useQuery(["auth", "me", "activity"], ...)` mit 30s staleTime — refetch on focus für aktuellen Stand nach inaktiver Tab.
+- Pro row: method-icon (Google glyph / KeyRound / RefreshCw), success-badge (grün ✓ / rot ⚠), Intl-formatted timestamp, IP, failure-reason (i18n-key `error.auth.activity.<code>`).
+- Loading / empty / error states mit retry-button.
+
+**i18n (`i18n/dictionaries.ts`)** — 3 locales × neue keys:
+- `auth.google.signIn` / `signUp` / `signingIn` (button labels)
+- `error.auth.google.disabled` / `emailExistsAsPassword` / `noPassword` (toast errors für backend-Fehler-codes)
+- `settings.activity.title` / `tagline` / `empty` / `success` / `failure` / `loadError`
+- `auth.method.PASSWORD` / `GOOGLE` / `REFRESH` (activity row method labels)
+- `error.auth.activity.<12 codes>` — RATE_LIMITED_ACCOUNT, USER_NOT_FOUND, INVALID_PASSWORD, OAUTH_*
+
+**Verifikation**: typecheck clean, lint 0 warnings, vitest 25/25 grün, next build 29/29 pages prerendered. /login 2.79kB, /register 4.36kB, /settings 10.2kB.
+
+**Manual smoke (dev, GOOGLE_OAUTH_CLIENT_ID unset)**: /login + /register + /settings rendern ohne Google-Block (keine dead UI, kein "Mit Google" button), backend `/api/v1/auth/google` returnt 503 `error.auth.google.disabled` falls direkt aufgerufen. Mit gesetztem client-id würde der GIS-button erscheinen und die end-to-end flow durchlaufen.
+
 ## Iteration 160 — Google Sign-In + Login-Recorder
 
 Backend-Hälfte vom OAuth-Feature. Schließt die security gaps die Iter 159 vorbereitet hat. Web-Frontend folgt in Iter 161.

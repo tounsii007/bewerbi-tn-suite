@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MotionConfig } from "framer-motion";
 import { useEffect, useMemo } from "react";
 import { Toaster } from "@/components/ui/toaster";
+import { GoogleOAuthBoundary } from "@/components/auth/google-oauth-provider";
 import { useAuthStore } from "@/stores/auth-store";
 import { useLocaleStore } from "@/stores/locale-store";
 import { useThemeStore } from "@/stores/theme-store";
@@ -45,8 +46,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
           This complements the CSS-level rule in globals.css (which
           already gates pure-CSS animations). */}
       <MotionConfig reducedMotion="user">
-        {children}
-        <Toaster />
+        {/* Iter 161 — gated Google OAuth provider. When the env var
+            is unset (dev default), this is a transparent passthrough
+            so no GIS script is injected and no console noise appears. */}
+        <GoogleOAuthBoundary>
+          {children}
+          <Toaster />
+        </GoogleOAuthBoundary>
       </MotionConfig>
     </QueryClientProvider>
   );

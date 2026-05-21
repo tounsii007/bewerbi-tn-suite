@@ -11,6 +11,7 @@ import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { PasswordMeter } from "@/components/auth/password-meter";
 import { SessionsList } from "@/components/auth/sessions-list";
+import { RecentActivity } from "@/components/auth/recent-activity";
 import { DeleteAccountCard } from "@/components/auth/delete-account-card";
 import { useAuthStore } from "@/stores/auth-store";
 import { authApi } from "@/lib/api";
@@ -118,6 +119,19 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <SessionsList />
+        </CardContent>
+      </Card>
+
+      {/* Iter 161 — server-side login history for spotting unfamiliar
+          sign-ins (success + failure) — distinct from "Aktive Sitzungen"
+          which only shows currently-valid refresh tokens. */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("settings.activity.title")}</CardTitle>
+          <CardDescription>{t("settings.activity.tagline")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <RecentActivity />
         </CardContent>
       </Card>
 

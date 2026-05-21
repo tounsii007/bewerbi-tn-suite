@@ -18,6 +18,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
+import { googleOAuthEnabled } from "@/components/auth/google-oauth-provider";
 import { useAuthStore } from "@/stores/auth-store";
 import { PasswordMeter } from "@/components/auth/password-meter";
 import { cn } from "@/lib/cn";
@@ -197,6 +199,24 @@ export default function RegisterPage() {
         oder
         <span className="h-px flex-1 bg-gray-200 dark:bg-dark-border" />
       </div>
+
+      {/* Iter 161 — Google sign-up. Forwards the selected role on first
+          signup; backend ignores it for existing users. Successful sign-
+          up routes the same way the password form does (onboarding for
+          applicant, employer dashboard otherwise). */}
+      {googleOAuthEnabled() && (
+        <div className="mb-6">
+          <GoogleSignInButton
+            role={role}
+            text="signup_with"
+            onSuccess={() =>
+              router.replace(
+                role === "EMPLOYER" ? "/employer/dashboard" : "/onboarding",
+              )
+            }
+          />
+        </div>
+      )}
 
       <p className="text-center text-sm text-gray-600 dark:text-dark-muted">
         Bereits ein Konto?{" "}
