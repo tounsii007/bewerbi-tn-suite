@@ -2,6 +2,12 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 162 — Dependabot: `@tootallnate/once` low-sev fix
+
+Single-line `mobile/package.json` override `@tootallnate/once@<3.0.1": "^3.0.1"` — bumpt die transitive dep (durch `jest-expo → jest-environment-jsdom → jsdom → http-proxy-agent`) auf 3.0.1 (GHSA: incorrect control flow scoping, low severity, fix verfügbar). `npm audit` reportet 0 vulnerabilities danach. Mobile-jest tests 12/12 grün — keine behavior-Änderung.
+
+Dependabot alert #10 wird beim nächsten dependabot-scan auto-closed.
+
 ## Iteration 161 — Web frontend: Google sign-in + recent activity
 
 Web-Hälfte zum OAuth-Feature aus Iter 160. Schließt die Loop (User → Google-Popup → ID-Token → Backend-Verify → JWT-Pair).
