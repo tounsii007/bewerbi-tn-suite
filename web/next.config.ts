@@ -1,4 +1,15 @@
 import type { NextConfig } from "next";
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+/**
+ * Iter 147 — bundle analyzer.
+ * Enable via `ANALYZE=true npm run build` — generates static HTML reports
+ * under .next/analyze/ that visualise each route's bundle composition.
+ */
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+  openAnalyzer: false,
+});
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -39,4 +50,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

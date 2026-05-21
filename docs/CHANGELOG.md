@@ -2,6 +2,30 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 147 — Performance pass (bundle analyzer + loading states)
+
+**Bundle Analyzer eingerichtet:**
+- `@next/bundle-analyzer` als devDep installiert.
+- `next.config.ts` mit `withBundleAnalyzer()` gewrappt — aktiviert via `ANALYZE=true`.
+- Neues npm script `analyze` (`ANALYZE=true next build`) — generiert HTML-Reports unter `.next/analyze/` für laufende Größen-Analyse.
+
+**Loading-States** für 3 meistbesuchte Routes:
+- `dashboard/loading.tsx`: Skeleton-Variante des Bento-Layouts (hero + 6 tiles + categories row). `tone="glass"` matched die echte UI.
+- `search/loading.tsx`: Header + search bar + sticky sidebar + 6 job-card skeletons.
+- `jobs/[id]/loading.tsx`: hero + 2 detail cards (description + requirements).
+
+**Effect**: Während Next.js die Page-Daten lädt (React Query, dynamic routes), erscheint sofort das Skeleton-Layout statt einer leeren Seite. Drastische Verbesserung der wahrgenommenen Performance bei navigation.
+
+**Bundle-Baseline** (vor Iter 147):
+- Landing: 8.01 kB + 162 kB First Load
+- Login: 2.47 kB + 232 kB
+- Dashboard: 11.3 kB + 181 kB
+- Search: 6.13 kB + 194 kB
+- Jobs/[id]: 6.67 kB + 183 kB
+- Visa: 14.1 kB + 183 kB (größtes Page-Bundle)
+
+Build verifiziert clean (29/29 prerender).
+
 ## Iteration 146 — i18n seeds erweitert für Iter-117/118 Strings
 
 Die mit Iter 117–143 eingeführten hart-codierten deutschen UI-Strings (Landing-Hero, Onboarding-Steps, Settings-Sections, Empty-States) sind jetzt in den 3 Seed-Files (`shared/i18n/{de,fr,ar}.json`) als Keys hinterlegt — bereit zum Upload an i18n-service.
