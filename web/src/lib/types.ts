@@ -72,6 +72,13 @@ export interface AuthUser {
   role: UserRole;
   emailVerified: boolean;
   preferredLocale: SupportedLocale;
+  /** Iter 169 — true when the account has a usable bcrypt hash on file.
+   *  Drives the visibility of "Passwort ändern" vs "Passwort setzen". */
+  hasPassword?: boolean;
+  /** Iter 169 — true when a Google identity is linked to the account.
+   *  Drives the visibility of "Mit Google verknüpfen" vs "Verknüpfung
+   *  entfernen". */
+  hasGoogleLinked?: boolean;
 }
 
 export interface AuthResponse {

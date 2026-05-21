@@ -32,6 +32,12 @@ interface AuthState {
   signOut: () => Promise<void>;
   hydrate: () => void;
   setUser: (user: AuthUser | null) => void;
+  /**
+   * Iter 169 — re-fetch /me/account so hasPassword + hasGoogleLinked
+   * flags refresh after link / unlink / set-initial-password. Doesn't
+   * re-mint JWTs (the existing access token remains valid).
+   */
+  refreshAccount: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()((set, get) => {
@@ -116,11 +122,38 @@ export const useAuthStore = create<AuthState>()((set, get) => {
           role: tokens.role as UserRole,
           emailVerified: tokens.emailVerified,
           preferredLocale: tokens.preferredLocale as AuthUser["preferredLocale"],
+          hasPassword: tokens.hasPassword,
+          hasGoogleLinked: tokens.hasGoogleLinked,
         },
         status: "authenticated",
       });
     },
 
     setUser: (user) => set({ user }),
+
+    refreshAccount: async () => {
+      try {
+        const account = await authApi.account();
+        // Merge — preserve preferredLocale (server might not echo it
+        // identically if the user changed it server-side, but for our
+        // current backend it always does). Account-summary may also
+        // omit transient fields; keep what we have for those.
+        set((s) => ({
+          user: s.user
+            ? {
+                ...s.user,
+                email: account.email,
+                role: account.role,
+                emailVerified: account.emailVerified,
+                preferredLocale: account.preferredLocale,
+                hasPassword: account.hasPassword,
+                hasGoogleLinked: account.hasGoogleLinked,
+              }
+            : s.user,
+        }));
+      } catch {
+        // Best-effort — keep the cached flags if the round-trip fails.
+      }
+    },
   };
 });

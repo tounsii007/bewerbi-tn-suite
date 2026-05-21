@@ -18,6 +18,12 @@ interface SessionUser {
   // the "verify your email" banner can decide whether to show.
   email?: string;
   emailVerified?: boolean;
+  /** Iter 169 — true when the account has a bcrypt hash on file.
+   *  Drives "Passwort ändern" vs "Passwort setzen" in settings. */
+  hasPassword?: boolean;
+  /** Iter 169 — true when a Google identity is linked. Drives the
+   *  "Mit Google verknüpfen" / "Verknüpfung entfernen" button. */
+  hasGoogleLinked?: boolean;
 }
 
 interface AuthSession {
@@ -55,6 +61,8 @@ interface AuthState {
   signInWithGoogle: (idToken: string, role?: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
   fetchProfile: () => Promise<void>;
+  /** Iter 169 — re-fetch /me/account so the linking flags refresh. */
+  refreshAccount: () => Promise<void>;
   mockLoginAs: (role: UserRole) => void;
   /** Called by the apiClient after a silent refresh so the new tokens
       are persisted to disk. */
@@ -110,6 +118,8 @@ export const useAuthStore = create<AuthState>()(
                   id: resp.user.id,
                   email: resp.user.email,
                   emailVerified: resp.user.emailVerified,
+                  hasPassword: resp.user.hasPassword,
+                  hasGoogleLinked: resp.user.hasGoogleLinked,
                 },
               },
             });
@@ -150,6 +160,8 @@ export const useAuthStore = create<AuthState>()(
                   id: resp.user.id,
                   email: resp.user.email,
                   emailVerified: resp.user.emailVerified,
+                  hasPassword: resp.user.hasPassword,
+                  hasGoogleLinked: resp.user.hasGoogleLinked,
                 },
               },
             });
@@ -190,6 +202,8 @@ export const useAuthStore = create<AuthState>()(
                 id: resp.user.id,
                 email: resp.user.email,
                 emailVerified: resp.user.emailVerified,
+                hasPassword: resp.user.hasPassword,
+                hasGoogleLinked: resp.user.hasGoogleLinked,
               },
             },
           });
@@ -225,6 +239,28 @@ export const useAuthStore = create<AuthState>()(
             .eq("user_id", session.user.id)
             .single();
           if (!error) set({ profile: data as Profile });
+        },
+
+        refreshAccount: async () => {
+          if (!IS_API_MODE) return;
+          try {
+            const account = await authApi.account();
+            set((s) => ({
+              session: s.session
+                ? {
+                    user: {
+                      ...s.session.user,
+                      email: account.email,
+                      emailVerified: account.emailVerified,
+                      hasPassword: account.hasPassword,
+                      hasGoogleLinked: account.hasGoogleLinked,
+                    },
+                  }
+                : s.session,
+            }));
+          } catch {
+            // Best-effort — keep cached flags on failure.
+          }
         },
 
         mockLoginAs: (role) => {

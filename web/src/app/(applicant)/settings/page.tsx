@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { PasswordMeter } from "@/components/auth/password-meter";
 import { SessionsList } from "@/components/auth/sessions-list";
 import { RecentActivity } from "@/components/auth/recent-activity";
+import { LinkedAccountsCard } from "@/components/auth/linked-accounts-card";
 import { DeleteAccountCard } from "@/components/auth/delete-account-card";
 import { useAuthStore } from "@/stores/auth-store";
 import { authApi } from "@/lib/api";
@@ -135,6 +136,14 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Iter 169 — verknüpfte konten card (Google ↔ Passwort).
+          Selbst-versteckt wenn nichts actionable ist. */}
+      <LinkedAccountsCard />
+
+      {/* "Passwort ändern" only makes sense for users who already have
+          a password. Google-only users see the "Passwort hinzufügen"
+          form in <LinkedAccountsCard> above instead. */}
+      {user?.hasPassword !== false && (
       <Card>
         <CardHeader>
           <CardTitle>Passwort ändern</CardTitle>
@@ -187,6 +196,7 @@ export default function SettingsPage() {
           </Button>
         </CardContent>
       </Card>
+      )}
 
       <Card>
         <CardHeader>

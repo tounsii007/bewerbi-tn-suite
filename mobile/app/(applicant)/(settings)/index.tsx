@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, Switch, Alert, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Globe, Moon, Bell, Shield, FileText, LogOut, ChevronRight, Info, KeyRound, Smartphone, Trash2, History, Settings as SettingsIcon } from "lucide-react-native";
+import { Globe, Moon, Bell, Shield, FileText, LogOut, ChevronRight, Info, KeyRound, Smartphone, Trash2, History, Link2, Settings as SettingsIcon } from "lucide-react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -45,6 +45,8 @@ export default function SettingsScreen() {
     { title: t("settings.language"), icon: Globe, color: "#2563EB", bg: "bg-blue-50", onPress: changeLanguage, value: i18n.language === "de" ? "Deutsch" : i18n.language === "ar" ? "العربية" : "Français" },
     { title: t("settings.darkMode"), icon: Moon, color: "#8b5cf6", bg: "bg-violet-50", toggle: true, value: isDark, onToggle: toggleTheme },
     { title: "Passwort ändern", icon: KeyRound, color: "#dc2626", bg: "bg-rose-50", onPress: () => router.push("/(applicant)/(settings)/change-password") },
+    // Iter 169 — manage Google ↔ password linking.
+    { title: "Verknüpfte Konten", icon: Link2, color: "#8b5cf6", bg: "bg-violet-50", onPress: () => router.push("/(applicant)/(settings)/linked-accounts") },
     { title: "Aktive Sitzungen", icon: Smartphone, color: "#0891b2", bg: "bg-cyan-50", onPress: () => router.push("/(applicant)/(settings)/sessions") },
     // Iter 168 — consumes the GET /me/activity endpoint exposed in
     // Iter 161 (web) / wired into mobile apiClient in Iter 166.

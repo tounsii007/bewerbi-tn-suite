@@ -2,6 +2,53 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 169 — Frontend für account-linking (Web + Mobile)
+
+Schließt das frontend-loop um Iter 167's backend account-linking endpoints. User können jetzt direkt aus der UI ihre Anmelde-methoden verwalten — Google verknüpfen / entkoppeln, Passwort zu Google-only account hinzufügen. Damit ist die OAuth-feature wirklich "keine lücke hinterlassen" complete.
+
+**Backend wire-up:**
+- `AuthResponse.UserDto` extended mit `hasPassword` + `hasGoogleLinked` flags (gebaut aus `user.hasPassword()` / `user.hasGoogle()` helpers von Iter 167). Damit weiß die UI direkt nach login welche linking-buttons sie zeigen muss, ohne extra round-trip.
+- **Neuer endpoint `GET /api/v1/auth/me/account`** — leichtgewichtige UserDto-summary. Settings-UI ruft das nach link/unlink/set-initial-password um die flags zu refreshen ohne JWT re-mint via /refresh.
+
+**Web (`<LinkedAccountsCard>` + /settings):**
+- Neue Card "Verknüpfte Konten" mit 2 status-rows (Passwort + Google, jeweils mit "Aktiv" badge wenn vorhanden) + state-dependent action:
+  - hasPassword + !hasGoogleLinked → `<GoogleLogin text="continue_with">` button für link
+  - hasPassword + hasGoogleLinked → "Verknüpfung entfernen" button (mit window.confirm)
+  - !hasPassword → "Passwort setzen" form mit PasswordMeter + confirm-field
+- Card selbst-versteckt wenn Google OAuth nicht configured AND user hat schon password (nichts actionable).
+- Bestehende "Passwort ändern" card jetzt conditional auf `user?.hasPassword !== false` — Google-only users sehen sie nicht (würde sie nur in den 409 von Iter 160 leiten).
+- `useAuthStore` extended mit `refreshAccount()` method die /me/account ruft + flags updated. Wird nach link/unlink aufgerufen.
+- `StoredTokens` (localStorage) persistiert die neuen flags damit sie nach reload sofort verfügbar sind.
+
+**Mobile (`linked-accounts.tsx` screen + settings-index):**
+- Dediziertes screen `app/(applicant)/(settings)/linked-accounts.tsx` mit gleichem 3-branch state machine wie web.
+- Link-flow nutzt `expo-auth-session` (selbe library wie Iter 166 login button) mit 3 platform-spezifischen clientIds.
+- Unlink mit native Alert.alert confirmation.
+- Set-password-form mit Input + PasswordMeter + confirm-field.
+- `useEffect` ruft `authStore.refreshAccount()` on mount damit ein user der auf web verknüpft hat im mobile-screen die aktuellen flags sieht.
+- `useAuthStore` extended (mobile) mit `refreshAccount()` + SessionUser jetzt mit `hasPassword`/`hasGoogleLinked`.
+- Settings-index: neuer "Verknüpfte Konten" item mit Link2 icon (violett-tinted) routes zur neuen screen.
+
+**i18n (web)** — 3 locales × ~25 neue keys:
+- `settings.linked.*` (title/tagline/method-rows/active-status/link-prompt/unlink-confirm/password-form)
+- `error.auth.google.link*` (linkRequiresPassword/linkEmailMismatch/linkAlreadyTaken/unlinkRequiresPassword)
+- `error.auth.password.alreadySet`
+- Mobile nutzt inline strings (matches existing mobile-i18n maturity gap).
+
+**Verifikation**: backend compile clean, web tsc clean / vitest 41/41 / build 29/29 prerendered (/settings 10.2→12.6kB durch linked-accounts card), mobile tsc clean / jest 12/12.
+
+**Damit Final-State der OAuth feature:**
+- ✅ Google-login + signup (3 clients)
+- ✅ Email/password als ebenbürtige path
+- ✅ Account-linking in beide richtungen (Iter 167 backend + Iter 169 frontend)
+- ✅ Rate-limiting (IP + email) inkl. JWKS-DoS-protection
+- ✅ GDPR-cascade auf login-attempts
+- ✅ Audit-trail via `AuditLogger` für jede operation
+- ✅ Activity-panel (web + mobile)
+- ✅ Test-coverage: web 41/41 + mobile 12/12 + common-security 44/44 + Playwright 17/17
+- ✅ Token-logging-hygiene auditiert
+- ⚠️ Out-of-scope (separate tasks): CSP-nonce fix (separate task gespawned), backend unit-tests für GoogleIdTokenVerifier (pre-existing identity-service test-infra gap), Apple sign-in.
+
 ## Iteration 168 — Mobile "Letzte Aktivität" screen
 
 Konsumiert die in Iter 161 (web) shipped + Iter 166 (mobile-apiClient) wired `GET /api/v1/auth/me/activity` endpoint. Damit kann der user sign-ins die er nicht gemacht hat direkt im phone-app spotten + reaktiv reagieren (passwort ändern / sessions beenden / google unlinken).

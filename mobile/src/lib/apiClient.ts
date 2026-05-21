@@ -153,7 +153,17 @@ export interface AuthResponse {
   accessTokenExpiresIn: number;
   refreshToken: string;
   refreshTokenExpiresAt: string;
-  user: { id: string; email: string; role: string; emailVerified: boolean; preferredLocale?: string };
+  user: {
+    id: string;
+    email: string;
+    role: string;
+    emailVerified: boolean;
+    preferredLocale?: string;
+    /** Iter 169 — true if the account has a bcrypt hash. */
+    hasPassword?: boolean;
+    /** Iter 169 — true if the account is linked to a Google identity. */
+    hasGoogleLinked?: boolean;
+  };
 }
 
 export const authApi = {
@@ -241,6 +251,26 @@ export const authApi = {
     request<LoginAttemptEntry[]>(
       `/api/v1/auth/me/activity?limit=${Math.max(1, Math.min(100, limit))}`,
     ),
+  // Iter 169 — re-fetch the account summary after link/unlink/set-
+  // initial-password so the settings UI updates without re-issuing JWTs.
+  account: () => request<AuthResponse["user"]>("/api/v1/auth/me/account"),
+  // Iter 169 — link an existing account to a Google identity. The
+  // verified email must match the account's email (anti-hijack).
+  linkGoogle: (idToken: string) =>
+    request<void>("/api/v1/auth/me/link-google", {
+      method: "POST",
+      body: JSON.stringify({ idToken }),
+    }),
+  // Iter 169 — remove the Google link. 409 if no password set.
+  unlinkGoogle: () =>
+    request<void>("/api/v1/auth/me/unlink-google", { method: "POST" }),
+  // Iter 169 — set the first password for a Google-only account.
+  // Revokes every refresh token on success.
+  setInitialPassword: (newPassword: string) =>
+    request<void>("/api/v1/auth/password/set-initial", {
+      method: "POST",
+      body: JSON.stringify({ newPassword }),
+    }),
 };
 
 /** Iter 166 — mirrors `tn.bewerbi.identity.domain.LoginAttempt`. */

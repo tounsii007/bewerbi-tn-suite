@@ -462,6 +462,20 @@ public class AuthService {
     }
 
     /**
+     * Iter 169 — return the lightweight account-summary DTO. The web/
+     * mobile settings UI calls this after a link/unlink/set-initial-
+     * password so the hasPassword/hasGoogleLinked flags refresh without
+     * having to re-mint tokens via /refresh.
+     */
+    public AuthResponse.UserDto accountSummary(UUID userId) {
+        User user = users.findById(userId)
+                .orElseThrow(() -> ResourceNotFoundException.of("User", userId));
+        return new AuthResponse.UserDto(user.getId(), user.getEmail(), user.getRole(),
+                user.isEmailVerified(), user.getPreferredLocale(),
+                user.hasPassword(), user.hasGoogle());
+    }
+
+    /**
      * Iter 160 — return the most-recent login attempts for a user.
      * Powers the "recent activity" view in /settings.
      */
@@ -958,7 +972,8 @@ public class AuthService {
                 refresh.token(),
                 refresh.expiresAt(),
                 new AuthResponse.UserDto(user.getId(), user.getEmail(), user.getRole(),
-                        user.isEmailVerified(), user.getPreferredLocale()));
+                        user.isEmailVerified(), user.getPreferredLocale(),
+                        user.hasPassword(), user.hasGoogle()));
     }
 
     /** Returns the SHA-256-hashed refresh tokens of a user — used by the
@@ -1114,7 +1129,14 @@ public class AuthService {
             String refreshToken,
             Instant refreshTokenExpiresAt,
             UserDto user) {
+        /**
+         * Iter 169 — added {@code hasPassword} + {@code hasGoogleLinked}
+         * so the UI can branch settings (show "Mit Google verknüpfen"
+         * only when not linked, show "Passwort setzen" only when no
+         * password yet, etc.) without a second round-trip.
+         */
         public record UserDto(UUID id, String email, UserRole role,
-                              boolean emailVerified, String preferredLocale) {}
+                              boolean emailVerified, String preferredLocale,
+                              boolean hasPassword, boolean hasGoogleLinked) {}
     }
 }

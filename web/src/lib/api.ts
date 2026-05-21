@@ -87,6 +87,23 @@ export const authApi = {
     api.get<LoginAttemptEntry[]>(
       `/api/v1/auth/me/activity?limit=${Math.max(1, Math.min(100, limit))}`,
     ),
+  // Iter 169 — re-fetch the account summary after link/unlink to update
+  // the settings UI without re-issuing JWTs.
+  account: () =>
+    api.get<AuthResponse["user"]>("/api/v1/auth/me/account"),
+  // Iter 169 — link an existing account to a Google identity (after
+  // verifying the same email matches). The user keeps their password
+  // and can subsequently log in either way.
+  linkGoogle: (idToken: string) =>
+    api.post<void>("/api/v1/auth/me/link-google", { idToken }),
+  // Iter 169 — remove the Google link. 409 if no password set.
+  unlinkGoogle: () =>
+    api.post<void>("/api/v1/auth/me/unlink-google"),
+  // Iter 169 — set the first password for a Google-only account. After
+  // this, the user can sign in with either Google or email/password.
+  // Revokes every refresh token on success.
+  setInitialPassword: (newPassword: string) =>
+    api.post<void>("/api/v1/auth/password/set-initial", { newPassword }),
 };
 
 /** Iter 161 — mirrors `tn.bewerbi.identity.domain.LoginAttempt`. */

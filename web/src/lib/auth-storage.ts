@@ -20,6 +20,12 @@ export interface StoredTokens {
   email: string;
   emailVerified: boolean;
   preferredLocale: string;
+  /** Iter 169 — mirrors AuthUser.hasPassword / hasGoogleLinked so the
+   *  settings UI can branch immediately on rehydrate without waiting
+   *  for /me/account to round-trip. Optional for back-compat with
+   *  storage written by older builds. */
+  hasPassword?: boolean;
+  hasGoogleLinked?: boolean;
 }
 
 export function readTokens(): StoredTokens | null {
@@ -52,6 +58,8 @@ export function writeTokens(resp: AuthResponse | null): void {
     email: resp.user.email,
     emailVerified: resp.user.emailVerified,
     preferredLocale: resp.user.preferredLocale,
+    hasPassword: resp.user.hasPassword,
+    hasGoogleLinked: resp.user.hasGoogleLinked,
   };
   window.localStorage.setItem(LOCAL_KEY, JSON.stringify(stored));
   // Mirror key fields into an HttpOnly cookie via the /api/session route.

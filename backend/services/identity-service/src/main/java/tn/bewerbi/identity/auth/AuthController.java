@@ -172,6 +172,19 @@ public class AuthController {
      * {@link #revokeSession(String)} — the plain token never crosses
      * the wire from the server side.
      */
+    /**
+     * Iter 169 — account summary (email + role + hasPassword +
+     * hasGoogleLinked). Called by settings after link / unlink /
+     * set-initial-password so the UI re-renders the correct buttons
+     * without having to mint new JWTs.
+     */
+    @GetMapping("/me/account")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Account summary for the current user")
+    public AuthService.AuthResponse.UserDto myAccount() {
+        return authService.accountSummary(CurrentUser.id());
+    }
+
     @GetMapping("/me/sessions")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "List active refresh-token sessions of the current user")
