@@ -24,6 +24,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { JobCard, JobCardSkeleton } from "@/components/shared/job-card";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useApiErrorToast } from "@/hooks/use-api-error-toast";
+import { useTranslate } from "@/i18n/use-translate";
 import { cn } from "@/lib/cn";
 import type { GermanLevel, JobCategory, JobType } from "@/lib/types";
 
@@ -53,6 +54,7 @@ const SALARY_BUCKETS = [
 export default function SearchPage() {
   const qc = useQueryClient();
   const toastApiError = useApiErrorToast();
+  const t = useTranslate();
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<JobCategory | undefined>();
@@ -310,9 +312,9 @@ export default function SearchPage() {
                 <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-primary-500/15 text-primary-600">
                   <Inbox className="size-8" />
                 </div>
-                <h3 className="mt-5 text-xl font-bold">Nichts gefunden</h3>
+                <h3 className="mt-5 text-xl font-bold">{t("empty.noResults.title")}</h3>
                 <p className="mt-2 text-sm text-gray-600 dark:text-dark-muted">
-                  Versuche, einen Filter zu lockern oder einen anderen Suchbegriff.
+                  {t("empty.noResults.body")}
                 </p>
                 {activeFilterCount > 0 && (
                   <div className="mt-6 flex justify-center gap-3">

@@ -10,10 +10,12 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { GradientText } from "@/components/ui/gradient-text";
 import { Reveal } from "@/components/ui/reveal";
 import { useApiErrorToast } from "@/hooks/use-api-error-toast";
+import { useTranslate } from "@/i18n/use-translate";
 
 export default function FavoritesPage() {
   const qc = useQueryClient();
   const toastApiError = useApiErrorToast();
+  const t = useTranslate();
   const favIds = useQuery({ queryKey: ["favorites"], queryFn: () => favoritesApi.list() });
   const jobs = useQueries({
     queries: (favIds.data ?? []).map((id) => ({
@@ -68,10 +70,9 @@ export default function FavoritesPage() {
             <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-accent-500/15 text-accent-600">
               <Heart className="size-8" />
             </div>
-            <h2 className="mt-5 text-xl font-bold">Noch keine Favoriten</h2>
+            <h2 className="mt-5 text-xl font-bold">{t("empty.noFav.title")}</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-gray-600 dark:text-dark-muted">
-              Markiere Stellen mit dem Herz-Icon und sie landen hier — perfekt
-              für die nächste Bewerbungsrunde.
+              {t("empty.noFav.body")}
             </p>
             <Button
               asChild

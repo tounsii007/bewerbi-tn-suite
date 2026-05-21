@@ -96,7 +96,7 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Konto</CardTitle>
+          <CardTitle>{t("settings.section.account")}</CardTitle>
           <CardDescription>Angemeldet als <b>{user?.email}</b>.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
@@ -176,7 +176,7 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Rechtliches</CardTitle>
+          <CardTitle>{t("settings.section.legal")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2 text-sm">
           <a href="/legal/privacy" className="text-primary-600 hover:underline">Datenschutz</a>

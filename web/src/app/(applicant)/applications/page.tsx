@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GradientText } from "@/components/ui/gradient-text";
 import { Reveal } from "@/components/ui/reveal";
+import { useTranslate } from "@/i18n/use-translate";
 import type { ApplicationStatus } from "@/lib/types";
 
 const STATUS_VARIANT: Record<
@@ -34,6 +35,7 @@ const STATUS_LABEL: Record<ApplicationStatus, string> = {
 };
 
 export default function ApplicationsPage() {
+  const t = useTranslate();
   const q = useQuery({
     queryKey: ["applications", "mine"],
     queryFn: () => applicationsApi.mine(),
@@ -73,9 +75,9 @@ export default function ApplicationsPage() {
             <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-primary-500/15 text-primary-600">
               <FileText className="size-8" />
             </div>
-            <h2 className="mt-5 text-xl font-bold">Noch keine Bewerbungen</h2>
+            <h2 className="mt-5 text-xl font-bold">{t("empty.noApps.title")}</h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-dark-muted">
-              Finde deinen ersten Job und bewirb dich in 60 Sekunden.
+              {t("empty.noApps.body")}
             </p>
             <Button
               asChild

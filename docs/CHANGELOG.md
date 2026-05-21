@@ -2,6 +2,27 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 149 — Web i18n wiring (Iter 146 keys aktiv schalten)
+
+Die Iter-146 Übersetzungen waren bisher nur in den shared/ JSON-Seeds. Jetzt sind sie auch in der Client-Dictionary verfügbar und werden in ersten Pages tatsächlich genutzt.
+
+**`web/src/i18n/dictionaries.ts`** — 52 neue Keys × 3 Locales = **156 neue Strings**:
+- `landing.*` — 25 Keys für Marketing-Hero (für zukünftige Verwendung wenn Landing zu Client-Component wird oder ein Server-Side-Translate-Helper kommt).
+- `settings.section.*` — 5 Keys (Konto/App/Rechtliches/Gefahrenzone/Sicherheit).
+- `settings.sessions.*` — 4 Keys (Title/Tagline/RevokeOthers/Current).
+- `onboarding.*` — 12 Keys (5 step titles + taglines + step/progress mit `{n}`/`{total}`/`{percent}` placeholders).
+- `empty.*` — 6 Keys (noResults/noApps/noFav je title+body).
+
+**Wiring** (3 Pages):
+- `/settings`: "Konto" → `t("settings.section.account")`, "Rechtliches" → `t("settings.section.legal")`. Die anderen Section-Headers stehen jetzt für FR/AR bereit.
+- `/applications`: Empty-State "Noch keine Bewerbungen" + Body → `t("empty.noApps.*")`.
+- `/favorites`: Empty-State "Noch keine Favoriten" + Body → `t("empty.noFav.*")`.
+- `/search`: Empty-State "Nichts gefunden" + Body → `t("empty.noResults.*")`.
+
+User die in den Settings auf FR/AR umstellen sehen jetzt die Empty-States in ihrer Sprache. Restliche Strings (HeroSection des Landings, Onboarding-Step-Wizards, etc) folgen in nächster Welle — diese Iteration legt nur die Infrastruktur.
+
+Build clean, 25 Web-Tests grün, typecheck grün.
+
 ## Iteration 148 — Loading-States für restliche heavy pages
 
 Fortsetzung der UX-Polish aus Iter 147. **8 weitere `loading.tsx`** für alle major content-Routes.
