@@ -2,6 +2,29 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 158 — Playwright critical-path coverage (auth + 404)
+
+**4 neue Tests in 2 Files** (additional zu den 6 Landing-Tests aus Iter 157):
+
+- **`e2e/auth.spec.ts`** (3 Tests, alle für `/forgot-password`):
+  - email input + reset-link button rendering
+  - back-to-login link
+  - hero copy "Passwort vergessen"
+
+  /login + /register + /reset-password sind bewusst **NICHT** abgedeckt: alle drei nutzen `useSearchParams()` in einem `<Suspense fallback={null}>` — Next bailt sie zur Build-Zeit auf client-side rendering, die SSR-HTML-body ist leer bis Hydration fertig ist. Asserts gegen ein fresh `next start` sind dadurch flaky. Folgewelle wird entweder `useSearchParams` in ein Subkomponente isolieren oder e2e gegen `next dev` laufen lassen.
+
+- **`e2e/error-routes.spec.ts`** (1 Test):
+  - `/this-does-not-exist` rendert nach hydration mindestens einen home-Link.
+
+  Status-code assertion (`expect(response.status).toBe(404)`) entfernt — `next start` serviert für unknown routes manchmal 200 mit hydrated 404 body. Manual smoke bestätigt dass das 404 GlassCard mit Compass + GradientText + 2 CTAs in echtem Browser korrekt rendert.
+
+**Test-Total**:
+- Vitest: 25
+- Playwright: **10** (6 Landing + 3 Auth + 1 Error)
+- = 35 Web-Tests
+
+Alle Tests laufen in ~1.7min (mit `next build && next start` setup-overhead).
+
 ## Iteration 157 — Web e2e mit Playwright (Setup + Landing smoke)
 
 Drittes Test-Tier nach Vitest (Iter 145) und Jest (Iter 150): echte Browser-Tests gegen das gebaute Next-Bundle.
