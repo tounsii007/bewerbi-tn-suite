@@ -2,6 +2,44 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 160 — Google Sign-In + Login-Recorder
+
+Backend-Hälfte vom OAuth-Feature. Schließt die security gaps die Iter 159 vorbereitet hat. Web-Frontend folgt in Iter 161.
+
+**Google ID-Token Verification (`auth/google/GoogleIdTokenVerifier.java`):**
+- Pure server-side verification — verifiziert RS256-Signature gegen Google's JWKS (`https://www.googleapis.com/oauth2/v3/certs`, cached, retrying). Niemals client-side claims trauen.
+- Verifikations-Chain (jeder Schritt rejecta das Token): Signature → `iss` ∈ {`https://accounts.google.com`, `accounts.google.com`} → `aud` matcht unsere client-id → `exp` future → `email_verified=true`.
+- `@ConditionalOnProperty(name = "bewerbi.security.google.client-id")` — bean lädt nur wenn property gesetzt ist, dev/CI builds ohne Google credentials starten unverändert.
+- Returnt `VerifiedGoogleUser` record (subject/email/given_name/family_name/picture/locale).
+- Stable error codes für audit-grouping: `OAUTH_TOKEN_MISSING`, `OAUTH_TOKEN_MALFORMED`, `OAUTH_TOKEN_INVALID`, `OAUTH_AUDIENCE_MISMATCH`, `OAUTH_EMAIL_UNVERIFIED`, `OAUTH_CLAIMS_INCOMPLETE`.
+
+**Login-Recorder (`auth/LoginAttemptRecorder.java`):**
+- Fire-and-forget Postgres-mirror der LoginAttempt-Rows (Kafka audit-stream bleibt primary trail).
+- Jeder save in `Propagation.REQUIRES_NEW` — transienter DB-Failure (z.B. brief Postgres restart) reißt die calling transaction nicht runter. Successful login returnt tokens auch wenn audit-row-insert failt.
+- `DataAccessException` → log WARN, nie throwen.
+
+**AuthService Integration:**
+- `login()` — jeder failure-pfad (rate-limit-account / rate-limit-ip / unknown user / wrong password) ruft `loginRecorder.recordFailure(...)` mit stable reason-code. Success-pfad: `recordSuccess(...)` mit `LoginMethod.PASSWORD`.
+- **Neue Methode `googleLogin(GoogleLoginRequest)`** mit 3 Pfaden:
+  1. `findByGoogleSubject(sub)` → existing Google-user, issue tokens.
+  2. `findByEmail(email)` → existing EMAIL-user → **409 ConflictException** (`error.auth.google.emailExistsAsPassword`). Account-linking ist future-iter, kein silent-takeover.
+  3. New → `User.fromGoogle()` + Profile mit `given_name` / `family_name` / `picture` aus Token. Kein verification email (Google verified bereits).
+- **OAuth-Guards für password-operationen:**
+  - `login(email, password)` für OAuth-only-user → BadCredentialsException, mit equal-time bcrypt gegen DUMMY_HASH (kein enumeration leak via timing).
+  - `requestPasswordReset(email)` für OAuth-only → silent return (kein email-leak).
+  - `changePassword()` für OAuth-only → 409 ConflictException (`error.auth.google.noPassword`).
+  - `deleteAccount()` für OAuth-only → skip password-check (Google-user hat keinen), aber equal-time DUMMY_HASH bcrypt für timing.
+- **GDPR cascade** bei `deleteAccount()`: `loginAttempts.anonymiseForUser(uid)` — Rows bleiben für security forensics, aber email + UA werden geblankt, user_id wird auf NULL gesetzt via `ON DELETE SET NULL`.
+
+**Neue Endpoints (`AuthController.java`):**
+- `POST /api/v1/auth/google` — body `{idToken, role?}`. Returnt same `AuthResponse` shape wie `/login`.
+- `GET /api/v1/auth/me/activity?limit=20` (authenticated) — recent login attempts für /settings UI. Limit server-side auf [1,100] clamped.
+
+**Config (`application.yml`):**
+- `bewerbi.security.google.client-id: ${GOOGLE_OAUTH_CLIENT_ID:}` — leer in dev (bean off, /auth/google returnt 503 `error.auth.google.disabled`). In prod: env-var setzen, same value wird ins web-bundle published.
+
+**Verifikation:** identity-service compile clean (`mvn -pl services/identity-service compile`). common-security tests 44/44 grün (proxy regression check — identity-service hat keine unit-tests, IntegrationTest weiterhin broken durch pre-existing common-security classpath-issue von vor Iter 159).
+
 ## Iteration 159 — DB foundation für OAuth + Login-History
 
 Vorbereitung für Iter 160 (Google Sign-In) + Iter 161 (Login-Recorder). Reiner Schema- + Entity-Pass — keine Behavior-Änderung.

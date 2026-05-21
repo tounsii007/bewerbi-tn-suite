@@ -29,6 +29,27 @@ public class AuthController {
         return authService.login(req);
     }
 
+    /**
+     * Iter 160 — Sign in (or auto-sign-up) with a Google ID token.
+     *
+     * <p>The web/mobile client exchanges Google's OAuth pop-up for an
+     * ID token (a JWT signed by Google) and posts it here. We verify
+     * it server-side against Google's JWKS, then either:
+     * <ul>
+     *   <li>issue tokens for the matched user, or</li>
+     *   <li>create a new user (provider=GOOGLE) and issue tokens.</li>
+     * </ul>
+     * Returns the same {@link AuthService.AuthResponse} shape as
+     * {@code /login} so the client treats both paths identically once
+     * the JWT is in hand.
+     */
+    @PostMapping("/google")
+    @Operation(summary = "Sign in / sign up via a Google ID token")
+    public AuthService.AuthResponse google(@Valid @RequestBody
+                                           AuthService.GoogleLoginRequest req) {
+        return authService.googleLogin(req);
+    }
+
     @PostMapping("/refresh")
     public AuthService.AuthResponse refresh(@RequestBody RefreshRequest req) {
         return authService.refresh(req.refreshToken());
@@ -114,6 +135,23 @@ public class AuthController {
     @Operation(summary = "List active refresh-token sessions of the current user")
     public java.util.List<tn.bewerbi.identity.auth.RefreshTokenStore.SessionInfo> mySessions() {
         return authService.listSessions(CurrentUser.id());
+    }
+
+    /**
+     * Iter 160 — recent login attempts (success + failure) for the
+     * current user. Powers the "recent activity" panel in /settings —
+     * a user can scan for sign-ins they didn't make and force a
+     * password reset / revoke sessions if something looks off.
+     *
+     * <p>{@code limit} is clamped server-side to [1, 100].
+     */
+    @GetMapping("/me/activity")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Recent login attempts (success + failure) for the current user")
+    public java.util.List<tn.bewerbi.identity.domain.LoginAttempt> myActivity(
+            @org.springframework.web.bind.annotation.RequestParam(value = "limit",
+                    defaultValue = "20") int limit) {
+        return authService.recentLoginAttempts(CurrentUser.id(), limit);
     }
 
     @org.springframework.web.bind.annotation.DeleteMapping("/me/sessions/{tokenHash}")

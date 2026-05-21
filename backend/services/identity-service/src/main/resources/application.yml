@@ -53,6 +53,14 @@ bewerbi:
       access-ttl-minutes: 60
       refresh-ttl-days: 30
       issuer: bewerbi.tn
+    # Iter 160 — Google OAuth (ID-token sign-in).
+    # Left empty in dev so the bean stays unloaded and /auth/google
+    # returns 503 with `error.auth.google.disabled` until an OAuth
+    # client is provisioned in Google Cloud Console. In prod, set
+    # GOOGLE_OAUTH_CLIENT_ID to the web-app OAuth-2.0 client ID;
+    # the same value is published to the web bundle for client init.
+    google:
+      client-id: ${GOOGLE_OAUTH_CLIENT_ID:}
   clients:
     i18n-service:
       base-url: ${I18N_SERVICE_URL:http://localhost:8181}

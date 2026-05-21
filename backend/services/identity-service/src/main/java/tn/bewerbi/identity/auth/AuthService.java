@@ -25,6 +25,7 @@ import tn.bewerbi.common.security.PasswordStrength;
 import tn.bewerbi.common.security.audit.AuditEvent;
 import tn.bewerbi.common.security.audit.AuditLogger;
 import tn.bewerbi.common.security.audit.LoginAttemptTracker;
+import tn.bewerbi.identity.auth.google.GoogleIdTokenVerifier;
 import tn.bewerbi.identity.domain.*;
 
 @Service
@@ -47,18 +48,28 @@ public class AuthService {
     private final AuditLogger audit;
     private final BreachedPasswordChecker breachedChecker;
     private final KnownDeviceTracker devices;
+    /** Iter 160 — Postgres-backed login history (per-user activity view). */
+    private final LoginAttemptRecorder loginRecorder;
+    /** Iter 160 — null unless `bewerbi.security.google.client-id` is set. */
+    private final GoogleIdTokenVerifier googleVerifier;
+    private final LoginAttemptRepository loginAttempts;
 
     public AuthService(UserRepository users, ProfileRepository profiles,
                        PasswordEncoder passwords, JwtTokenService tokens,
                        EventPublisher events, RefreshTokenStore refreshStore,
+                       LoginAttemptRecorder loginRecorder,
+                       LoginAttemptRepository loginAttempts,
                        ObjectProvider<LoginAttemptTracker> attemptsProvider,
                        ObjectProvider<AuditLogger> auditProvider,
                        ObjectProvider<BreachedPasswordChecker> breachedProvider,
-                       ObjectProvider<KnownDeviceTracker> devicesProvider) {
+                       ObjectProvider<KnownDeviceTracker> devicesProvider,
+                       ObjectProvider<GoogleIdTokenVerifier> googleProvider) {
         this.users = users; this.profiles = profiles;
         this.passwords = passwords; this.tokens = tokens;
         this.events = events;
         this.refreshStore = refreshStore;
+        this.loginRecorder = loginRecorder;
+        this.loginAttempts = loginAttempts;
         // Optional: in unit tests without Redis these beans are absent.
         this.attempts = attemptsProvider.getIfAvailable();
         this.audit = auditProvider.getIfAvailable();
@@ -66,6 +77,8 @@ public class AuthService {
         //   bewerbi.security.password.breach-check.enabled=true
         this.breachedChecker = breachedProvider.getIfAvailable();
         this.devices = devicesProvider.getIfAvailable();
+        // Optional: only present when bewerbi.security.google.client-id is set.
+        this.googleVerifier = googleProvider.getIfAvailable();
     }
 
     public AuthResponse register(RegisterRequest req) {
@@ -113,6 +126,7 @@ public class AuthService {
     public AuthResponse login(LoginRequest req) {
         String email = req.email().toLowerCase();
         String ip = currentClientIp();
+        String ua = currentUserAgent();
 
         // Per-account lockout — short-circuit before touching the DB / bcrypt.
         if (attempts != null && attempts.isLockedOut(email)) {
@@ -121,25 +135,46 @@ public class AuthService {
                 audit.log(AuditEvent.failure("AUTH_LOGIN_LOCKED", email, email,
                         "locked-out " + retryAfter + "s"));
             }
+            loginRecorder.recordFailure(null, email, LoginMethod.PASSWORD,
+                    "RATE_LIMITED_ACCOUNT", ip, ua);
             throw TooManyRequestsException.of(retryAfter);
         }
-        // Per-IP lockout (Iter 113) — catches credential-stuffing that
-        // rotates accounts but stays on the same source. Higher threshold
-        // than per-account so legit shared IPs (offices, NAT) don't
-        // lock up.
+        // Per-IP lockout (Iter 113).
         if (attempts != null && attempts.isIpLockedOut(ip)) {
             long retryAfter = attempts.remainingIpLockoutSeconds(ip);
             if (audit != null) {
                 audit.log(AuditEvent.failure("AUTH_LOGIN_LOCKED", email, email,
                         "ip-locked-out " + ip + " " + retryAfter + "s"));
             }
+            loginRecorder.recordFailure(null, email, LoginMethod.PASSWORD,
+                    "RATE_LIMITED_IP", ip, ua);
             throw TooManyRequestsException.of(retryAfter);
         }
 
         var user = users.findByEmail(email).orElse(null);
+
+        // Iter 160 — block password login for OAuth-only users. A Google
+        // user submitting `email + password` should hear "you signed up
+        // with Google" instead of equal-time-bcrypt nonsense (their
+        // password_hash is NULL). We DO still run a bcrypt against the
+        // dummy hash to keep timing equal vs. wrong-password.
+        if (user != null && user.isOauthOnly()) {
+            passwords.matches(req.password(), DUMMY_HASH);
+            if (attempts != null) {
+                attempts.recordFailure(email);
+                attempts.recordIpFailure(ip);
+            }
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_LOGIN_FAILED",
+                        user.getId().toString(), email, "oauth-only-account"));
+            }
+            loginRecorder.recordFailure(user.getId(), email, LoginMethod.PASSWORD,
+                    "OAUTH_ACCOUNT_USE_GOOGLE", ip, ua);
+            throw new BadCredentialsException("Invalid credentials");
+        }
+
         // Equal-time check: even if the user is missing, run bcrypt against the
-        // configured dummy hash so an attacker can't enumerate accounts by
-        // measuring response latency.
+        // configured dummy hash.
         boolean valid = user != null && passwords.matches(req.password(), user.getPasswordHash());
         if (user == null) {
             passwords.matches(req.password(), DUMMY_HASH);
@@ -153,25 +188,133 @@ public class AuthService {
                 audit.log(AuditEvent.failure("AUTH_LOGIN_FAILED", email, email,
                         "invalid-credentials"));
             }
+            loginRecorder.recordFailure(
+                    user != null ? user.getId() : null, email,
+                    LoginMethod.PASSWORD,
+                    user != null ? "INVALID_PASSWORD" : "USER_NOT_FOUND",
+                    ip, ua);
             throw new BadCredentialsException("Invalid credentials");
         }
 
         if (attempts != null) {
             attempts.reset(email);
-            // Don't reset IP on success — a stuffing attacker who
-            // eventually gets a hit on *some* account would otherwise
-            // wipe the per-IP counter and keep going.
         }
         if (audit != null) {
             audit.log(AuditEvent.success("AUTH_LOGIN_SUCCESS",
                     user.getId().toString(), email));
         }
+        loginRecorder.recordSuccess(user.getId(), email, LoginMethod.PASSWORD, ip, ua);
         user.touchLogin();
-        // Notify on first login from a fresh (IP, UA) pair so the user
-        // can spot a hostile takeover that the rate-limiter + lockout
-        // didn't catch (e.g. credential-stuffing with a leaked password).
         notifyOnNewDevice(user);
         return issueTokens(user);
+    }
+
+    /**
+     * Iter 160 — Google ID token login / signup.
+     *
+     * <p>The client (web/mobile) gets an ID token from Google's sign-in
+     * SDK and POSTs it here. We verify it server-side against Google's
+     * JWKS — never trust client-side claims.
+     *
+     * <p>3 paths:
+     * <ol>
+     *   <li>Existing GOOGLE user (lookup by `sub`) → issue tokens.</li>
+     *   <li>Existing EMAIL user (lookup by email) → 409 with a clear
+     *       message asking them to log in with their password instead.
+     *       Future iteration: account-linking flow.</li>
+     *   <li>Brand-new user → create with {@link User#fromGoogle}, also
+     *       seed a Profile with the given/family name from the token.
+     *       No verification email needed (Google verified the email).</li>
+     * </ol>
+     */
+    public AuthResponse googleLogin(GoogleLoginRequest req) {
+        if (googleVerifier == null) {
+            throw new tn.bewerbi.common.api.exception.ServiceUnavailableException(
+                    "Google sign-in is not configured", "error.auth.google.disabled");
+        }
+        String ip = currentClientIp();
+        String ua = currentUserAgent();
+
+        GoogleIdTokenVerifier.VerifiedGoogleUser g;
+        try {
+            g = googleVerifier.verify(req.idToken());
+        } catch (GoogleIdTokenVerifier.GoogleTokenException e) {
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_LOGIN_FAILED", "google", "google",
+                        e.code() + ": " + e.getMessage()));
+            }
+            loginRecorder.recordFailure(null, "[google]", LoginMethod.GOOGLE,
+                    e.code(), ip, ua);
+            throw new BadCredentialsException("Google token rejected: " + e.code());
+        }
+
+        // Path 1 — existing Google user (lookup by stable sub).
+        var existing = users.findByGoogleSubject(g.subject());
+        if (existing.isPresent()) {
+            User user = existing.get();
+            recordGoogleSuccess(user, g.email(), ip, ua);
+            user.touchLogin();
+            notifyOnNewDevice(user);
+            return issueTokens(user);
+        }
+
+        // Path 2 — email collision with a password account.
+        var byEmail = users.findByEmail(g.email());
+        if (byEmail.isPresent()) {
+            User u = byEmail.get();
+            loginRecorder.recordFailure(u.getId(), g.email(), LoginMethod.GOOGLE,
+                    "OAUTH_EMAIL_COLLISION_PASSWORD_USER", ip, ua);
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_LOGIN_FAILED",
+                        u.getId().toString(), g.email(),
+                        "google-email-collides-with-password-user"));
+            }
+            throw new ConflictException(
+                    "This email is registered with a password — please log in with your password.",
+                    "error.auth.google.emailExistsAsPassword");
+        }
+
+        // Path 3 — new Google user.
+        UserRole desiredRole = req.role() != null ? req.role() : UserRole.APPLICANT;
+        User user = User.fromGoogle(g.email(), g.subject(), desiredRole);
+        user.setPreferredLocale(LocaleContext.currentTag());
+        users.save(user);
+
+        Profile profile = new Profile(user.getId());
+        if (g.givenName() != null) profile.setFirstName(g.givenName());
+        if (g.familyName() != null) profile.setLastName(g.familyName());
+        if (g.pictureUrl() != null) profile.setPhotoUrl(g.pictureUrl());
+        profile.setCountry("Tunesien");
+        profiles.save(profile);
+
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_REGISTER",
+                    user.getId().toString(), user.getEmail()));
+        }
+        recordGoogleSuccess(user, g.email(), ip, ua);
+        user.touchLogin();
+        return issueTokens(user);
+    }
+
+    private void recordGoogleSuccess(User user, String email, String ip, String ua) {
+        if (attempts != null) {
+            attempts.reset(email);
+        }
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_LOGIN_SUCCESS",
+                    user.getId().toString(), email));
+        }
+        loginRecorder.recordSuccess(user.getId(), email, LoginMethod.GOOGLE, ip, ua);
+    }
+
+    /**
+     * Iter 160 — return the most-recent login attempts for a user.
+     * Powers the "recent activity" view in /settings.
+     */
+    public List<LoginAttempt> recentLoginAttempts(UUID userId, int limit) {
+        int clamped = Math.max(1, Math.min(100, limit));
+        return loginAttempts.findByUserIdOrderByOccurredAtDesc(
+                userId, org.springframework.data.domain.PageRequest.of(0, clamped));
     }
 
     private void notifyOnNewDevice(User user) {
@@ -279,18 +422,28 @@ public class AuthService {
      */
     public void deleteAccount(UUID userId, String passwordConfirmation) {
         var user = users.findById(userId).orElse(null);
-        boolean valid = user != null
-                && passwords.matches(passwordConfirmation, user.getPasswordHash());
-        if (user == null) {
+        // Iter 160 — OAuth-only users have no password to confirm. We
+        // accept the request as-is (the user has already proven they
+        // own the account by holding a valid JWT to even reach this
+        // endpoint). For symmetry with the password path we still
+        // burn a bcrypt against DUMMY_HASH to keep response timing flat.
+        boolean oauthOnly = user != null && user.isOauthOnly();
+        if (oauthOnly) {
             passwords.matches(passwordConfirmation, DUMMY_HASH);
-        }
-        if (!valid) {
-            if (audit != null && user != null) {
-                audit.log(AuditEvent.failure("AUTH_ACCOUNT_DELETE",
-                        user.getId().toString(), user.getEmail(),
-                        "invalid-password-confirmation"));
+        } else {
+            boolean valid = user != null
+                    && passwords.matches(passwordConfirmation, user.getPasswordHash());
+            if (user == null) {
+                passwords.matches(passwordConfirmation, DUMMY_HASH);
             }
-            throw new BadCredentialsException("Invalid credentials");
+            if (!valid) {
+                if (audit != null && user != null) {
+                    audit.log(AuditEvent.failure("AUTH_ACCOUNT_DELETE",
+                            user.getId().toString(), user.getEmail(),
+                            "invalid-password-confirmation"));
+                }
+                throw new BadCredentialsException("Invalid credentials");
+            }
         }
 
         String email = user.getEmail();
@@ -303,6 +456,12 @@ public class AuthService {
         if (devices != null) {
             devices.forgetUser(user.getId());
         }
+
+        // Iter 160 — GDPR Art. 17: anonymise the login-attempt audit
+        // rows before the FK is nulled by ON DELETE SET NULL. We keep
+        // the rows (security forensics trail) but blank the email so
+        // the trail can no longer be linked back to a natural person.
+        loginAttempts.anonymiseForUser(user.getId());
 
         // Persist the audit trail BEFORE the row goes away, so the
         // log entry actually carries the email rather than "unknown".
@@ -334,6 +493,23 @@ public class AuthService {
      */
     public void changePassword(UUID userId, String oldPassword, String newPassword) {
         var user = users.findById(userId).orElse(null);
+        // Iter 160 — OAuth-only users have no password to change. Reject
+        // with a domain-specific 409 so the UI can route them to "manage
+        // your Google account" instead of a generic "wrong password".
+        // Equal-time bcrypt against DUMMY_HASH so an attacker who guesses
+        // an email can't distinguish "this account is on Google" from
+        // "this account doesn't exist" via response time.
+        if (user != null && user.isOauthOnly()) {
+            passwords.matches(oldPassword, DUMMY_HASH);
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_PASSWORD_CHANGED",
+                        user.getId().toString(), user.getEmail(),
+                        "oauth-only-account"));
+            }
+            throw new ConflictException(
+                    "This account is managed by Google — no password to change.",
+                    "error.auth.google.noPassword");
+        }
         boolean valid = user != null && passwords.matches(oldPassword, user.getPasswordHash());
         if (user == null) {
             passwords.matches(oldPassword, DUMMY_HASH);
@@ -383,6 +559,17 @@ public class AuthService {
             if (audit != null) {
                 audit.log(AuditEvent.failure("AUTH_PASSWORD_RESET_REQUESTED",
                         normalized, normalized, "unknown-account"));
+            }
+            return;
+        }
+
+        // Iter 160 — OAuth-only users have no password to reset. Stay
+        // silent (no enumeration leak) — the user will not receive an
+        // email and there's nothing to reset.
+        if (user.isOauthOnly()) {
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_PASSWORD_RESET_REQUESTED",
+                        user.getId().toString(), normalized, "oauth-only-account"));
             }
             return;
         }
@@ -720,6 +907,23 @@ public class AuthService {
             @jakarta.validation.constraints.Size(max = 254) String email,
             @jakarta.validation.constraints.NotBlank
             @jakarta.validation.constraints.Size(max = 200) String password) {}
+
+    /**
+     * Iter 160 — payload for POST /api/v1/auth/google.
+     *
+     * <p>The {@code idToken} is the Google ID token (a JWT signed by Google,
+     * NOT our backend) that the client SDK returns after the user picks
+     * an account. Length cap of 4096 covers any realistic Google JWT
+     * (typically ~1.2 KB) and prevents oversized-payload DoS.
+     *
+     * <p>{@code role} is only honoured on first signup. For an existing
+     * user it's ignored — role changes go through a dedicated admin
+     * endpoint, not OAuth sign-in.
+     */
+    public record GoogleLoginRequest(
+            @jakarta.validation.constraints.NotBlank
+            @jakarta.validation.constraints.Size(max = 4096) String idToken,
+            UserRole role) {}
 
     public record ForgotPasswordRequest(
             @jakarta.validation.constraints.Email
