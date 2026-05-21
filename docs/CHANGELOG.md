@@ -2,6 +2,38 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 163 — Web unit tests für Iter-161 OAuth components
+
+Hebt vitest von 25 → 41 tests. Coverage für die security-kritischen OAuth-Web-paths damit zukünftige refactors keine silent breakage einbauen.
+
+**`google-sign-in-button.test.tsx`** (6 tests):
+- `googleOAuthEnabled()` returnt `false` bei missing / leerer / whitespace-only env-var, `true` bei real value.
+- `<GoogleSignInButton>` returnt `null` (empty DOM) ohne env-var → keine GIS-script injection in dev.
+- Rendert die GoogleLogin host nur wenn env-var gesetzt.
+- Forwarded `text` prop: default `"signin_with"`, `"signup_with"` für register page.
+- `@react-oauth/google` ist via vi.mock gestubbt — Tests laufen ohne real Google-credentials.
+
+**`recent-activity.test.tsx`** (4 tests):
+- Loading state: pending promise → `t("common.loading")` sichtbar.
+- Empty: API returnt `[]` → "settings.activity.empty" copy.
+- Data: 2 entries (success + failure) rendert success-badge + failure-badge + method-labels (PASSWORD/GOOGLE) + failure-reason code + beide IPs.
+- Error: API rejected → "settings.activity.loadError" + retry-button.
+- Runs in isolated QueryClient (retry off, staleTime 0) per test.
+
+**`auth-store.test.ts`** (5 tests):
+- `signInWithGoogle` happy-path: status authenticating → authenticated, user persisted, onLoginSuccess called.
+- Role-forwarding: passed → backend; omitted → undefined.
+- Error-path: status → anonymous, error message persisted, original error re-thrown.
+- Fallback error message für errors ohne `message` field.
+- `setOnUnauthorized()` wird genau 1× registriert (Zustand factory single-run).
+- API + api-client + auth-storage komplett gemockt via `vi.mock(...)` — Test runt ohne network / localStorage / sonner.
+
+**Stack notes**:
+- Wir nutzen `vi.resetModules()` + dynamic `await import()` per test so each one gets a fresh Zustand store (Zustand stores sind module-level singletons).
+- Caveat in `translateOrCode()` discovered: wenn mocked useTranslate die key zurückgibt, strippt der helper everything up to last dot, so "auth.method.PASSWORD" → "PASSWORD" für assertions.
+
+Verifikation: typecheck clean, lint 0 warnings, vitest **41/41 grün**.
+
 ## Iteration 162 — Dependabot: `@tootallnate/once` low-sev fix
 
 Single-line `mobile/package.json` override `@tootallnate/once@<3.0.1": "^3.0.1"` — bumpt die transitive dep (durch `jest-expo → jest-environment-jsdom → jsdom → http-proxy-agent`) auf 3.0.1 (GHSA: incorrect control flow scoping, low severity, fix verfügbar). `npm audit` reportet 0 vulnerabilities danach. Mobile-jest tests 12/12 grün — keine behavior-Änderung.
