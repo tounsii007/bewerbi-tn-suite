@@ -1,8 +1,7 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { CheckCircle2, XCircle, Loader2, Mail, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,19 +11,19 @@ import { authApi } from "@/lib/api";
 import { apiErrorMessage } from "@/lib/api-errors";
 import { useTranslate } from "@/i18n/use-translate";
 
+/**
+ * Iter 164 — reads `?token=` from `window.location` in a useEffect
+ * instead of via useSearchParams. Same reasoning as /reset-password:
+ * keeping the page free of useSearchParams means it prerenders
+ * statically (no Suspense bail) so Playwright can hit the page and
+ * see the "verifying" first paint without depending on hydration to
+ * fill in the chrome.
+ */
 export default function VerifyEmailPage() {
-  return (
-    <Suspense fallback={null}>
-      <VerifyEmailContent />
-    </Suspense>
-  );
-}
-
-function VerifyEmailContent() {
-  const search = useSearchParams();
-  const token = search.get("token");
   const t = useTranslate();
-  const [status, setStatus] = useState<"idle" | "ok" | "error">("idle");
+  const [status, setStatus] = useState<"loading" | "idle" | "ok" | "error">(
+    "loading",
+  );
   const [error, setError] = useState<string | null>(null);
   const [resendEmail, setResendEmail] = useState("");
   const [resendDone, setResendDone] = useState(false);
@@ -40,11 +39,14 @@ function VerifyEmailContent() {
   };
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const token = new URLSearchParams(window.location.search).get("token");
     if (!token) {
       setStatus("error");
       setError("Kein Token in der URL gefunden.");
       return;
     }
+    setStatus("idle");
     authApi
       .verifyEmail(token)
       .then(() => setStatus("ok"))
@@ -52,12 +54,12 @@ function VerifyEmailContent() {
         setStatus("error");
         setError(e.message ?? "Token ungültig oder abgelaufen.");
       });
-  }, [token]);
+  }, []);
 
   return (
     <AuthShell title="E-Mail bestätigen">
       <div className="text-center">
-        {status === "idle" && (
+        {(status === "loading" || status === "idle") && (
           <>
             <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-primary-500/15 text-primary-600">
               <Loader2 className="size-8 animate-spin" />

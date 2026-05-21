@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -31,27 +31,61 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>;
 
+/**
+ * Iter 164 — reads `?token=` via window.location in a useEffect
+ * instead of useSearchParams(). This keeps the page fully prerender-
+ * able (no Suspense bail) so Playwright can assert against static
+ * HTML without depending on client-side hydration to fill in chrome.
+ *
+ * The {@link tokenState} = "loading" branch renders the page chrome
+ * + a tiny skeleton on first paint. The useEffect runs after mount
+ * and resolves to either "missing" (no token in URL) or "ready" (we
+ * have one). The form / no-token / success branches all render the
+ * inner content; the page chrome is owned by AuthShell.
+ */
 export default function ResetPasswordPage() {
-  return (
-    <Suspense fallback={null}>
-      <ResetForm />
-    </Suspense>
-  );
-}
-
-function ResetForm() {
   const router = useRouter();
-  const search = useSearchParams();
-  const token = search.get("token") ?? "";
+  const [token, setToken] = useState<string | null>(null);
+  const [tokenLoaded, setTokenLoaded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const t = useTranslate();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const value = new URLSearchParams(window.location.search).get("token");
+    setToken(value && value.length > 0 ? value : null);
+    setTokenLoaded(true);
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { newPassword: "", confirm: "" },
   });
   const newPassword = form.watch("newPassword");
+
+  // First paint (pre-effect): show the chrome + a tiny skeleton. The
+  // effect resolves the token on next tick, then we re-render into the
+  // form / no-token / success branch.
+  if (!tokenLoaded) {
+    return (
+      <AuthShell title="Passwort zurücksetzen">
+        <div className="mb-6">
+          <h2 className="text-3xl font-extrabold tracking-tight">
+            Passwort zurücksetzen
+          </h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-dark-muted">
+            Folge dem Link aus deiner E-Mail und wähle ein neues Passwort.
+          </p>
+        </div>
+        <div className="space-y-3" aria-hidden="true" data-testid="reset-skeleton">
+          <div className="h-10 w-full rounded-xl bg-gray-100 dark:bg-dark-bg-alt" />
+          <div className="h-10 w-full rounded-xl bg-gray-100 dark:bg-dark-bg-alt" />
+          <div className="h-12 w-full rounded-xl bg-gray-100 dark:bg-dark-bg-alt" />
+        </div>
+      </AuthShell>
+    );
+  }
 
   if (!token) {
     return (
@@ -81,6 +115,10 @@ function ResetForm() {
   }
 
   async function onSubmit(values: FormValues) {
+    // token is non-null here — the branch above ensures it before this
+    // returns the form; TS just can't follow the control flow through
+    // the closure.
+    if (!token) return;
     setSubmitting(true);
     try {
       await authApi.resetPassword(token, values.newPassword);
@@ -125,7 +163,6 @@ function ResetForm() {
           Achte auf ein starkes Passwort — die Stärke wird live geprüft.
         </p>
       </div>
-
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-5"

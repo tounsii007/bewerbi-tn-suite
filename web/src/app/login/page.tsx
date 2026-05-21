@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -25,17 +25,24 @@ const schema = z.object({
 
 type LoginValues = z.infer<typeof schema>;
 
-export default function LoginPage() {
-  return (
-    <Suspense fallback={null}>
-      <LoginForm />
-    </Suspense>
-  );
+/**
+ * Iter 164 — read the `?redirect=` query param on demand instead of via
+ * `useSearchParams()`. Reason: useSearchParams forces the whole tree
+ * into a Suspense bail, which means Next prerenders an empty body and
+ * our Playwright tests can't assert against the static HTML. By
+ * reading window.location at submit time, the page prerenders normally.
+ *
+ * Safe because:
+ *  - the value is only consumed inside an event handler (post-hydration)
+ *  - safeRedirectPath() rejects external URLs + scheme tricks
+ */
+function readRedirectFromQuery(): string | null {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get("redirect");
 }
 
-function LoginForm() {
+export default function LoginPage() {
   const router = useRouter();
-  const search = useSearchParams();
   const signIn = useAuthStore((s) => s.signIn);
   const [submitting, setSubmitting] = useState(false);
   const t = useTranslate();
@@ -49,7 +56,7 @@ function LoginForm() {
     setSubmitting(true);
     try {
       await signIn(values.email, values.password);
-      const redirect = safeRedirectPath(search.get("redirect"), "/dashboard");
+      const redirect = safeRedirectPath(readRedirectFromQuery(), "/dashboard");
       router.replace(redirect);
     } catch (e) {
       toast.error(apiErrorMessage(t, e, "Anmeldung fehlgeschlagen"));
@@ -132,7 +139,7 @@ function LoginForm() {
         <div className="mb-6">
           <GoogleSignInButton
             onSuccess={() => {
-              const redirect = safeRedirectPath(search.get("redirect"), "/dashboard");
+              const redirect = safeRedirectPath(readRedirectFromQuery(), "/dashboard");
               router.replace(redirect);
             }}
           />

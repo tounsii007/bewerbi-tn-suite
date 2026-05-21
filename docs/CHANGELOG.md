@@ -2,6 +2,28 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 164 — Auth-Pages prerender-clean (Suspense raus, e2e ausgebaut)
+
+Räumt das Iter-158-TODO ab: /login + /register + /reset-password sind jetzt in Playwright abgedeckt. Vorher waren alle drei "bewusst nicht abgedeckt" weil sie als ganzes in `<Suspense fallback={null}>` saßen und der SSR-body bis Hydration leer war.
+
+**Refactor pattern (`useSearchParams` → `useEffect + window.location.search`):**
+- **`/login/page.tsx`**: useSearchParams komplett raus. `readRedirectFromQuery()` helper liest `window.location.search` direkt im event-handler (post-hydration). Suspense weg, Page rendert komplett statisch. `?redirect=` weiterhin honouriert beim sign-in success (password + Google paths).
+- **`/reset-password/page.tsx`**: useSearchParams raus. `useState<string|null>(null)` + `useEffect` der den token nach mount in state setzt. 4 render branches: `!tokenLoaded` (initial skeleton), `!token` (Link unvollständig), `done` (success), default (form). Page chrome wird in jeder branch wieder gezeigt damit user state-transitions visuell konsistent sind.
+- **`/verify/page.tsx`**: useSearchParams raus, alles in ein einziges Component mit `useState<"loading"|"idle"|"ok"|"error">`. useEffect liest token aus URL und kickt verifyEmail-call.
+
+**Playwright e2e** (`web/e2e/auth.spec.ts`) — 10 → 17 tests:
+- **Login page** (4): inputs + submit-button visible, links zu register + forgot-password, welcome-headline, Google-button hidden ohne env-var.
+- **Register page** (3): role-toggle (Bewerber+Arbeitgeber), form-fields + submit, link zu login.
+- **Forgot password page** (3): unverändert von Iter 158.
+
+**Auch nach Refactor NICHT abgedeckt: /reset-password + /verify**
+- Beide hängen davon ab dass useEffect post-mount läuft, und das hängt davon ab dass React hydratisiert.
+- Ein **pre-existing CSP-Bug** verhindert hydration unter `next start`: das Middleware setzt per-request Nonces in der CSP, aber Next.js bakt prerendered script-tags ohne nonce in die statische HTML. Browser blocked alle chunks via `strict-dynamic` → React lädt nie → useEffect läuft nie → page hängt im skeleton.
+- Verifiziert via `curl -s http://localhost:3015/login | grep nonce=` — 0 matches.
+- Separater task gespawned um die nonce-wiring zu fixen. Nach dem fix können /reset-password + /verify assertions hier hinzugefügt werden (Comment-block in der spec markiert die stelle).
+
+**Verifikation:** typecheck clean, vitest 41/41, playwright 17/17, build 29/29 prerendered pages. /reset-password 3.71kB (vorher 3.69kB — winzige zunahme durch state-machine).
+
 ## Iteration 165 — Rate-limit on POST /auth/google + JWKS-DoS-Schutz
 
 Schließt eine echte Lücke aus Iter 160: `POST /api/v1/auth/google` ruft `googleVerifier.verify()` auf, was network-I/O (JWKS fetch wenn cache cold) + RSA-Signature-validation triggert. Ohne rate-limit ist der endpoint ein DoS-Vektor für jeden unauthenticated client.
