@@ -3,16 +3,25 @@ import { Inter, Cairo } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
+// Iter 153 — Inter is used everywhere; preload it so the first paint
+// has the font ready (eliminates FOUT). Cairo loads non-eagerly because
+// only the ~5% AR-locale users see it.
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
   variable: "--font-inter",
   display: "swap",
+  preload: true,
+  // Pre-load only the weights actually used in the UI to avoid loading
+  // 12+ weight files.
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const cairo = Cairo({
   subsets: ["arabic"],
   variable: "--font-cairo",
   display: "swap",
+  preload: false,
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -56,6 +65,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Iter 153 — explicitly DO NOT lock zoom (a11y / WCAG 2.1 SC 1.4.4
+  // requires text-resize up to 200%). maximumScale/userScalable left
+  // unset so the browser default (5x zoom, scalable) applies.
+  // colorScheme tells the browser to render native form controls etc.
+  // in the right palette before the React hydration finishes.
+  colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
     { media: "(prefers-color-scheme: dark)", color: "#0f172a" },

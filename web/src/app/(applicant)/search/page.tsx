@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -133,16 +133,22 @@ export default function SearchPage() {
     }
   };
 
-  const toggleFav = async (jobId: string) => {
-    const isFav = favoritesQuery.data?.includes(jobId);
-    try {
-      if (isFav) await favoritesApi.remove(jobId);
-      else await favoritesApi.add(jobId);
-      await qc.invalidateQueries({ queryKey: ["favorites"] });
-    } catch (e) {
-      toastApiError(e, "Aktion fehlgeschlagen");
-    }
-  };
+  // Iter 153 — stable identity so memoized JobCard children don't
+  // re-render on every parent state change (filter chips, search input).
+  const favIds = favoritesQuery.data;
+  const toggleFav = useCallback(
+    async (jobId: string) => {
+      const isFav = favIds?.includes(jobId);
+      try {
+        if (isFav) await favoritesApi.remove(jobId);
+        else await favoritesApi.add(jobId);
+        await qc.invalidateQueries({ queryKey: ["favorites"] });
+      } catch (e) {
+        toastApiError(e, "Aktion fehlgeschlagen");
+      }
+    },
+    [favIds, qc, toastApiError],
+  );
 
   const filterPanel = (
     <FilterPanel

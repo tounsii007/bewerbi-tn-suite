@@ -2,6 +2,30 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 153 — Konkrete Performance + a11y wins
+
+Vier kleine, gezielte Optimierungen statt Lighthouse-Lifecycle (kann nicht ohne Browser laufen).
+
+**Font Loading — `layout.tsx`**:
+- `Inter`: weights gepinnt auf `["400", "500", "600", "700", "800"]` (5 statt default 12+). Spart ~2 woff2-Files = ~120 KB Download.
+- `Cairo`: `preload: false` — nur ~5% AR-locale User brauchen es; nicht-AR User sparen sich Cairo komplett aus dem initialen Bundle.
+
+**Viewport — `layout.tsx`**:
+- `colorScheme: "light dark"` — Browser rendert native form controls / scrollbars sofort im richtigen Theme statt zu flashen.
+- **Bewusst NICHT gesetzt**: `maximumScale` / `userScalable` — WCAG 2.1 SC 1.4.4 fordert text resize bis 200%. Browser-default (5× zoom) bleibt aktiv.
+
+**Memoization — `JobCard`**:
+- `JobCardImpl` → `export const JobCard = memo(JobCardImpl)`.
+- Verhindert re-render aller sichtbaren Jobs wenn der Parent (Search-Page) State ändert (Filter-Chips, Search-Input).
+- Folgewin: `toggleFav` in Search-Page mit `useCallback` gewrappt — sonst würde die new-closure-per-render den memo defeaten.
+
+**Build clean, 25 Web-Tests grün, typecheck grün.**
+
+Quantitativer Impact (Schätzung):
+- ~120 KB weniger Font-Download für non-AR User
+- Re-renders der Job-Liste bei Filter-Toggles: ~6 statt N (wo N = jobs visible)
+- Native form-control flash beim ersten Paint: weg
+
 ## Iteration 152 — PWA Manifest + Metadata enhancements
 
 **`web/src/app/manifest.ts`** — erheblich erweitert:

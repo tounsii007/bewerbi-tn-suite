@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import { Building2, Clock, Heart, MapPin, Sparkles } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -71,7 +72,7 @@ interface JobCardProps {
   href?: string;
 }
 
-export function JobCard({ job, isFavorite, onFavorite, href }: JobCardProps) {
+function JobCardImpl({ job, isFavorite, onFavorite, href }: JobCardProps) {
   const salary = formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency);
   const gradient = TYPE_GRADIENT[job.type];
 
@@ -163,6 +164,16 @@ export function JobCard({ job, isFavorite, onFavorite, href }: JobCardProps) {
     </article>
   );
 }
+
+/**
+ * Iter 153 — memoize JobCard so it skips re-renders when its props are
+ * referentially stable. In the search page, filter-chip toggles cause
+ * the whole list to re-render; memo cuts the cost when the underlying
+ * jobs haven't changed. (Note: callers that pass new `onFavorite`
+ * closures every render will still re-render; wrapping that with
+ * useCallback in the caller is the follow-up win.)
+ */
+export const JobCard = memo(JobCardImpl);
 
 export function JobCardSkeleton() {
   return (
