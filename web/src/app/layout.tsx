@@ -22,7 +22,35 @@ export const metadata: Metadata = {
   },
   description:
     "Stellen, Ausbildungen und Visum-Hilfe für Tunesier:innen, die in Deutschland durchstarten wollen.",
-  icons: [{ rel: "icon", url: "/favicon.svg" }],
+  // Iter 152 — PWA-friendly icon set + Apple-specific touch icon. The
+  // 192px icon doubles as the apple-touch-icon when iOS Safari can't
+  // find /apple-icon at the root.
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "bewerbi.tn",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    title: "bewerbi.tn — Deine Brücke nach Deutschland",
+    description:
+      "Stellen, Ausbildungen und Visum-Hilfe für Tunesier:innen, die in Deutschland durchstarten wollen.",
+    siteName: "bewerbi.tn",
+    locale: "de_DE",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "bewerbi.tn — Deine Brücke nach Deutschland",
+    description:
+      "Stellen, Ausbildungen und Visum-Hilfe für Tunesier:innen, die in Deutschland durchstarten wollen.",
+  },
 };
 
 export const viewport: Viewport = {

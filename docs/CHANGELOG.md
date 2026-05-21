@@ -2,6 +2,26 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 152 — PWA Manifest + Metadata enhancements
+
+**`web/src/app/manifest.ts`** — erheblich erweitert:
+- `id`: stable PWA identity (`/?utm_source=pwa`) — Browser können Installs über URL-Änderungen hinweg korrelieren.
+- `name` erweitert auf "bewerbi.tn — Brücke nach Deutschland" (besser für App-Drawer Suche).
+- `scope: "/"` + `display_override: ["standalone", "minimal-ui"]` — Standalone bevorzugt, graceful fallback.
+- `categories: ["productivity", "business", "education"]` — Discoverability in Edge/Samsung Internet App Stores.
+- `prefer_related_applications: false` — explicit Signal das es keine native App gibt (verhindert App-Store-Prompts in Safari).
+- **`shortcuts`** (3 Quick-Links): Long-press auf Home-Icon → Direkt zu "Stellen suchen" / "Meine Bewerbungen" / "Visum-Tracker". Jeder mit eigenem UTM-Source-Tracking.
+
+**`web/src/app/layout.tsx`** — metadata expanded:
+- `icons` als strukturiertes Objekt (icon SVG + apple-touch PNG 192).
+- `appleWebApp`: capable, title, statusBarStyle — iOS Add-to-Home-Screen behavior.
+- `formatDetection.telephone: false` — verhindert automatische Telefonnummer-Verlinkung.
+- `openGraph` + `twitter` cards für Link-Previews auf Social Media + Messengern (Facebook, X, LinkedIn, WhatsApp).
+
+Build clean. Manifest jetzt 190 B (vorher 153 B) — winziger Anstieg, riesiger Installability-Win.
+
+Note: Service Worker (offline-first asset caching) bewusst nicht hinzugefügt — ein halb-gebauter SW kann Cache-Poisoning verursachen. Wenn es richtig gemacht wird, dann mit Workbox + separater Iteration.
+
 ## Iteration 151 — Route Error-Boundaries + 404 Page
 
 **Lücke**: bisher keine `error.tsx` / `not-found.tsx` / `global-error.tsx` — runtime errors landeten auf Next.js' Default-Fallback-Page (graphisch fremd, kein Brand).
