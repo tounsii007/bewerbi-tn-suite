@@ -2,6 +2,28 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 157 — Web e2e mit Playwright (Setup + Landing smoke)
+
+Drittes Test-Tier nach Vitest (Iter 145) und Jest (Iter 150): echte Browser-Tests gegen das gebaute Next-Bundle.
+
+**Setup:**
+- `@playwright/test` als devDep + chromium browser (112 MiB headless shell heruntergeladen).
+- `playwright.config.ts`: testDir `./e2e`, baseURL `http://localhost:3010`, webServer = `npm run build && next start -p 3010`, retain trace/screenshot/video bei failure.
+- `package.json`: 2 neue Scripts — `test:e2e` (CLI) + `test:e2e:ui` (interactive Trace Viewer).
+- `.gitignore`: `test-results/` + `playwright-report/` + `playwright/.cache/` excludiert.
+
+**`web/e2e/landing.spec.ts`** — 6 smoke tests gegen die Landing:
+- Hero: GradientText headline + primary CTA mit korrektem href.
+- Sticky glass nav: brand mark + visible primary CTA (Login-Link ist hidden auf mobile, also nicht assertbar).
+- Trust strip + features bento + stats section.
+- Visa types section (mit scrollIntoView damit below-fold elements visibility-check passieren).
+- Anchor links (Features → #features).
+- No pageerror (uncaught JS exceptions). Console-error noise wird bewusst nicht assertet — production noise (vendor pre-fetches, optional API 404s) ist kein smoke-test signal.
+
+Alle 6 Tests grün in ~44s. Vitest (25) + Playwright (6) = 31 Web-Tests.
+
+**Bug gefixt während Setup**: playwright.config.ts JSDoc-Kommentar enthielt das Pattern `src/**/*.test.tsx` — die `*/` Sequence darin schließt den `/**` Kommentar vorzeitig. Workaround: das Pattern aus dem Kommentar paraphrasieren.
+
 ## Iteration 156 — Flutter widget tests für Iter-128 Primitives
 
 **4 neue Test-Files mit 19 Tests:**
