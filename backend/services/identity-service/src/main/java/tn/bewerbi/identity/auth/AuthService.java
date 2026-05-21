@@ -235,10 +235,32 @@ public class AuthService {
         String ip = currentClientIp();
         String ua = currentUserAgent();
 
+        // Iter 165 — apply the IP-level rate-limit BEFORE token-verify.
+        // Token-verify hits Google's JWKS (network I/O + RSA validation)
+        // which is too expensive to let an unauthenticated client invoke
+        // freely. The per-email axis can't apply here because we don't
+        // know the email until verification succeeds.
+        if (attempts != null && attempts.isIpLockedOut(ip)) {
+            long retryAfter = attempts.remainingIpLockoutSeconds(ip);
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_LOGIN_LOCKED", "google", "google",
+                        "oauth-ip-locked-out " + ip + " " + retryAfter + "s"));
+            }
+            loginRecorder.recordFailure(null, "[google]", LoginMethod.GOOGLE,
+                    "RATE_LIMITED_IP", ip, ua);
+            throw TooManyRequestsException.of(retryAfter);
+        }
+
         GoogleIdTokenVerifier.VerifiedGoogleUser g;
         try {
             g = googleVerifier.verify(req.idToken());
         } catch (GoogleIdTokenVerifier.GoogleTokenException e) {
+            // Iter 165 — count token-verify failures toward the per-IP
+            // lockout. Burns through the rate-limit budget if someone
+            // spams the endpoint with garbage JWTs.
+            if (attempts != null) {
+                attempts.recordIpFailure(ip);
+            }
             if (audit != null) {
                 audit.log(AuditEvent.failure("AUTH_LOGIN_FAILED", "google", "google",
                         e.code() + ": " + e.getMessage()));
@@ -299,6 +321,11 @@ public class AuthService {
     private void recordGoogleSuccess(User user, String email, String ip, String ua) {
         if (attempts != null) {
             attempts.reset(email);
+            // Iter 165 — also clear the per-IP counter on a confirmed
+            // success. A legit user shouldn't carry forward failure
+            // credit from earlier token-verify errors (e.g. their
+            // session expired mid-OAuth-handshake).
+            attempts.resetIp(ip);
         }
         if (audit != null) {
             audit.log(AuditEvent.success("AUTH_LOGIN_SUCCESS",

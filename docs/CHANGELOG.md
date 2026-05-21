@@ -2,6 +2,26 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 165 — Rate-limit on POST /auth/google + JWKS-DoS-Schutz
+
+Schließt eine echte Lücke aus Iter 160: `POST /api/v1/auth/google` ruft `googleVerifier.verify()` auf, was network-I/O (JWKS fetch wenn cache cold) + RSA-Signature-validation triggert. Ohne rate-limit ist der endpoint ein DoS-Vektor für jeden unauthenticated client.
+
+**Gap-analyse:** Der existing `LoginAttemptTracker` (Iter 47+113) hat zwei Achsen — per-email (10/10min → 15min lockout) + per-IP (50/10min → 15min lockout). Die per-email Achse kann auf /auth/google nicht greifen weil der email erst NACH verification bekannt ist (token signed by Google). Die per-IP Achse war aber gar nicht verdrahtet.
+
+**Fixes:**
+- **Pre-verify IP-lockout-check**: `attempts.isIpLockedOut(ip)` als allerstes Gate (vor token-verify) → 429 mit `Retry-After`.
+- **Post-verify-failure IP-counter increment**: `attempts.recordIpFailure(ip)` nach jeder `GoogleTokenException`. Garbage-token-flood füllt das per-IP-budget genauso wie wrong-password attempts.
+- **IP-counter-reset on success**: `attempts.resetIp(ip)` in `recordGoogleSuccess()` — ein legit user soll kein failure-credit aus einem expired-session retry-loop akkumulieren.
+- **Audit-events**: `AUTH_LOGIN_LOCKED` mit reason `oauth-ip-locked-out <ip> <retry>s` für SOC-dashboards die Google-spezifische lockouts vom password-flow trennen wollen.
+- **LoginAttempt-Mirror**: bekommt `RATE_LIMITED_IP` reason in der Postgres-history-tabelle.
+
+**Token-hygiene-audit**: grep über services/identity-service bestätigt — nirgendwo wird der raw idToken (oder substring/preview davon) geloggt. `GoogleIdTokenVerifier` loggt nur `e.getMessage()` (verification-failure-text aus Nimbus). `MethodArgumentNotValidException` im `GlobalExceptionHandler` returnt nur field-name + violation-message, nie den rejected value. Hash-prefix-logging wie bei refresh-tokens nicht nötig hier (ID-tokens werden nicht persisted).
+
+**No-go (bewusst nicht gemacht):**
+- per-email lockout via verified `g.email()` — würde es einem attacker erlauben, durch wiederholte Google-OAuth-attempts gegen einen email den password-login dieses users zu sperren. Lockout-weaponization gegen legit accounts ist worse als die DoS-Risk gegen unsere infrastructure.
+
+**Verifikation**: identity-service compile clean. common-security 44/44 grün.
+
 ## Iteration 163 — Web unit tests für Iter-161 OAuth components
 
 Hebt vitest von 25 → 41 tests. Coverage für die security-kritischen OAuth-Web-paths damit zukünftige refactors keine silent breakage einbauen.
