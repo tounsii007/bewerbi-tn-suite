@@ -2,6 +2,24 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 144 — Dependabot moderate remediation
+
+Eine der zwei moderate Vulnerabilities adressiert.
+
+**`backend/pom.xml`** — `nimbus-jose.version`: 9.47 → 10.0.2
+
+GHSA-xwmg-2g98-w7v9 (DoS via deeply-nested JSON):
+- Vulnerable range: `>= 9.38-rc1, < 10.0.2`
+- Unser 9.47 lag im vulnerable range
+- Fix war nur im 10.x-Branch verfügbar (kein 9.x backport)
+- Spring Boot 3.4.13 ist Nimbus-10 kompatibel — alle 44 common-security Tests + identity-service Tests grün
+
+**postcss** (zweite moderate Dependabot Vulnerability):
+- Vulnerable range war `< 8.5.10`
+- web/package-lock.json zeigt bereits `postcss@8.5.15` (durch web `overrides` block in package.json)
+- mobile/package-lock.json zeigt ebenfalls `8.5.15` (durch mobile `overrides`)
+- Sollte beim nächsten Dependabot-Re-Scan automatisch closen — kein code-change nötig
+
 ## Iteration 143 — Storybook stories für Iter-117 Primitives
 
 6 neue Story-Files für die Iter-117 Web-Primitives (vorher: nur Button + GlassCard + BentoGrid + EmptyState dokumentiert).
