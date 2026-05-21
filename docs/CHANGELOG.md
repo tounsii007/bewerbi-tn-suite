@@ -2,6 +2,23 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 168 — Mobile "Letzte Aktivität" screen
+
+Konsumiert die in Iter 161 (web) shipped + Iter 166 (mobile-apiClient) wired `GET /api/v1/auth/me/activity` endpoint. Damit kann der user sign-ins die er nicht gemacht hat direkt im phone-app spotten + reaktiv reagieren (passwort ändern / sessions beenden / google unlinken).
+
+**Neue screen** (`mobile/app/(applicant)/(settings)/activity.tsx`):
+- AuroraBackground subtle + SafeArea + back-button. Header: orange→red gradient History-icon + GradientText title + tagline.
+- FlatList über LoginAttemptEntry[] mit pull-to-refresh via RefreshControl.
+- Per row: method-icon (native Google SVG glyph für GOOGLE, KeyRound für PASSWORD, RefreshCw für REFRESH), Intl-formatted timestamp, success/failure pill (green check / red triangle), method label, IP, translated failure-reason.
+- Loading state: ActivityIndicator centered. Empty state: text + retry-button bei error. Mock-mode renders empty list (endpoint braucht real backend).
+- Stable failure-reason translations (`humanReason()`) — inline statt i18n weil mobile's i18n setup noch weniger mature ist als web's; same 12 codes wie web (`error.auth.activity.*`).
+
+**Settings index** (`(settings)/index.tsx`):
+- Neues account-item "Letzte Aktivität" mit History-icon + amber styling. Routes zur neuen screen.
+- History-icon import aus lucide-react-native added.
+
+**Verifikation**: tsc clean, jest 12/12 grün.
+
 ## Iteration 167 — Backend account-linking (Google ↔ password)
 
 Schließt die Iter-160-Lücke "future: account-linking" — Users können jetzt zwischen Google + Email/Password fluid wechseln statt in dem provider stecken zu bleiben mit dem sie signed-up haben. Backend-only iter; frontend wiring (Settings-buttons) wird zu Iter 169.
