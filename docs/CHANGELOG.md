@@ -2,6 +2,20 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 155 — Mobile +not-found.tsx (Expo Router 404)
+
+**`mobile/app/+not-found.tsx`** (Expo Router convention für catch-all unknown routes):
+- AuroraBackground (vivid) + SafeArea + ScrollView wrapper.
+- GlassCard (strong + glow) als hero card.
+- Gradient-icon-square (Compass, 64×64) mit shadow-glow.
+- "Hier endet die <GradientText brand>Karte</GradientText>" Headline.
+- 2 ShimmerButtons: Compass → home, Search → search (statisch um nicht zu konkurrieren).
+- `Stack.Screen options={{ headerShown: false }}` — no native header bar.
+
+Bisher: typo deeplinks landeten auf Expo Router's default-Fallback (text-only "Unmatched route"). Jetzt: on-brand 404 mit Recovery-CTAs.
+
+Mobile tsc clean, 12 Tests grün.
+
 ## Iteration 154 — Onboarding wizard i18n wiring
 
 Die Iter-146 onboarding.* Keys werden jetzt aktiv genutzt.
