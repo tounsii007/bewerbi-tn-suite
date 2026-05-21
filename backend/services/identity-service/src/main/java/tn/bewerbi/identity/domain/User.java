@@ -93,12 +93,83 @@ public class User extends BaseEntity {
     public AuthProvider getAuthProvider() { return authProvider; }
     public String getGoogleSubject() { return googleSubject; }
 
+    /** Iter 167 — has a usable bcrypt hash on file. */
+    public boolean hasPassword() {
+        return passwordHash != null && !passwordHash.isBlank();
+    }
+
+    /** Iter 167 — has a linked Google identity. */
+    public boolean hasGoogle() {
+        return googleSubject != null && !googleSubject.isBlank();
+    }
+
     /**
-     * Iter 159 — true for non-EMAIL users (Google etc). Use this everywhere
-     * password operations could otherwise leak a 500 from a null bcrypt hash:
-     * forgot-password, change-password, delete-account (password-confirm).
+     * Iter 159 — true when the account *can only* authenticate via OAuth
+     * (no local password). Used as a guard around every password-touching
+     * operation: forgot-password, change-password, delete-account
+     * (password-confirm).
+     *
+     * <p>Iter 167 rewrote this from `authProvider != EMAIL` to a
+     * passwordHash-presence check, because the linking flows now allow:
+     * <ul>
+     *   <li>a GOOGLE-signup user to add a password ({@link #setInitialPassword}),
+     *       after which they are no longer OAuth-only.</li>
+     *   <li>an EMAIL-signup user to link Google ({@link #linkGoogle}),
+     *       and still keep their password — they were never OAuth-only.</li>
+     * </ul>
+     * authProvider remains the *signup origin*, useful for analytics
+     * but no longer the gating signal for password operations.
      */
     public boolean isOauthOnly() {
-        return authProvider != AuthProvider.EMAIL;
+        return !hasPassword() && hasGoogle();
+    }
+
+    /**
+     * Iter 167 — link a Google identity to an existing user.
+     *
+     * <p>Caller is responsible for verifying:
+     * <ul>
+     *   <li>the user is authenticated</li>
+     *   <li>the Google ID token has been verified server-side</li>
+     *   <li>the verified email matches {@link #getEmail()} (anti-hijack)</li>
+     *   <li>no other user already has this googleSubject (anti-double-link)</li>
+     * </ul>
+     */
+    public void linkGoogle(String googleSubject) {
+        if (googleSubject == null || googleSubject.isBlank()) {
+            throw new IllegalArgumentException("googleSubject required");
+        }
+        if (hasGoogle() && !googleSubject.equals(this.googleSubject)) {
+            throw new IllegalStateException("User already linked to a different Google account");
+        }
+        this.googleSubject = googleSubject;
+    }
+
+    /**
+     * Iter 167 — unlink a Google identity from a user.
+     *
+     * <p>The caller MUST verify the user still has a password ({@link #hasPassword()})
+     * before unlinking, otherwise the user is locked out (no Google +
+     * no password = no way back in).
+     */
+    public void unlinkGoogle() {
+        this.googleSubject = null;
+    }
+
+    /**
+     * Iter 167 — set the *initial* password for a user who signed up via
+     * OAuth and didn't have one yet. Distinct from {@code changePassword}
+     * which assumes there's already a password to verify against.
+     *
+     * <p>Caller responsibility: strength check + ensure {@link #hasPassword()}
+     * is currently false before calling (otherwise they should be using
+     * the change-password flow).
+     */
+    public void setInitialPassword(String hash) {
+        if (hasPassword()) {
+            throw new IllegalStateException(
+                    "User already has a password — use changePassword instead");
+        }
+        this.passwordHash = hash;
     }
 }

@@ -117,6 +117,48 @@ public class AuthController {
         authService.changePassword(CurrentUser.id(), req.oldPassword(), req.newPassword());
     }
 
+    /**
+     * Iter 167 — set the *initial* password for a Google-only user.
+     * Returns 409 if the account already has a password (use
+     * /password/change instead).
+     */
+    @PostMapping("/password/set-initial")
+    @PreAuthorize("isAuthenticated()")
+    @org.springframework.web.bind.annotation.ResponseStatus(
+            org.springframework.http.HttpStatus.NO_CONTENT)
+    @Operation(summary = "Set initial password for an OAuth-only account")
+    public void setInitialPassword(@Valid @RequestBody AuthService.SetPasswordRequest req) {
+        authService.setInitialPassword(CurrentUser.id(), req.newPassword());
+    }
+
+    /**
+     * Iter 167 — link a Google identity to the current account so the
+     * user can log in via either email/password OR Google. The token's
+     * email must match the account's email (anti-hijack).
+     */
+    @PostMapping("/me/link-google")
+    @PreAuthorize("isAuthenticated()")
+    @org.springframework.web.bind.annotation.ResponseStatus(
+            org.springframework.http.HttpStatus.NO_CONTENT)
+    @Operation(summary = "Link a Google identity to the current account")
+    public void linkGoogle(@Valid @RequestBody AuthService.GoogleLoginRequest req) {
+        authService.linkGoogle(CurrentUser.id(), req);
+    }
+
+    /**
+     * Iter 167 — remove the Google link from the current account.
+     * Hard-rejected with 409 if the account has no password
+     * (otherwise the user would be locked out).
+     */
+    @PostMapping("/me/unlink-google")
+    @PreAuthorize("isAuthenticated()")
+    @org.springframework.web.bind.annotation.ResponseStatus(
+            org.springframework.http.HttpStatus.NO_CONTENT)
+    @Operation(summary = "Remove the Google link from the current account")
+    public void unlinkGoogle() {
+        authService.unlinkGoogle(CurrentUser.id());
+    }
+
     // The former /internal/users/{userId}/verification-token endpoint was
     // removed in Iter 39: the DB now stores SHA-256 of the verification
     // token, so a service-to-service call could only return the hash —

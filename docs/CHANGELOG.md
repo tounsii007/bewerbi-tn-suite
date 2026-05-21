@@ -2,6 +2,44 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 167 — Backend account-linking (Google ↔ password)
+
+Schließt die Iter-160-Lücke "future: account-linking" — Users können jetzt zwischen Google + Email/Password fluid wechseln statt in dem provider stecken zu bleiben mit dem sie signed-up haben. Backend-only iter; frontend wiring (Settings-buttons) wird zu Iter 169.
+
+**Drei flows:**
+
+1. **Email/password user adds Google → POST /api/v1/auth/me/link-google**
+   - Verifies the ID token via existing GoogleIdTokenVerifier (Iter 160).
+   - **Anti-hijack guard**: verified Google email MUST match the account's email. Without dies könnte jeder mit gestohlenem session-cookie ein Google-account linken und damit später als der user einloggen.
+   - **Anti-double-link guard**: 409 ConflictException wenn ein anderer user dieselbe googleSubject hat (defense-in-depth über die DB-unique-index).
+   - **Anti-degradation guard**: User MUSS bereits password haben, sonst error. Linking soll keine password-only user accidentally in dual-auth flippen ohne dass sie's bewusst wollen.
+
+2. **Google-only user adds password → POST /api/v1/auth/password/set-initial**
+   - 409 wenn user bereits password hat (use /password/change instead).
+   - Strength check (same MIN_PASSWORD_SCORE als alle password ops).
+   - On success: refreshStore.revokeAll() → user muss sich auf allen devices neu einloggen (gleicher pattern wie change-password).
+   - Audit: `AUTH_PASSWORD_SET_INITIAL`.
+
+3. **Linked user unlinks Google → POST /api/v1/auth/me/unlink-google**
+   - 409 wenn user kein password hat (würde sich selbst aussperren).
+   - Idempotent: returns 204 silently wenn googleSubject bereits null.
+   - Audit: `AUTH_GOOGLE_UNLINK`.
+
+**User entity (`User.java`):**
+- **`isOauthOnly()` redefined**: vorher `authProvider != EMAIL`, jetzt `!hasPassword() && hasGoogle()`. Das macht password-operations korrekt nach dem linking — ein GOOGLE-signup user der ein password gesetzt hat ist nicht mehr OAuth-only. Existing guards (forgot-password, change-password, delete-account) propagieren die neue semantic automatisch.
+- Neue helpers: `hasPassword()`, `hasGoogle()`.
+- Neue domain methods: `linkGoogle(subject)`, `unlinkGoogle()`, `setInitialPassword(hash)` — alle mit invariant-checks. `setInitialPassword` throws wenn schon password gesetzt (defensive — should be impossible da service-layer guards das schon checken, aber belt + braces).
+- `authProvider` field bleibt unverändert (signup-origin, jetzt nur noch analytics-info, nicht mehr gate-signal).
+
+**Stable error keys** (für frontend translation in Iter 169):
+- `error.auth.google.linkRequiresPassword`
+- `error.auth.google.linkEmailMismatch`
+- `error.auth.google.linkAlreadyTaken`
+- `error.auth.google.unlinkRequiresPassword`
+- `error.auth.password.alreadySet`
+
+**Verifikation:** identity-service compile clean, common-security 44/44 grün. Out-of-scope: frontend buttons + i18n keys (Iter 169).
+
 ## Iteration 166 — Mobile: Google sign-in via expo-auth-session
 
 Schließt OAuth über alle 3 clients (web von Iter 161, mobile jetzt). Same backend, same loop (User → System-Browser → Google → ID-Token → /api/v1/auth/google → JWT-pair).

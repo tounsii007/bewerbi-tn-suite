@@ -335,6 +335,133 @@ public class AuthService {
     }
 
     /**
+     * Iter 167 — link a Google identity to the currently-authenticated
+     * user (who signed up via email + password and now also wants to
+     * use Google).
+     *
+     * <p>Guards:
+     * <ul>
+     *   <li>The verified Google email must match the user's email — we
+     *       don't let one user link a Google account they don't own.</li>
+     *   <li>No other user may already hold the same {@code sub} —
+     *       blocked by the DB unique index but checked early for a
+     *       clean 409 error rather than a constraint-violation 500.</li>
+     *   <li>The user must currently have a password — linking does NOT
+     *       remove their password access. If they had no password we'd
+     *       be silently turning a "password-only" user into a "Google-
+     *       only" user by side-effect, which is not what they asked for.</li>
+     * </ul>
+     */
+    public void linkGoogle(UUID userId, GoogleLoginRequest req) {
+        if (googleVerifier == null) {
+            throw new tn.bewerbi.common.api.exception.ServiceUnavailableException(
+                    "Google sign-in is not configured", "error.auth.google.disabled");
+        }
+        User user = users.findById(userId)
+                .orElseThrow(() -> ResourceNotFoundException.of("User", userId));
+        if (!user.hasPassword()) {
+            throw new ConflictException(
+                    "Account has no password — use the dedicated link flow.",
+                    "error.auth.google.linkRequiresPassword");
+        }
+
+        GoogleIdTokenVerifier.VerifiedGoogleUser g;
+        try {
+            g = googleVerifier.verify(req.idToken());
+        } catch (GoogleIdTokenVerifier.GoogleTokenException e) {
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_GOOGLE_LINK",
+                        user.getId().toString(), user.getEmail(),
+                        e.code() + ": " + e.getMessage()));
+            }
+            throw new BadCredentialsException("Google token rejected: " + e.code());
+        }
+
+        // Anti-hijack: only link a Google identity that matches the
+        // user's verified email. Without this, anyone with access to
+        // the session cookie could link an arbitrary Google account
+        // and use it to sign in later as the user.
+        if (!user.getEmail().equalsIgnoreCase(g.email())) {
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_GOOGLE_LINK",
+                        user.getId().toString(), user.getEmail(),
+                        "email-mismatch:" + g.email()));
+            }
+            throw new ConflictException(
+                    "Google email does not match account email.",
+                    "error.auth.google.linkEmailMismatch");
+        }
+
+        var conflict = users.findByGoogleSubject(g.subject());
+        if (conflict.isPresent() && !conflict.get().getId().equals(user.getId())) {
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_GOOGLE_LINK",
+                        user.getId().toString(), user.getEmail(),
+                        "google-already-linked-to-other-user"));
+            }
+            throw new ConflictException(
+                    "This Google account is already linked to a different user.",
+                    "error.auth.google.linkAlreadyTaken");
+        }
+
+        user.linkGoogle(g.subject());
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_GOOGLE_LINK",
+                    user.getId().toString(), user.getEmail()));
+        }
+    }
+
+    /**
+     * Iter 167 — unlink the Google identity. Hard-rejected if the user
+     * has no password, because that would lock them out.
+     */
+    public void unlinkGoogle(UUID userId) {
+        User user = users.findById(userId)
+                .orElseThrow(() -> ResourceNotFoundException.of("User", userId));
+        if (!user.hasGoogle()) {
+            return; // idempotent: not-linked is already in the desired state
+        }
+        if (!user.hasPassword()) {
+            throw new ConflictException(
+                    "Cannot unlink Google — set a password first, otherwise you'll be locked out.",
+                    "error.auth.google.unlinkRequiresPassword");
+        }
+        user.unlinkGoogle();
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_GOOGLE_UNLINK",
+                    user.getId().toString(), user.getEmail()));
+        }
+    }
+
+    /**
+     * Iter 167 — set the *initial* password for a Google-only user.
+     * Distinct from {@link #changePassword} which requires the user
+     * to know their existing password.
+     *
+     * <p>Once set, {@link User#isOauthOnly()} flips to false, so the
+     * user can subsequently log in either via Google or via email +
+     * password. After this call we revoke every refresh token so the
+     * user has to re-authenticate everywhere — same pattern as
+     * password change.
+     */
+    public void setInitialPassword(UUID userId, String newPassword) {
+        User user = users.findById(userId)
+                .orElseThrow(() -> ResourceNotFoundException.of("User", userId));
+        if (user.hasPassword()) {
+            throw new ConflictException(
+                    "Account already has a password — use change-password instead.",
+                    "error.auth.password.alreadySet");
+        }
+        rejectWeakPassword(newPassword);
+        user.setInitialPassword(passwords.encode(newPassword));
+        refreshStore.revokeAll(user.getId());
+        if (audit != null) {
+            audit.log(AuditEvent.success("AUTH_PASSWORD_SET_INITIAL",
+                    user.getId().toString(), user.getEmail()));
+        }
+    }
+
+    /**
      * Iter 160 — return the most-recent login attempts for a user.
      * Powers the "recent activity" view in /settings.
      */
@@ -973,6 +1100,10 @@ public class AuthService {
     public record DeleteAccountRequest(
             @jakarta.validation.constraints.NotBlank
             @jakarta.validation.constraints.Size(max = 200) String password) {}
+
+    /** Iter 167 — set the first password on an OAuth-only account. */
+    public record SetPasswordRequest(
+            @jakarta.validation.constraints.Size(min = 8, max = 72) String newPassword) {}
 
     public record AuthResponse(
             String accessToken,
