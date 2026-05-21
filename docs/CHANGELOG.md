@@ -2,6 +2,33 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 150 — Mobile Test-Infrastruktur (Jest + RN Testing Library)
+
+Mobile war bisher komplett ungetestet (nur Backend + Flutter hatten Tests + nun Web seit Iter 145). Jetzt auch Mobile.
+
+**Neue Dev-Dependencies:**
+- `jest-expo` (Expo-preset für Metro-Transforms + Standard-Mocks)
+- `jest@29` (gepinnt auf 29 für jest-expo Kompatibilität — Jest 30 hat breaking changes in `_moduleMocker.clearMocksOnScope`)
+- `@testing-library/react-native` (RN-Pendant zu @testing-library/react)
+- `@types/jest`
+- `react-native-worklets` (transitive dep für reanimated 4.x Babel-Plugin)
+
+**`jest.config.js`**: preset jest-expo, testMatch für src/ + app/, transformIgnorePatterns für ESM-Module (expo-* / react-native* / @react-native-masked-view / nativewind), collectCoverageFrom auf `src/components/ui/`.
+
+**`package.json`**: 3 neue Scripts — `test`, `test:watch`, `test:coverage`.
+
+**Bekannte Hürde gelöst**: nativewind babel-plugin injiziert `_ReactNativeCSSInterop` Referenzen in jede JSX-Expression, was Jest's "module factory may not reference out-of-scope variables" Rule bricht. Workaround: `jest.mock()` Factories nutzen `require("react-native").View` direkt (kein JSX, kein React.createElement) — passt durch nativewind's Filter durch.
+
+**3 Test-Files, 12 Tests:**
+
+- **`GradientText.test.tsx`** (4 Tests): renders content (×2 wegen mask+dup), alle 4 variants, style-prop forwarding, default variant.
+
+- **`GlassCard.test.tsx`** (5 Tests): renders children, ohne onPress non-interactive, mit onPress press fires once, alle 4 strength variants, glow prop.
+
+- **`BentoGrid.test.tsx`** (3 Tests): Grid + Row + Cell render, BentoRow flex-direction, BentoCell defaults.
+
+Alle 12 Tests grün via `npm test` in ~4.5s. Mobile tsc bleibt clean.
+
 ## Iteration 149 — Web i18n wiring (Iter 146 keys aktiv schalten)
 
 Die Iter-146 Übersetzungen waren bisher nur in den shared/ JSON-Seeds. Jetzt sind sie auch in der Client-Dictionary verfügbar und werden in ersten Pages tatsächlich genutzt.
