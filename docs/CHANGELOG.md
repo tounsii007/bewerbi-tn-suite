@@ -2,6 +2,20 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 156 — Flutter widget tests für Iter-128 Primitives
+
+**4 neue Test-Files mit 19 Tests:**
+
+- **`test/app_gradient_text_test.dart`** (4 Tests): text content rendering, ShaderMask wrapping, alle 4 variants (brand/aurora/sunrise/flame), style + textAlign forwarding.
+
+- **`test/app_glass_card_test.dart`** (5 Tests): children rendering, BackdropFilter present, blur-sigma scaling pro strength (subtle 8 / default 14 / strong 20 / frosted 28), onTap wiring + tap registration via `tester.tap()`, glow shadow prop.
+
+- **`test/app_number_ticker_test.dart`** (5 Tests): starts at 0 → animates to value (de_DE format "1.284"), prefix + suffix, decimals (de_DE comma `4,5`), style forwarding, **reduce-motion snap** via `MediaQuery(disableAnimations: true)` — value rendert sofort ohne pumpAndSettle.
+
+- **`test/app_reveal_test.dart`** (5 Tests): child renders after pumpAndSettle, alle 5 directions (up/down/left/right/none), reduce-motion = Opacity 1.0 sofort, delay prop ohne throw.
+
+**Total Flutter Tests**: 214 (vorher: 195). Alle grün.
+
 ## Iteration 155 — Mobile +not-found.tsx (Expo Router 404)
 
 **`mobile/app/+not-found.tsx`** (Expo Router convention für catch-all unknown routes):
