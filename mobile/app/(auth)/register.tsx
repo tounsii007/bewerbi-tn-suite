@@ -27,6 +27,7 @@ import { AuroraBackground } from "../../src/components/ui/AuroraBackground";
 import { GlassCard } from "../../src/components/ui/GlassCard";
 import { GradientText } from "../../src/components/ui/GradientText";
 import { ShimmerButton } from "../../src/components/ui/ShimmerButton";
+import { GoogleSignInButton } from "../../src/components/auth/GoogleSignInButton";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useThemeStore } from "../../src/hooks/useColorScheme";
 import type { UserRole } from "../../src/types";
@@ -296,6 +297,51 @@ export default function RegisterScreen() {
                     </ShimmerButton>
                   </View>
                 )}
+
+                {/* Iter 166 — Google sign-up. Forwards the currently-
+                    selected role on first signup; backend ignores it
+                    for existing users. Hidden when no Google OAuth
+                    client IDs are configured (dev / preview default). */}
+                <View style={{ marginTop: 16 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 10,
+                      marginBottom: 14,
+                    }}
+                  >
+                    <View
+                      style={{
+                        flex: 1,
+                        height: 1,
+                        backgroundColor: isDark
+                          ? "rgba(148,163,184,0.25)"
+                          : "rgba(0,0,0,0.08)",
+                      }}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        fontWeight: "600",
+                        color: isDark ? "#94a3b8" : "#9ca3af",
+                        letterSpacing: 1,
+                      }}
+                    >
+                      ODER
+                    </Text>
+                    <View
+                      style={{
+                        flex: 1,
+                        height: 1,
+                        backgroundColor: isDark
+                          ? "rgba(148,163,184,0.25)"
+                          : "rgba(0,0,0,0.08)",
+                      }}
+                    />
+                  </View>
+                  <GoogleSignInButton text="signup" role={role} />
+                </View>
               </GlassCard>
             </Animated.View>
 

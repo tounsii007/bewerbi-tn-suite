@@ -47,6 +47,12 @@ interface AuthState {
     firstName: string,
     lastName: string,
   ) => Promise<void>;
+  /**
+   * Iter 166 — exchange a Google ID token (from expo-auth-session) for
+   * our JWT pair. `role` is only honoured server-side on first signup.
+   * IS_API_MODE-only; throws in mock + supabase modes.
+   */
+  signInWithGoogle: (idToken: string, role?: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
   fetchProfile: () => Promise<void>;
   mockLoginAs: (role: UserRole) => void;
@@ -166,6 +172,28 @@ export const useAuthStore = create<AuthState>()(
             });
             if (profileError) throw profileError;
           }
+        },
+
+        signInWithGoogle: async (idToken, role) => {
+          if (!IS_API_MODE) {
+            throw new Error("Google sign-in is only available in API mode.");
+          }
+          const apiRole = role
+            ? role === "applicant" ? "APPLICANT" : "EMPLOYER"
+            : undefined;
+          const resp = await authApi.google({ idToken, role: apiRole });
+          apiSetTokens(resp);
+          set({
+            tokens: toTokenPair(resp),
+            session: {
+              user: {
+                id: resp.user.id,
+                email: resp.user.email,
+                emailVerified: resp.user.emailVerified,
+              },
+            },
+          });
+          await get().fetchProfile();
         },
 
         signOut: async () => {

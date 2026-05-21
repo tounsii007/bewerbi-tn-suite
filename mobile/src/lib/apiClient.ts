@@ -166,6 +166,15 @@ export const authApi = {
   }) => rawRequest<AuthResponse>("/api/v1/auth/register", { method: "POST", body: JSON.stringify(body) }),
   login: (body: { email: string; password: string }) =>
     rawRequest<AuthResponse>("/api/v1/auth/login", { method: "POST", body: JSON.stringify(body) }),
+  // Iter 166 — exchange a Google ID token for our JWT pair. The backend
+  // verifies the token server-side against Google's JWKS, then matches
+  // an existing GOOGLE user, returns 409 on email collision with a
+  // password account, or creates a new user.
+  google: (body: { idToken: string; role?: "APPLICANT" | "EMPLOYER" }) =>
+    rawRequest<AuthResponse>("/api/v1/auth/google", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
   refresh: (refreshToken: string) =>
     rawRequest<AuthResponse>("/api/v1/auth/refresh", {
       method: "POST",
@@ -225,7 +234,27 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify({ password }),
     }),
+  // Iter 166 — recent login attempts (success + failure). Mirrors the
+  // web's authApi.activity from Iter 161. Powers a future
+  // "Letzte Aktivität" panel in the settings tab.
+  activity: (limit = 20) =>
+    request<LoginAttemptEntry[]>(
+      `/api/v1/auth/me/activity?limit=${Math.max(1, Math.min(100, limit))}`,
+    ),
 };
+
+/** Iter 166 — mirrors `tn.bewerbi.identity.domain.LoginAttempt`. */
+export interface LoginAttemptEntry {
+  id: string;
+  userId: string | null;
+  email: string;
+  method: "PASSWORD" | "GOOGLE" | "REFRESH";
+  success: boolean;
+  failureReason: string | null;
+  ip: string | null;
+  userAgent: string | null;
+  occurredAt: string;
+}
 
 // ---------- Profile ----------
 

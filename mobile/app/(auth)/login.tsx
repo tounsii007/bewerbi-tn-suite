@@ -19,6 +19,7 @@ import { GradientText } from "../../src/components/ui/GradientText";
 import { GlassCard } from "../../src/components/ui/GlassCard";
 import { AuroraBackground } from "../../src/components/ui/AuroraBackground";
 import { ShimmerButton } from "../../src/components/ui/ShimmerButton";
+import { GoogleSignInButton } from "../../src/components/auth/GoogleSignInButton";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useThemeStore } from "../../src/hooks/useColorScheme";
 import { IS_MOCK_MODE } from "../../src/lib/supabase";
@@ -200,6 +201,52 @@ export default function LoginScreen() {
                     {t("auth.login")}
                   </ShimmerButton>
                 )}
+
+                {/* Iter 166 — Google sign-in. Renders only when the
+                    EXPO_PUBLIC_GOOGLE_OAUTH_*_CLIENT_ID env vars are
+                    set; hidden in dev/mock builds so no confusing
+                    "Mit Google anmelden" button appears with no
+                    backend wiring. */}
+                <View style={{ marginTop: 16 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 10,
+                      marginBottom: 14,
+                    }}
+                  >
+                    <View
+                      style={{
+                        flex: 1,
+                        height: 1,
+                        backgroundColor: isDark
+                          ? "rgba(148,163,184,0.25)"
+                          : "rgba(0,0,0,0.08)",
+                      }}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        fontWeight: "600",
+                        color: isDark ? "#94a3b8" : "#9ca3af",
+                        letterSpacing: 1,
+                      }}
+                    >
+                      ODER
+                    </Text>
+                    <View
+                      style={{
+                        flex: 1,
+                        height: 1,
+                        backgroundColor: isDark
+                          ? "rgba(148,163,184,0.25)"
+                          : "rgba(0,0,0,0.08)",
+                      }}
+                    />
+                  </View>
+                  <GoogleSignInButton text="signin" />
+                </View>
               </GlassCard>
             </Animated.View>
 

@@ -2,6 +2,46 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 166 — Mobile: Google sign-in via expo-auth-session
+
+Schließt OAuth über alle 3 clients (web von Iter 161, mobile jetzt). Same backend, same loop (User → System-Browser → Google → ID-Token → /api/v1/auth/google → JWT-pair).
+
+**Neue deps** (`npx expo install` für SDK-compat versions):
+- `expo-auth-session ~7.0.11` — wraps OAuth 2.0 PKCE flow with platform-native auth-session (iOS ASWebAuthenticationSession, Android Custom Tabs, Expo Go web-browser)
+- `expo-crypto ~15.0.9` — peer für PKCE-challenge generation
+- `expo-web-browser ~15.0.11` — bereits in app.json plugins gelistet, jetzt mit `maybeCompleteAuthSession()` für OAuth-callback aktiv
+
+**`src/lib/apiClient.ts`:**
+- `authApi.google({idToken, role?})` — POST `/api/v1/auth/google`.
+- `authApi.activity(limit)` — für zukünftige mobile activity panel.
+- `LoginAttemptEntry` type exportiert (mirror der backend domain class).
+
+**`src/stores/authStore.ts`:**
+- Neue `signInWithGoogle(idToken, role?)` method, IS_API_MODE-only (throws in mock + supabase modes — Google flow geht direkt gegen unser Spring-backend, nicht via Supabase).
+- Mapt RN-side UserRole (`"applicant"|"employer"|"admin"`) auf API-side (`APPLICANT|EMPLOYER`) — gleicher pattern wie `signUp()`.
+- Persistiert tokens + session via existing pattern, fetchProfile lazy.
+
+**`src/components/auth/GoogleSignInButton.tsx`:**
+- Uses `Google.useAuthRequest` aus `expo-auth-session/providers/google` mit 3 separate clientIds (iOS / Android / Web) — Google scopt ID-tokens per-platform per-OAuth-client.
+- `googleOAuthEnabled()` helper checkt für **alle drei** env-vars: `EXPO_PUBLIC_GOOGLE_OAUTH_IOS_CLIENT_ID` / `_ANDROID_CLIENT_ID` / `_WEB_CLIENT_ID`. Component returnt `null` wenn keine gesetzt → no dead UI in dev.
+- Robustes ID-token-extraction für beide flows: `result.authentication?.idToken` (native) oder `(result.params as Record<string,string>)?.id_token` (web).
+- Native SVG glyph (`react-native-svg`) statt PNG-asset — gleicher multicolor Google "G" wie web.
+- Branded button styling matches dark/light mode der app, mit ActivityIndicator während busy.
+
+**Login + Register screens** (`app/(auth)/login.tsx` + `register.tsx`):
+- "ODER" divider plus GoogleSignInButton below the primary CTA inside the GlassCard.
+- Login: `text="signin"` ("Mit Google anmelden").
+- Register: `text="signup"` ("Mit Google registrieren") plus current `role` state passed (Bewerber/Arbeitgeber).
+
+**Backend audience check** — Iter 160's `GoogleIdTokenVerifier` matched die ID-token's `aud` claim gegen ein single `GOOGLE_OAUTH_CLIENT_ID`. Für mobile müssen iOS + Android + Web client-ids alle in der allowed-audience-list bei Google Cloud Console stehen — typically: web-client-id ist die primary `aud`, mobile clients sind im "Authorized JavaScript origins" eingetragen aber emittieren tokens with the web client-id als `aud` wenn man's korrekt configured. Operationally documented im app.json comment.
+
+**Verifikation**: tsc clean, jest 12/12 grün, npm audit 0 vulns. Dependabot alert #10 weiterhin geclosed by Iter 162.
+
+**Out-of-scope (future iter):**
+- Mobile "Letzte Aktivität" panel (API ist verdrahtet, screen fehlt noch — Iter 167?)
+- App-side i18n keys für die Google-button labels (currently hardcoded German strings, matches existing mobile-app pattern)
+- Apple sign-in (separate auth provider, separate Apple-developer-program work)
+
 ## Iteration 164 — Auth-Pages prerender-clean (Suspense raus, e2e ausgebaut)
 
 Räumt das Iter-158-TODO ab: /login + /register + /reset-password sind jetzt in Playwright abgedeckt. Vorher waren alle drei "bewusst nicht abgedeckt" weil sie als ganzes in `<Suspense fallback={null}>` saßen und der SSR-body bis Hydration leer war.
