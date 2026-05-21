@@ -2,6 +2,35 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 145 — Web Vitest setup + Iter 117 primitive tests
+
+Erste Web-Test-Infrastruktur. Bisher hatten wir nur Backend (JUnit) und Flutter (widget tests) Tests — Web war komplett ungetestet.
+
+**Neue Dev-Dependencies:**
+- `vitest` (Test-Runner) + `@vitejs/plugin-react` (JSX-Transform)
+- `@testing-library/react` + `@testing-library/jest-dom` + `@testing-library/user-event`
+- `happy-dom` (leichter als jsdom für Component-Smoke-Tests)
+
+**`vitest.config.ts`**: alias `@/` → `src/`, environment happy-dom, setupFiles, excludes Storybook-Files (`*.stories.tsx`).
+
+**`vitest.setup.ts`**: Polyfills für happy-dom:
+- `matchMedia` (framer-motion liest's für reduced-motion)
+- `IntersectionObserver` Stub der synchron `isIntersecting: true` meldet (damit Reveal/NumberTicker ihren Final-State rendern)
+
+**`package.json`**: `test` (run-once) + `test:watch` Scripts.
+
+**4 Test-Files mit 25 Tests:**
+
+- **`gradient-text.test.tsx`** (6 Tests): rendering, default span tag, `as="h1"` switch, variant changes className, custom className forwarding, animate prop toggles `animate-border-flow`.
+
+- **`bento-grid.test.tsx`** (8 Tests): `.bento` wrapper, child rendering, default col-span-12, `span.base`/`span.md`/`span.lg` mapping, `rows` prop, `rows=1` is no-op, `interactive` adds lift.
+
+- **`shimmer-button.test.tsx`** (6 Tests): renders as `<button>`/`<a>`, onClick fires, size classes, `static=true` removes rotating border, disabled prevents click.
+
+- **`aurora-background.test.tsx`** (5 Tests): children render, 3 blobs present, `animate-blob` classes when animated, removed when static, opacity differs between variants.
+
+**Build verifiziert clean** (29/29 pages prerender).
+
 ## Iteration 144 — Dependabot moderate remediation
 
 Eine der zwei moderate Vulnerabilities adressiert.
