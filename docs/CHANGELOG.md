@@ -2,6 +2,25 @@
 
 Iterationsweises Hardening, Modernisierung und Konsolidierung der bewerbi.tn-Suite.
 
+## Iteration 148 — Loading-States für restliche heavy pages
+
+Fortsetzung der UX-Polish aus Iter 147. **8 weitere `loading.tsx`** für alle major content-Routes.
+
+**Neu**:
+- `applications/loading.tsx` (icon-tile-header + 4 row-skeletons)
+- `favorites/loading.tsx` (icon-tile-header + 6 card-skeletons 3-col)
+- `profile/loading.tsx` (header + completeness card + form + sections)
+- `visa/loading.tsx` (icon-header + hero-card + 4 row-skeletons)
+- `anerkennung/loading.tsx` (icon-header + setup-card)
+- `saved-searches/loading.tsx` (icon-header + 4 row-skeletons)
+- `cv-upload/loading.tsx` (center-aligned hero + drop-zone)
+- `admin/companies/loading.tsx` (header + 5 row-skeletons)
+- `employer/dashboard/loading.tsx` (hero + bento layout)
+
+**Total**: 11 `loading.tsx` files (3 aus Iter 147 + 8 jetzt) — alle Authenticated-Routes haben jetzt sofortiges Skeleton-Feedback bei Navigation.
+
+Build clean (29/29 prerender, gleiche Page-Bundle-Größen — `loading.tsx` ist ein separater micro-chunk).
+
 ## Iteration 147 — Performance pass (bundle analyzer + loading states)
 
 **Bundle Analyzer eingerichtet:**
