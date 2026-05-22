@@ -94,3 +94,13 @@ coverage/
 # which is source. Anchored.
 /data/
 /volumes/
+
+# ───────────────── Local dev overrides ─────────────────
+# Per-developer machine-local files. Compose override lets a dev remap
+# ports / inject env vars without dirtying the shared compose files
+# (e.g. when another stack already occupies 5432/6379). `.claude/`
+# is the preview-tool's launch config — every developer points it at
+# their own workspace.
+backend/compose.override.yaml
+backend/compose.override.yml
+.claude/

@@ -19,7 +19,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 /**
@@ -49,7 +49,12 @@ import org.springframework.stereotype.Component;
  * {@code @Autowired(required = false)} to detect "Google not enabled".
  */
 @Component
-@ConditionalOnProperty(name = "bewerbi.security.google.client-id")
+// @ConditionalOnProperty treats an empty string as "present" and
+// would still try to instantiate the bean — which fails in the
+// constructor below. SpEL gives us a real non-blank check so the
+// bean stays unloaded until the env var is actually populated.
+@ConditionalOnExpression(
+    "'${bewerbi.security.google.client-id:}'.trim().length() > 0")
 public class GoogleIdTokenVerifier {
 
     private static final Logger log = LoggerFactory.getLogger(GoogleIdTokenVerifier.class);
