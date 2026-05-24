@@ -100,6 +100,49 @@ class AuthMetricsTest {
                 "action", "set_initial_password", "outcome", "success")).isEqualTo(1.0);
     }
 
+    @Test
+    void recordAccountAction_segregatesByActionAndOutcome() {
+        // Iter 189 — the new account-level meter.
+        metrics.recordAccountAction("change_password", true);
+        metrics.recordAccountAction("change_password", false);
+        metrics.recordAccountAction("change_password", false);
+        metrics.recordAccountAction("logout", true);
+        metrics.recordAccountAction("logout_all", true);
+        metrics.recordAccountAction("delete_account", true);
+        metrics.recordAccountAction("delete_account", false);
+
+        assertThat(count("auth.account.total",
+                "action", "change_password", "outcome", "success")).isEqualTo(1.0);
+        assertThat(count("auth.account.total",
+                "action", "change_password", "outcome", "failure")).isEqualTo(2.0);
+        assertThat(count("auth.account.total",
+                "action", "logout", "outcome", "success")).isEqualTo(1.0);
+        assertThat(count("auth.account.total",
+                "action", "logout_all", "outcome", "success")).isEqualTo(1.0);
+        assertThat(count("auth.account.total",
+                "action", "delete_account", "outcome", "success")).isEqualTo(1.0);
+        assertThat(count("auth.account.total",
+                "action", "delete_account", "outcome", "failure")).isEqualTo(1.0);
+    }
+
+    @Test
+    void linkAndAccountAreSeparateMeters() {
+        // Both meters use the same tag names {action, outcome}; make
+        // sure they live in different series so an "account-actions"
+        // dashboard panel doesn't accidentally pull in provider-link
+        // counts (or vice versa).
+        metrics.recordProviderLinkAction("link", true);
+        metrics.recordAccountAction("change_password", true);
+
+        assertThat(count("auth.link.total", "action", "link", "outcome", "success"))
+                .isEqualTo(1.0);
+        assertThat(count("auth.account.total",
+                "action", "change_password", "outcome", "success")).isEqualTo(1.0);
+        // Sanity: link total has NO change_password tag value.
+        assertThat(count("auth.link.total",
+                "action", "change_password", "outcome", "success")).isEqualTo(0.0);
+    }
+
     /** Helper to fetch the count for a (name, tagPairs...) coordinate. */
     private double count(String name, String... tagPairs) {
         var search = registry.find(name);
