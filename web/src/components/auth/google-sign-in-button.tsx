@@ -1,6 +1,7 @@
 "use client";
 
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/auth-store";
@@ -64,22 +65,37 @@ export function GoogleSignInButton({
   // matches our locale-store result in the common case, and trying to
   // override it requires a per-button prop that the typed wrapper from
   // @react-oauth/google doesn't expose.
+  //
+  // Iter 188 — overlay a spinner + pointer-events-none on the iframe
+  // wrapper while the backend round-trip is in flight. The GIS iframe
+  // itself can't be styled or disabled (third-party origin), so we
+  // dim it and block clicks at the wrapper level instead.
   return (
     <div
-      className="flex w-full justify-center"
+      className="relative flex w-full justify-center"
       aria-busy={busy}
       data-testid="google-sign-in-button"
     >
-      <GoogleLogin
-        onSuccess={handleCredential}
-        onError={() => toast.error(t("error.auth.google.disabled"))}
-        text={text}
-        shape="rectangular"
-        size="large"
-        theme="outline"
-        width="320"
-        useOneTap={false}
-      />
+      <div className={busy ? "pointer-events-none opacity-50 transition-opacity" : ""}>
+        <GoogleLogin
+          onSuccess={handleCredential}
+          onError={() => toast.error(t("error.auth.google.disabled"))}
+          text={text}
+          shape="rectangular"
+          size="large"
+          theme="outline"
+          width="320"
+          useOneTap={false}
+        />
+      </div>
+      {busy && (
+        <div
+          className="pointer-events-none absolute inset-0 flex items-center justify-center"
+          aria-hidden="true"
+        >
+          <Loader2 className="size-5 animate-spin text-primary-600 dark:text-primary-400" />
+        </div>
+      )}
     </div>
   );
 }
