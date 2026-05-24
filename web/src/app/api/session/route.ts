@@ -26,7 +26,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     name: COOKIE_NAME,
     value: JSON.stringify({ u: body.userId, r: body.role }),
     httpOnly: true,
-    sameSite: "strict",
+    // Iter 182 — strict → lax. Reason: with strict, the cookie is
+    // not sent on any cross-origin navigation, including a click on
+    // an emailed link to /dashboard or a back-button from accounts
+    // .google.com after the OAuth handoff. That forces an
+    // unnecessary re-login every time the user arrives from outside.
+    // lax still blocks the dangerous cross-site POSTs (CSRF), the
+    // iframe traffic ('frame-ancestors none' on the CSP catches
+    // those anyway), and prefetches — only top-level GET
+    // navigations get the cookie.
+    sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge,
@@ -40,7 +49,7 @@ export async function DELETE(): Promise<NextResponse> {
     name: COOKIE_NAME,
     value: "",
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 0,

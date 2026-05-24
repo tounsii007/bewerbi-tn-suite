@@ -28,16 +28,57 @@ export interface StoredTokens {
   hasGoogleLinked?: boolean;
 }
 
+/**
+ * Iter 183 — shape-validate the localStorage payload before trusting
+ * it. The old version did a blind cast which let a partial / hand-
+ * edited / older-schema value leak through and either crash on the
+ * first property access or — worse — silently rehydrate as a partly-
+ * authenticated session with undefined accessToken (every API call
+ * would 401, the user would see broken pages).
+ *
+ * Required fields (accessToken, refreshToken, accessTokenExpiresAt,
+ * refreshTokenExpiresAt, userId, role) must all be non-empty strings.
+ * Optional flags (hasPassword, hasGoogleLinked) may be absent — the
+ * settings UI guards on undefined and the auto-refresh from Iter 178
+ * fills them in.
+ *
+ * Any structural mismatch wipes the slot — same outcome as a
+ * JSON.parse failure, just earlier in the chain.
+ */
 export function readTokens(): StoredTokens | null {
   if (typeof window === "undefined") return null;
   const raw = window.localStorage.getItem(LOCAL_KEY);
   if (!raw) return null;
+  let parsed: unknown;
   try {
-    return JSON.parse(raw) as StoredTokens;
+    parsed = JSON.parse(raw);
   } catch {
     window.localStorage.removeItem(LOCAL_KEY);
     return null;
   }
+  if (!isStoredTokens(parsed)) {
+    window.localStorage.removeItem(LOCAL_KEY);
+    return null;
+  }
+  return parsed;
+}
+
+function isStoredTokens(value: unknown): value is StoredTokens {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return nonEmpty(v.accessToken)
+    && nonEmpty(v.refreshToken)
+    && nonEmpty(v.accessTokenExpiresAt)
+    && nonEmpty(v.refreshTokenExpiresAt)
+    && nonEmpty(v.userId)
+    && nonEmpty(v.role)
+    && typeof v.email === "string"
+    && typeof v.preferredLocale === "string"
+    && typeof v.emailVerified === "boolean";
+}
+
+function nonEmpty(v: unknown): v is string {
+  return typeof v === "string" && v.length > 0;
 }
 
 export function writeTokens(resp: AuthResponse | null): void {
