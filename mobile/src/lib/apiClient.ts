@@ -100,6 +100,21 @@ async function refreshAccessToken(): Promise<AuthResponse> {
 
 // ----- Low-level request wrappers ---------------------------------------
 
+/**
+ * Iter 193 — short, URL-safe correlation id. crypto.randomUUID is
+ * native in RN Hermes 0.71+ (we're on 0.81) so the fallback branch
+ * is just defensive. Same shape as the web's helper (Iter 192) so
+ * a cross-platform trace looks consistent.
+ */
+function randomCorrelationId(): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const c = (globalThis as any).crypto;
+  if (c && typeof c.randomUUID === "function") {
+    return c.randomUUID() as string;
+  }
+  return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+}
+
 async function rawRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   if (!headers.has("Content-Type") && init.body && !(init.body instanceof FormData)) {
@@ -107,6 +122,13 @@ async function rawRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
   if (!headers.has("Accept-Language")) {
     headers.set("Accept-Language", i18n.language || "de");
+  }
+  // Iter 193 — match the web's Iter 192 X-Correlation-Id pattern so
+  // mobile-originated requests are equally easy to trace in backend
+  // logs. RN Hermes ships crypto.randomUUID since Reanimated 3.x
+  // (we're on 4.x), so the polyfill branch is just defensive.
+  if (!headers.has("X-Correlation-Id")) {
+    headers.set("X-Correlation-Id", randomCorrelationId());
   }
   const res = await fetch(`${BASE}${path}`, { ...init, headers });
   if (!res.ok) {
