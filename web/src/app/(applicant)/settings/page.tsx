@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { LogOut, KeyRound } from "lucide-react";
@@ -26,11 +26,21 @@ export default function SettingsPage() {
   const router = useRouter();
   const signOut = useAuthStore((s) => s.signOut);
   const user = useAuthStore((s) => s.user);
+  const refreshAccount = useAuthStore((s) => s.refreshAccount);
   const t = useTranslate();
   const [oldPwd, setOldPwd] = useState("");
   const [newPwd, setNewPwd] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
   const [changing, setChanging] = useState(false);
+
+  // Iter 178 — fetch /me/account on mount so hasPassword +
+  // hasGoogleLinked flags reflect any changes the user made on
+  // another device since this client last logged in. Otherwise the
+  // LinkedAccountsCard branches off stale localStorage data and the
+  // user sees buttons that 409 against the backend.
+  useEffect(() => {
+    void refreshAccount();
+  }, [refreshAccount]);
 
   const logoutAllDevices = async () => {
     try {

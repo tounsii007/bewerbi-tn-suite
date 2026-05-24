@@ -39,6 +39,35 @@ export function LinkedAccountsCard() {
   const { hasPassword, hasGoogleLinked } = user;
   const oauthAvailable = googleOAuthEnabled();
 
+  // Iter 178 — older localStorage written before Iter 169 doesn't
+  // carry these flags. Without this guard the card would render
+  // "add a password" against accounts that already have one, then
+  // POST set-initial-password and get 409. The settings page does
+  // a refreshAccount() on mount so this state is transient; until
+  // it resolves, render an unobtrusive skeleton so the UI doesn't
+  // flicker between wrong → right.
+  if (hasPassword === undefined || hasGoogleLinked === undefined) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("settings.linked.title")}</CardTitle>
+          <CardDescription>{t("settings.linked.tagline")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div
+            className="space-y-3"
+            aria-hidden="true"
+            data-testid="linked-skeleton"
+          >
+            <div className="h-12 w-full rounded-xl bg-gray-100 dark:bg-dark-bg-alt" />
+            <div className="h-12 w-full rounded-xl bg-gray-100 dark:bg-dark-bg-alt" />
+            <div className="h-10 w-1/3 rounded-xl bg-gray-100 dark:bg-dark-bg-alt" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Hide the card entirely when there's literally nothing actionable.
   if (!oauthAvailable && hasPassword && !hasGoogleLinked) return null;
 
