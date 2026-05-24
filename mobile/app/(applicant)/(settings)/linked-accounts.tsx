@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -23,7 +23,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { GoogleGlyph } from "../../../src/components/auth/GoogleGlyph";
-import { authApi, IS_API_MODE } from "../../../src/lib/apiClient";
+import { authApi } from "../../../src/lib/apiClient";
 import { apiErrorMessage } from "../../../src/lib/apiError";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { useThemeStore } from "../../../src/hooks/useColorScheme";
@@ -54,11 +54,9 @@ export default function LinkedAccountsScreen() {
   const refreshAccount = useAuthStore((s) => s.refreshAccount);
   const signOut = useAuthStore((s) => s.signOut);
 
-  useEffect(() => {
-    // Pull fresh flags on screen mount so a user who linked on web
-    // sees the up-to-date state when they open the mobile screen.
-    if (IS_API_MODE) void refreshAccount();
-  }, [refreshAccount]);
+  // Iter 191 — the settings _layout fires refreshAccount() on
+  // Settings-tab entry, so all sub-screens (this one included) see
+  // fresh flags without each one having to wire its own useEffect.
 
   if (!user) {
     return (
