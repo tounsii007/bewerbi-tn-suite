@@ -32,6 +32,27 @@ function currentLanguage(): string {
   return document.documentElement.lang || "de";
 }
 
+/**
+ * Iter 192 — short, URL-safe correlation id. crypto.randomUUID is
+ * the natural choice (36 chars, RFC 4122 v4) — both browsers and
+ * the Edge runtime expose it. Length matches what Spring Boot's
+ * MDC fields display, so logs read cleanly.
+ *
+ * Falls back to a Math.random base-36 string for ancient browsers
+ * that lack crypto.randomUUID (Safari < 15.4, Edge < 80) — those
+ * are well below 1% of our traffic but cheap to handle.
+ */
+function randomCorrelationId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return (
+    Date.now().toString(36)
+    + "-"
+    + Math.random().toString(36).slice(2, 10)
+  );
+}
+
 function scheduleProactiveRefresh(tokens: StoredTokens): void {
   if (refreshTimer) clearTimeout(refreshTimer);
   const expiresAtMs = new Date(tokens.accessTokenExpiresAt).getTime();
@@ -94,6 +115,16 @@ async function rawRequest<T>(path: string, opts: FetchOptions = {}, withAuth = t
     headers.set("Content-Type", "application/json");
   }
   headers.set("Accept-Language", currentLanguage());
+  // Iter 192 — per-request correlation id. The backend's MDC filter
+  // already generates one when missing, but having the client mint
+  // it lets devtools-network show the value alongside the request,
+  // which means a user can quote "trace 7f3c…" in a support ticket
+  // and ops can grep server logs for it without juggling timestamps.
+  // We only set it when the caller didn't already, so explicit
+  // overrides for e.g. retry-chain tracing still work.
+  if (!headers.has("X-Correlation-Id")) {
+    headers.set("X-Correlation-Id", randomCorrelationId());
+  }
 
   if (withAuth) {
     const t = readTokens();
