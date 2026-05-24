@@ -44,13 +44,13 @@ export default function SettingsScreen() {
   const accountItems = [
     { title: t("settings.language"), icon: Globe, color: "#2563EB", bg: "bg-blue-50", onPress: changeLanguage, value: i18n.language === "de" ? "Deutsch" : i18n.language === "ar" ? "العربية" : "Français" },
     { title: t("settings.darkMode"), icon: Moon, color: "#8b5cf6", bg: "bg-violet-50", toggle: true, value: isDark, onToggle: toggleTheme },
-    { title: "Passwort ändern", icon: KeyRound, color: "#dc2626", bg: "bg-rose-50", onPress: () => router.push("/(applicant)/(settings)/change-password") },
+    { title: t("settings.changePassword"), icon: KeyRound, color: "#dc2626", bg: "bg-rose-50", onPress: () => router.push("/(applicant)/(settings)/change-password") },
     // Iter 169 — manage Google ↔ password linking.
-    { title: "Verknüpfte Konten", icon: Link2, color: "#8b5cf6", bg: "bg-violet-50", onPress: () => router.push("/(applicant)/(settings)/linked-accounts") },
-    { title: "Aktive Sitzungen", icon: Smartphone, color: "#0891b2", bg: "bg-cyan-50", onPress: () => router.push("/(applicant)/(settings)/sessions") },
+    { title: t("settings.linkedAccounts"), icon: Link2, color: "#8b5cf6", bg: "bg-violet-50", onPress: () => router.push("/(applicant)/(settings)/linked-accounts") },
+    { title: t("settings.sessions"), icon: Smartphone, color: "#0891b2", bg: "bg-cyan-50", onPress: () => router.push("/(applicant)/(settings)/sessions") },
     // Iter 168 — consumes the GET /me/activity endpoint exposed in
     // Iter 161 (web) / wired into mobile apiClient in Iter 166.
-    { title: "Letzte Aktivität", icon: History, color: "#f59e0b", bg: "bg-amber-50", onPress: () => router.push("/(applicant)/(settings)/activity") },
+    { title: t("settings.activity"), icon: History, color: "#f59e0b", bg: "bg-amber-50", onPress: () => router.push("/(applicant)/(settings)/activity") },
   ];
 
   const appItems = [

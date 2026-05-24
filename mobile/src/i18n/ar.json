@@ -50,7 +50,33 @@
     "password.strength.weak": "ضعيفة",
     "password.strength.fair": "متوسطة",
     "password.strength.strong": "قوية",
-    "password.strength.very-strong": "قوية جدًا"
+    "password.strength.very-strong": "قوية جدًا",
+    "passwordActive": "نشطة — يمكنك تسجيل الدخول بالبريد + كلمة المرور.",
+    "passwordMissing": "غير محدَّدة — أضف كلمة مرور.",
+    "googleActive": "مرتبط — يمكنك تسجيل الدخول عبر Google.",
+    "googleMissing": "غير مرتبط.",
+    "statusActive": "نشط",
+    "linkGoogle": "اربط مع Google",
+    "linkGoogleWhy": "اربط حساب Google لتتمكَّن من تسجيل الدخول عبر Google أيضاً. يجب أن يتطابق بريدك الإلكتروني.",
+    "linkGoogleSuccess": "تم ربط حساب Google.",
+    "unlinkGoogle": "إزالة ربط Google",
+    "unlinkGoogleConfirm": "هل تريد فعلاً إزالة ربط Google؟ ستتمكَّن بعد ذلك من تسجيل الدخول فقط بالبريد + كلمة المرور.",
+    "unlinkGoogleWhy": "يمكنك حالياً تسجيل الدخول بـ Google + كلمة المرور. بعد الإزالة ستعمل كلمة المرور فقط.",
+    "unlinkGoogleSuccess": "تم إزالة ربط Google.",
+    "setPasswordWhy": "حدِّد كلمة مرور لتتمكَّن من تسجيل الدخول بدون Google أيضاً. ستُنهَى جميع الجلسات النشطة بعد الحفظ.",
+    "setPasswordNewLabel": "كلمة المرور الجديدة",
+    "setPasswordConfirmLabel": "تأكيد كلمة المرور",
+    "setPasswordMismatch": "كلمتا المرور غير متطابقتين.",
+    "setPasswordTooShort": "كلمة المرور: 8 أحرف على الأقل.",
+    "setPasswordCta": "حدِّد كلمة المرور",
+    "setPasswordSuccess": "تم تحديد كلمة المرور. الرجاء تسجيل الدخول مجدَّداً.",
+    "setPasswordSuccessTitle": "تم تحديد كلمة المرور",
+    "googleNotConfigured": "تسجيل الدخول عبر Google غير مهيَّأ في هذه النسخة.",
+    "noIdToken": "لم يتم استلام رمز ID من Google.",
+    "loginAgain": "الرجاء تسجيل الدخول.",
+    "methodPassword": "كلمة المرور",
+    "methodGoogle": "Google",
+    "methodRefresh": "تجديد الرمز"
   },
   "error": {
     "auth.email.exists": "هذا البريد الإلكتروني مسجل بالفعل.",
@@ -173,7 +199,13 @@
     "privacy": "الخصوصية",
     "terms": "الشروط",
     "version": "الإصدار",
-    "dangerZone": "منطقة الخطر"
+    "dangerZone": "منطقة الخطر",
+    "linkedAccounts": "الحسابات المرتبطة",
+    "linkedAccountsSub": "تحكَّم في طرق تسجيل الدخول — كلمة المرور أو Google أو كلاهما.",
+    "activity": "النشاط الأخير",
+    "activitySub": "آخر 20 محاولة تسجيل دخول. هل هناك شيء مشبوه؟ غيِّر كلمة المرور وأنهِ الجلسات.",
+    "sessions": "الجلسات النشطة",
+    "changePassword": "تغيير كلمة المرور"
   },
   "account": {
     "delete": {
@@ -275,5 +307,27 @@
     "suggestedSkills": "المهارات",
     "suggestedLanguages": "اللغات",
     "noHints": "لم يتم الكشف عن بيانات"
+  },
+  "activity": {
+    "loadError": "تعذَّر تحميل النشاط.",
+    "empty": "لا توجد محاولات تسجيل دخول بعد.",
+    "retry": "حاول مرة أخرى",
+    "success": "ناجح",
+    "failure": "فاشل",
+    "ipLabel": "IP",
+    "reason": {
+      "RATE_LIMITED_ACCOUNT": "الحساب مقفول مؤقتاً",
+      "RATE_LIMITED_IP": "عنوان IP مقفول مؤقتاً",
+      "USER_NOT_FOUND": "حساب غير معروف",
+      "INVALID_PASSWORD": "كلمة مرور خاطئة",
+      "OAUTH_ACCOUNT_USE_GOOGLE": "الرجاء تسجيل الدخول عبر Google",
+      "OAUTH_EMAIL_COLLISION_PASSWORD_USER": "الحساب مسجَّل مسبقاً بكلمة مرور",
+      "OAUTH_TOKEN_MISSING": "رمز Google مفقود",
+      "OAUTH_TOKEN_MALFORMED": "رمز Google غير صالح",
+      "OAUTH_TOKEN_INVALID": "رمز Google غير صالح",
+      "OAUTH_AUDIENCE_MISMATCH": "رمز Google لتطبيق آخر",
+      "OAUTH_EMAIL_UNVERIFIED": "بريد Google غير موثَّق",
+      "OAUTH_CLAIMS_INCOMPLETE": "رمز Google ناقص"
+    }
   }
 }

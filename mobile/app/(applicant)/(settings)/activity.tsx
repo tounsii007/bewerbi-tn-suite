@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   AlertTriangle,
@@ -40,6 +41,7 @@ import { Card } from "../../../src/components/ui/Card";
  */
 export default function ActivityScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { isDark } = useThemeStore();
   const [items, setItems] = useState<LoginAttemptEntry[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,13 +59,13 @@ export default function ActivityScreen() {
       const data = await authApi.activity(20);
       setItems(data);
     } catch (e) {
-      setError(apiErrorMessage(e, "Aktivität konnte nicht geladen werden."));
+      setError(apiErrorMessage(e, t("activity.loadError")));
       setItems([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void fetchActivity();
@@ -82,7 +84,7 @@ export default function ActivityScreen() {
             <TouchableOpacity
               onPress={() => router.back()}
               className="mr-3 -ml-2 p-2"
-              accessibilityLabel="Zurück"
+              accessibilityLabel={t("common.back")}
             >
               <ArrowLeft size={22} color={isDark ? "#e2e8f0" : "#0f172a"} />
             </TouchableOpacity>
@@ -112,15 +114,14 @@ export default function ActivityScreen() {
                 variant="brand"
                 style={{ fontSize: 22, fontWeight: "800", lineHeight: 26 }}
               >
-                Letzte Aktivität
+                {t("settings.activity")}
               </GradientText>
               <Text
                 className={`text-[13px] mt-1 ${
                   isDark ? "text-dark-muted" : "text-gray-600"
                 }`}
               >
-                Die letzten 20 Anmeldeversuche. Etwas Verdächtiges?
-                Passwort ändern und Sitzungen beenden.
+                {t("settings.activitySub")}
               </Text>
             </View>
           </View>
@@ -149,7 +150,7 @@ export default function ActivityScreen() {
                     isDark ? "text-dark-muted" : "text-gray-500"
                   }`}
                 >
-                  {error ?? "Noch keine Anmeldeversuche."}
+                  {error ?? t("activity.empty")}
                 </Text>
                 {error && (
                   <TouchableOpacity
@@ -158,7 +159,7 @@ export default function ActivityScreen() {
                   >
                     <RefreshCw size={14} color="#2563EB" />
                     <Text className="text-primary-500 text-[13px] font-semibold">
-                      Erneut versuchen
+                      {t("activity.retry")}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -179,11 +180,15 @@ function ActivityRow({
   entry: LoginAttemptEntry;
   isDark: boolean;
 }) {
+  const { t, i18n } = useTranslation();
   const when = new Date(entry.occurredAt);
-  const whenLabel = new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(when);
+  // Use the active i18n language so AR/FR users see localised
+  // numerals + month names. Falls back to Intl's "default locale"
+  // if the language isn't a valid BCP-47 tag.
+  const whenLabel = new Intl.DateTimeFormat(
+    i18n.language || undefined,
+    { dateStyle: "medium", timeStyle: "short" },
+  ).format(when);
 
   const methodIcon =
     entry.method === "GOOGLE" ? (
@@ -196,10 +201,17 @@ function ActivityRow({
 
   const methodLabel =
     entry.method === "PASSWORD"
-      ? "Passwort"
+      ? t("auth.methodPassword")
       : entry.method === "GOOGLE"
-        ? "Google"
-        : "Token-Refresh";
+        ? t("auth.methodGoogle")
+        : t("auth.methodRefresh");
+
+  // Iter 179 — translated reason via the activity.reason.<code>
+  // dict block. Fallback to the raw code if a new backend code
+  // arrives before the dict knows it.
+  const reasonLabel = entry.failureReason
+    ? t(`activity.reason.${entry.failureReason}`, { defaultValue: entry.failureReason })
+    : null;
 
   return (
     <Card className="mb-2" elevation={1}>
@@ -218,14 +230,14 @@ function ActivityRow({
               <View className="flex-row items-center gap-1 bg-emerald-50 rounded-full px-2 py-0.5">
                 <Check size={11} color="#059669" />
                 <Text className="text-emerald-700 text-[11px] font-semibold">
-                  Erfolgreich
+                  {t("activity.success")}
                 </Text>
               </View>
             ) : (
               <View className="flex-row items-center gap-1 bg-rose-50 rounded-full px-2 py-0.5">
                 <AlertTriangle size={11} color="#dc2626" />
                 <Text className="text-rose-700 text-[11px] font-semibold">
-                  Fehlgeschlagen
+                  {t("activity.failure")}
                 </Text>
               </View>
             )}
@@ -244,12 +256,12 @@ function ActivityRow({
                   isDark ? "text-dark-muted" : "text-gray-500"
                 }`}
               >
-                IP: {entry.ip}
+                {t("activity.ipLabel")}: {entry.ip}
               </Text>
             )}
-            {entry.failureReason && (
+            {reasonLabel && (
               <Text className="text-[12px] text-rose-600 font-medium">
-                {humanReason(entry.failureReason)}
+                {reasonLabel}
               </Text>
             )}
           </View>
@@ -257,39 +269,6 @@ function ActivityRow({
       </View>
     </Card>
   );
-}
-
-/** Stable failure-reason codes → human labels. Mirrors the web
- *  `error.auth.activity.<code>` i18n block from Iter 161; mobile uses
- *  inline strings since the i18n setup here is less mature. */
-function humanReason(code: string): string {
-  switch (code) {
-    case "RATE_LIMITED_ACCOUNT":
-      return "Konto kurzzeitig gesperrt";
-    case "RATE_LIMITED_IP":
-      return "IP kurzzeitig gesperrt";
-    case "USER_NOT_FOUND":
-      return "Unbekanntes Konto";
-    case "INVALID_PASSWORD":
-      return "Falsches Passwort";
-    case "OAUTH_ACCOUNT_USE_GOOGLE":
-      return "Bitte mit Google anmelden";
-    case "OAUTH_EMAIL_COLLISION_PASSWORD_USER":
-      return "Konto bereits mit Passwort registriert";
-    case "OAUTH_TOKEN_MISSING":
-      return "Google-Token fehlt";
-    case "OAUTH_TOKEN_MALFORMED":
-    case "OAUTH_TOKEN_INVALID":
-      return "Google-Token ungültig";
-    case "OAUTH_AUDIENCE_MISMATCH":
-      return "Google-Token für andere App";
-    case "OAUTH_EMAIL_UNVERIFIED":
-      return "Google-E-Mail nicht verifiziert";
-    case "OAUTH_CLAIMS_INCOMPLETE":
-      return "Google-Token unvollständig";
-    default:
-      return code;
-  }
 }
 
 function GoogleGlyph() {

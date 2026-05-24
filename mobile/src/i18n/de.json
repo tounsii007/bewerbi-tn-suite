@@ -50,7 +50,33 @@
     "password.strength.weak": "Schwach",
     "password.strength.fair": "Mittel",
     "password.strength.strong": "Stark",
-    "password.strength.very-strong": "Sehr stark"
+    "password.strength.very-strong": "Sehr stark",
+    "passwordActive": "Aktiv — du kannst dich mit E-Mail + Passwort anmelden.",
+    "passwordMissing": "Nicht gesetzt — füge ein Passwort hinzu.",
+    "googleActive": "Verknüpft — du kannst dich mit Google anmelden.",
+    "googleMissing": "Nicht verknüpft.",
+    "statusActive": "Aktiv",
+    "linkGoogle": "Mit Google verknüpfen",
+    "linkGoogleWhy": "Verbinde dein Google-Konto, damit du dich künftig auch mit Google anmelden kannst. Deine E-Mail muss übereinstimmen.",
+    "linkGoogleSuccess": "Google-Konto verknüpft.",
+    "unlinkGoogle": "Google-Verknüpfung entfernen",
+    "unlinkGoogleConfirm": "Google-Verknüpfung wirklich entfernen? Du kannst dich danach nur noch mit E-Mail + Passwort anmelden.",
+    "unlinkGoogleWhy": "Du kannst dich aktuell mit Google + Passwort anmelden. Nach dem Entfernen funktioniert nur noch das Passwort.",
+    "unlinkGoogleSuccess": "Google-Verknüpfung entfernt.",
+    "setPasswordWhy": "Setze ein Passwort, damit du dich auch ohne Google anmelden kannst. Alle aktiven Sitzungen werden nach dem Speichern beendet.",
+    "setPasswordNewLabel": "Neues Passwort",
+    "setPasswordConfirmLabel": "Passwort bestätigen",
+    "setPasswordMismatch": "Passwörter stimmen nicht überein.",
+    "setPasswordTooShort": "Passwort: mindestens 8 Zeichen.",
+    "setPasswordCta": "Passwort setzen",
+    "setPasswordSuccess": "Passwort gesetzt. Bitte erneut anmelden.",
+    "setPasswordSuccessTitle": "Passwort gesetzt",
+    "googleNotConfigured": "Google-Anmeldung ist in diesem Build nicht konfiguriert.",
+    "noIdToken": "Kein ID-Token von Google erhalten.",
+    "loginAgain": "Bitte einloggen.",
+    "methodPassword": "Passwort",
+    "methodGoogle": "Google",
+    "methodRefresh": "Token-Refresh"
   },
   "error": {
     "auth.email.exists": "Diese E-Mail ist bereits registriert.",
@@ -173,7 +199,13 @@
     "privacy": "Datenschutz",
     "terms": "Nutzungsbedingungen",
     "version": "Version",
-    "dangerZone": "Gefahrenzone"
+    "dangerZone": "Gefahrenzone",
+    "linkedAccounts": "Verknüpfte Konten",
+    "linkedAccountsSub": "Verwalte wie du dich anmelden kannst — Passwort, Google, oder beide.",
+    "activity": "Letzte Aktivität",
+    "activitySub": "Die letzten 20 Anmeldeversuche. Etwas Verdächtiges? Passwort ändern und Sitzungen beenden.",
+    "sessions": "Aktive Sitzungen",
+    "changePassword": "Passwort ändern"
   },
   "account": {
     "delete": {
@@ -294,5 +326,27 @@
     "suggestedSkills": "Kompetenzen",
     "suggestedLanguages": "Sprachen",
     "noHints": "Keine Daten automatisch erkannt"
+  },
+  "activity": {
+    "loadError": "Aktivität konnte nicht geladen werden.",
+    "empty": "Noch keine Anmeldeversuche.",
+    "retry": "Erneut versuchen",
+    "success": "Erfolgreich",
+    "failure": "Fehlgeschlagen",
+    "ipLabel": "IP",
+    "reason": {
+      "RATE_LIMITED_ACCOUNT": "Konto kurzzeitig gesperrt",
+      "RATE_LIMITED_IP": "IP kurzzeitig gesperrt",
+      "USER_NOT_FOUND": "Unbekanntes Konto",
+      "INVALID_PASSWORD": "Falsches Passwort",
+      "OAUTH_ACCOUNT_USE_GOOGLE": "Bitte mit Google anmelden",
+      "OAUTH_EMAIL_COLLISION_PASSWORD_USER": "Konto bereits mit Passwort registriert",
+      "OAUTH_TOKEN_MISSING": "Google-Token fehlt",
+      "OAUTH_TOKEN_MALFORMED": "Google-Token ungültig",
+      "OAUTH_TOKEN_INVALID": "Google-Token ungültig",
+      "OAUTH_AUDIENCE_MISMATCH": "Google-Token für andere App",
+      "OAUTH_EMAIL_UNVERIFIED": "Google-E-Mail nicht verifiziert",
+      "OAUTH_CLAIMS_INCOMPLETE": "Google-Token unvollständig"
+    }
   }
 }

@@ -5,9 +5,9 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
-  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   Check,
@@ -48,6 +48,7 @@ WebBrowser.maybeCompleteAuthSession();
  */
 export default function LinkedAccountsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { isDark } = useThemeStore();
   const user = useAuthStore((s) => s.session?.user);
   const refreshAccount = useAuthStore((s) => s.refreshAccount);
@@ -64,7 +65,7 @@ export default function LinkedAccountsScreen() {
       <AuroraBackground variant="subtle" style={{ flex: 1, borderRadius: 0 }}>
         <SafeAreaView className="flex-1 items-center justify-center" edges={["top"]}>
           <Text className={isDark ? "text-dark-muted" : "text-gray-500"}>
-            Bitte einloggen.
+            {t("auth.loginAgain")}
           </Text>
         </SafeAreaView>
       </AuroraBackground>
@@ -82,7 +83,7 @@ export default function LinkedAccountsScreen() {
               <TouchableOpacity
                 onPress={() => router.back()}
                 className="mr-3 -ml-2 p-2"
-                accessibilityLabel="Zurück"
+                accessibilityLabel={t("common.back")}
               >
                 <ArrowLeft size={22} color={isDark ? "#e2e8f0" : "#0f172a"} />
               </TouchableOpacity>
@@ -112,15 +113,14 @@ export default function LinkedAccountsScreen() {
                   variant="brand"
                   style={{ fontSize: 22, fontWeight: "800", lineHeight: 26 }}
                 >
-                  Verknüpfte Konten
+                  {t("settings.linkedAccounts")}
                 </GradientText>
                 <Text
                   className={`text-[13px] mt-1 ${
                     isDark ? "text-dark-muted" : "text-gray-600"
                   }`}
                 >
-                  Verwalte wie du dich anmelden kannst — Passwort, Google,
-                  oder beide.
+                  {t("settings.linkedAccountsSub")}
                 </Text>
               </View>
             </View>
@@ -129,10 +129,8 @@ export default function LinkedAccountsScreen() {
             <Card className="mb-3" elevation={1}>
               <MethodRow
                 icon={<KeyRound size={18} color={isDark ? "#94a3b8" : "#6b7280"} />}
-                title="Passwort"
-                subtitle={hasPassword
-                  ? "Aktiv — du kannst dich mit E-Mail + Passwort anmelden."
-                  : "Nicht gesetzt — füge ein Passwort hinzu."}
+                title={t("auth.methodPassword")}
+                subtitle={hasPassword ? t("auth.passwordActive") : t("auth.passwordMissing")}
                 active={!!hasPassword}
                 isDark={isDark}
               />
@@ -141,10 +139,8 @@ export default function LinkedAccountsScreen() {
             <Card className="mb-5" elevation={1}>
               <MethodRow
                 icon={<GoogleGlyph />}
-                title="Google"
-                subtitle={hasGoogleLinked
-                  ? "Verknüpft — du kannst dich mit Google anmelden."
-                  : "Nicht verknüpft."}
+                title={t("auth.methodGoogle")}
+                subtitle={hasGoogleLinked ? t("auth.googleActive") : t("auth.googleMissing")}
                 active={!!hasGoogleLinked}
                 isDark={isDark}
               />
@@ -161,8 +157,8 @@ export default function LinkedAccountsScreen() {
               <SetInitialPasswordSection
                 onSet={async () => {
                   Alert.alert(
-                    "Passwort gesetzt",
-                    "Bitte melde dich erneut an.",
+                    t("auth.setPasswordSuccessTitle"),
+                    t("auth.setPasswordSuccess"),
                   );
                   await signOut();
                   router.replace("/(auth)/login");
@@ -189,6 +185,7 @@ function MethodRow({
   active: boolean;
   isDark: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <View className="flex-row items-start gap-3">
       <View
@@ -211,7 +208,7 @@ function MethodRow({
             <View className="flex-row items-center gap-1 bg-emerald-50 rounded-full px-2 py-0.5">
               <Check size={11} color="#059669" />
               <Text className="text-emerald-700 text-[10px] font-bold">
-                Aktiv
+                {t("auth.statusActive")}
               </Text>
             </View>
           )}
@@ -229,6 +226,7 @@ function MethodRow({
 }
 
 function LinkGoogleSection({ onLinked }: { onLinked: () => Promise<void> }) {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
 
   const [, , promptAsync] = Google.useAuthRequest({
@@ -247,7 +245,7 @@ function LinkGoogleSection({ onLinked }: { onLinked: () => Promise<void> }) {
     return (
       <Card elevation={1}>
         <Text className="text-[13px] text-gray-500">
-          Google-Anmeldung ist in diesem Build nicht konfiguriert.
+          {t("auth.googleNotConfigured")}
         </Text>
       </Card>
     );
@@ -260,7 +258,7 @@ function LinkGoogleSection({ onLinked }: { onLinked: () => Promise<void> }) {
       const result = await promptAsync();
       if (result.type !== "success") {
         if (result.type === "error") {
-          Alert.alert("Google", result.error?.message ?? "Verknüpfung fehlgeschlagen");
+          Alert.alert("Google", result.error?.message ?? t("auth.linkGoogle"));
         }
         return;
       }
@@ -268,14 +266,14 @@ function LinkGoogleSection({ onLinked }: { onLinked: () => Promise<void> }) {
         result.authentication?.idToken
         ?? (result.params as Record<string, string>)?.id_token;
       if (!idToken) {
-        Alert.alert("Google", "Kein ID-Token von Google erhalten.");
+        Alert.alert("Google", t("auth.noIdToken"));
         return;
       }
       await authApi.linkGoogle(idToken);
-      Alert.alert("Erfolg", "Google-Konto verknüpft.");
+      Alert.alert(t("common.success"), t("auth.linkGoogleSuccess"));
       await onLinked();
     } catch (e) {
-      Alert.alert("Google", apiErrorMessage(e, "Verknüpfen fehlgeschlagen."));
+      Alert.alert("Google", apiErrorMessage(e, t("auth.linkGoogle")));
     } finally {
       setBusy(false);
     }
@@ -286,12 +284,11 @@ function LinkGoogleSection({ onLinked }: { onLinked: () => Promise<void> }) {
       <View className="flex-row items-start gap-2 mb-3">
         <ShieldCheck size={16} color="#2563EB" style={{ marginTop: 2 }} />
         <Text className="flex-1 text-[12px] text-gray-600">
-          Verbinde dein Google-Konto, damit du dich künftig auch mit Google
-          anmelden kannst. Deine E-Mail muss übereinstimmen.
+          {t("auth.linkGoogleWhy")}
         </Text>
       </View>
       <Button
-        title={busy ? "Verknüpfen…" : "Mit Google verknüpfen"}
+        title={busy ? `${t("auth.linkGoogle")}…` : t("auth.linkGoogle")}
         onPress={handlePress}
         loading={busy}
         size="lg"
@@ -303,25 +300,26 @@ function LinkGoogleSection({ onLinked }: { onLinked: () => Promise<void> }) {
 }
 
 function UnlinkGoogleSection({ onUnlinked }: { onUnlinked: () => Promise<void> }) {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
 
   const handleUnlink = () => {
     Alert.alert(
-      "Verknüpfung entfernen",
-      "Google-Verknüpfung wirklich entfernen? Du kannst dich danach nur noch mit E-Mail + Passwort anmelden.",
+      t("auth.unlinkGoogle"),
+      t("auth.unlinkGoogleConfirm"),
       [
-        { text: "Abbrechen", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Entfernen",
+          text: t("auth.unlinkGoogle"),
           style: "destructive",
           onPress: async () => {
             setBusy(true);
             try {
               await authApi.unlinkGoogle();
-              Alert.alert("Erfolg", "Google-Verknüpfung entfernt.");
+              Alert.alert(t("common.success"), t("auth.unlinkGoogleSuccess"));
               await onUnlinked();
             } catch (e) {
-              Alert.alert("Fehler", apiErrorMessage(e, "Entfernen fehlgeschlagen."));
+              Alert.alert(t("common.error"), apiErrorMessage(e, t("auth.unlinkGoogle")));
             } finally {
               setBusy(false);
             }
@@ -336,12 +334,11 @@ function UnlinkGoogleSection({ onUnlinked }: { onUnlinked: () => Promise<void> }
       <View className="flex-row items-start gap-2 mb-3">
         <ShieldCheck size={16} color="#059669" style={{ marginTop: 2 }} />
         <Text className="flex-1 text-[12px] text-gray-600">
-          Du kannst dich aktuell mit Google + Passwort anmelden. Nach dem
-          Entfernen funktioniert nur noch das Passwort.
+          {t("auth.unlinkGoogleWhy")}
         </Text>
       </View>
       <Button
-        title={busy ? "Entfernen…" : "Google-Verknüpfung entfernen"}
+        title={busy ? `${t("auth.unlinkGoogle")}…` : t("auth.unlinkGoogle")}
         onPress={handleUnlink}
         loading={busy}
         variant="secondary"
@@ -354,17 +351,18 @@ function UnlinkGoogleSection({ onUnlinked }: { onUnlinked: () => Promise<void> }
 }
 
 function SetInitialPasswordSection({ onSet }: { onSet: () => Promise<void> }) {
+  const { t } = useTranslation();
   const [newPwd, setNewPwd] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
   const [busy, setBusy] = useState(false);
 
   const handleSet = async () => {
     if (newPwd.length < 8) {
-      Alert.alert("Fehler", "Passwort: mindestens 8 Zeichen.");
+      Alert.alert(t("common.error"), t("auth.setPasswordTooShort"));
       return;
     }
     if (newPwd !== confirmPwd) {
-      Alert.alert("Fehler", "Passwörter stimmen nicht überein.");
+      Alert.alert(t("common.error"), t("auth.setPasswordMismatch"));
       return;
     }
     setBusy(true);
@@ -372,7 +370,7 @@ function SetInitialPasswordSection({ onSet }: { onSet: () => Promise<void> }) {
       await authApi.setInitialPassword(newPwd);
       await onSet();
     } catch (e) {
-      Alert.alert("Fehler", apiErrorMessage(e, "Passwort konnte nicht gesetzt werden."));
+      Alert.alert(t("common.error"), apiErrorMessage(e, t("auth.setPasswordCta")));
     } finally {
       setBusy(false);
     }
@@ -383,31 +381,29 @@ function SetInitialPasswordSection({ onSet }: { onSet: () => Promise<void> }) {
       <View className="flex-row items-start gap-2 mb-3">
         <LockIcon size={16} color="#2563EB" style={{ marginTop: 2 }} />
         <Text className="flex-1 text-[12px] text-gray-600">
-          Setze ein Passwort, damit du dich auch ohne Google anmelden kannst.
-          Alle aktiven Sitzungen werden nach dem Speichern beendet.
+          {t("auth.setPasswordWhy")}
         </Text>
       </View>
       <Input
-        label="Neues Passwort"
+        label={t("auth.setPasswordNewLabel")}
         value={newPwd}
         onChangeText={setNewPwd}
         secureTextEntry
-        placeholder="Mindestens 8 Zeichen"
       />
       <View style={{ marginTop: 8 }}>
         <PasswordMeter value={newPwd} />
       </View>
       <View style={{ marginTop: 12 }}>
         <Input
-          label="Passwort bestätigen"
+          label={t("auth.setPasswordConfirmLabel")}
           value={confirmPwd}
           onChangeText={setConfirmPwd}
           secureTextEntry
-          />
+        />
       </View>
       <View style={{ marginTop: 16 }}>
         <Button
-          title={busy ? "Speichern…" : "Passwort setzen"}
+          title={busy ? `${t("common.save")}…` : t("auth.setPasswordCta")}
           onPress={handleSet}
           loading={busy}
           disabled={!newPwd || !confirmPwd}

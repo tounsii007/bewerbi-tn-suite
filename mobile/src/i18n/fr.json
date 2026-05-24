@@ -50,7 +50,33 @@
     "password.strength.weak": "Faible",
     "password.strength.fair": "Moyen",
     "password.strength.strong": "Fort",
-    "password.strength.very-strong": "Très fort"
+    "password.strength.very-strong": "Très fort",
+    "passwordActive": "Actif — vous pouvez vous connecter avec e-mail + mot de passe.",
+    "passwordMissing": "Non défini — ajoutez un mot de passe.",
+    "googleActive": "Lié — vous pouvez vous connecter avec Google.",
+    "googleMissing": "Non lié.",
+    "statusActive": "Actif",
+    "linkGoogle": "Lier avec Google",
+    "linkGoogleWhy": "Liez votre compte Google pour pouvoir aussi vous connecter avec Google. Votre e-mail doit correspondre.",
+    "linkGoogleSuccess": "Compte Google lié.",
+    "unlinkGoogle": "Supprimer la liaison Google",
+    "unlinkGoogleConfirm": "Vraiment supprimer la liaison Google ? Vous ne pourrez ensuite vous connecter qu'avec e-mail + mot de passe.",
+    "unlinkGoogleWhy": "Vous pouvez actuellement vous connecter avec Google + mot de passe. Après suppression, seul le mot de passe fonctionnera.",
+    "unlinkGoogleSuccess": "Liaison Google supprimée.",
+    "setPasswordWhy": "Définissez un mot de passe pour pouvoir aussi vous connecter sans Google. Toutes les sessions actives seront fermées après l'enregistrement.",
+    "setPasswordNewLabel": "Nouveau mot de passe",
+    "setPasswordConfirmLabel": "Confirmer le mot de passe",
+    "setPasswordMismatch": "Les mots de passe ne correspondent pas.",
+    "setPasswordTooShort": "Mot de passe : 8 caractères minimum.",
+    "setPasswordCta": "Définir le mot de passe",
+    "setPasswordSuccess": "Mot de passe défini. Veuillez vous reconnecter.",
+    "setPasswordSuccessTitle": "Mot de passe défini",
+    "googleNotConfigured": "La connexion Google n'est pas configurée dans cette version.",
+    "noIdToken": "Aucun jeton ID reçu de Google.",
+    "loginAgain": "Veuillez vous connecter.",
+    "methodPassword": "Mot de passe",
+    "methodGoogle": "Google",
+    "methodRefresh": "Renouvellement de jeton"
   },
   "error": {
     "auth.email.exists": "Cette adresse e-mail est déjà enregistrée.",
@@ -173,7 +199,13 @@
     "privacy": "Confidentialité",
     "terms": "Conditions",
     "version": "Version",
-    "dangerZone": "Zone de danger"
+    "dangerZone": "Zone de danger",
+    "linkedAccounts": "Comptes liés",
+    "linkedAccountsSub": "Gérez vos méthodes de connexion — mot de passe, Google, ou les deux.",
+    "activity": "Activité récente",
+    "activitySub": "Les 20 dernières tentatives de connexion. Quelque chose de suspect ? Changez le mot de passe et terminez les sessions.",
+    "sessions": "Sessions actives",
+    "changePassword": "Changer le mot de passe"
   },
   "account": {
     "delete": {
@@ -275,5 +307,27 @@
     "suggestedSkills": "Compétences",
     "suggestedLanguages": "Langues",
     "noHints": "Aucune donnée détectée"
+  },
+  "activity": {
+    "loadError": "Impossible de charger l'activité.",
+    "empty": "Aucune tentative de connexion pour le moment.",
+    "retry": "Réessayer",
+    "success": "Réussi",
+    "failure": "Échec",
+    "ipLabel": "IP",
+    "reason": {
+      "RATE_LIMITED_ACCOUNT": "Compte temporairement verrouillé",
+      "RATE_LIMITED_IP": "IP temporairement verrouillée",
+      "USER_NOT_FOUND": "Compte inconnu",
+      "INVALID_PASSWORD": "Mot de passe incorrect",
+      "OAUTH_ACCOUNT_USE_GOOGLE": "Veuillez vous connecter avec Google",
+      "OAUTH_EMAIL_COLLISION_PASSWORD_USER": "Compte déjà enregistré avec un mot de passe",
+      "OAUTH_TOKEN_MISSING": "Jeton Google manquant",
+      "OAUTH_TOKEN_MALFORMED": "Jeton Google invalide",
+      "OAUTH_TOKEN_INVALID": "Jeton Google invalide",
+      "OAUTH_AUDIENCE_MISMATCH": "Jeton Google pour une autre app",
+      "OAUTH_EMAIL_UNVERIFIED": "E-mail Google non vérifié",
+      "OAUTH_CLAIMS_INCOMPLETE": "Jeton Google incomplet"
+    }
   }
 }
