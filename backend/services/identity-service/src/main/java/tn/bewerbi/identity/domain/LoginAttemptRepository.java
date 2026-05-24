@@ -42,4 +42,34 @@ public interface LoginAttemptRepository extends JpaRepository<LoginAttempt, UUID
     @Query("UPDATE LoginAttempt la SET la.userId = NULL, la.email = '[deleted]', " +
            "la.userAgent = NULL WHERE la.userId = :userId")
     int anonymiseForUser(@Param("userId") UUID userId);
+
+    /**
+     * Iter 180 — ops query: count distinct failed-login emails per IP
+     * within a time window. Spikes signal credential stuffing — one IP
+     * trying many emails — which the per-IP rate-limiter eventually
+     * locks out, but ops want to see it early.
+     *
+     * <p>Backed by idx_login_attempts_ip_time (V6 migration).
+     * Returns {@code (ip, distinctEmailCount)} pairs.
+     */
+    @Query("SELECT la.ip, COUNT(DISTINCT la.email) FROM LoginAttempt la " +
+           "WHERE la.success = false AND la.ip IS NOT NULL " +
+           "AND la.occurredAt > :since " +
+           "GROUP BY la.ip HAVING COUNT(DISTINCT la.email) >= :minDistinctEmails " +
+           "ORDER BY COUNT(DISTINCT la.email) DESC")
+    List<Object[]> findStuffingSources(@Param("since") Instant since,
+                                       @Param("minDistinctEmails") long minDistinctEmails);
+
+    /**
+     * Iter 180 — count attempts in the last {@code since} window grouped
+     * by method + outcome. Powers a Grafana panel that complements the
+     * Iter 176 Micrometer counters (DB-backed answer is authoritative;
+     * the counter is fast). Two-row result per method (success + failure).
+     *
+     * <p>Returns {@code (method, success, count)}.
+     */
+    @Query("SELECT la.method, la.success, COUNT(la) FROM LoginAttempt la " +
+           "WHERE la.occurredAt > :since " +
+           "GROUP BY la.method, la.success")
+    List<Object[]> countByMethodAndOutcome(@Param("since") Instant since);
 }
