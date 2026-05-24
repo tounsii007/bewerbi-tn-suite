@@ -36,6 +36,7 @@ const PUBLIC_PATHS = [
 const PUBLIC_PREFIXES = [
   "/_next/",
   "/api/session",
+  "/api/csp-report",      // Iter 177 — browser CSP violation sink
   "/api/v1/auth/",
   "/api/v1/i18n/",
   "/api/v1/professions",
@@ -127,9 +128,55 @@ function generateNonce(): string {
   return btoa(binary);
 }
 
+/**
+ * Iter 177 — stricter "what-if" policy emitted as Report-Only.
+ *
+ * Browsers evaluate this in parallel with the enforced CSP but
+ * never block; instead they POST a JSON report to {@code report-uri}
+ * (`/api/csp-report`). Lets us:
+ *   - tighten in the future (add strict-dynamic back, drop
+ *     unsafe-inline on style-src, restrict img-src to specific
+ *     CDNs) and see breakage *before* enforcing it
+ *   - spot real XSS attempts (a report from a domain we don't
+ *     own is a smoke signal)
+ *
+ * The enforced CSP from {@link buildCsp} is what actually protects
+ * the user. This is monitoring, not enforcement.
+ */
+function buildReportOnlyCsp(nonce: string): string {
+  const self = "'self'";
+  const googleAuthOrigins = "https://accounts.google.com";
+  return [
+    `default-src ${self}`,
+    // Stricter than the enforced policy: re-add strict-dynamic to
+    // catch any path where a non-nonce'd script still works (which
+    // would be a hydration regression for our dynamic pages).
+    `script-src ${self} 'nonce-${nonce}' 'strict-dynamic' ${googleAuthOrigins}`,
+    // Drop unsafe-inline on style-src to surface any inline <style>
+    // we might be shipping (Tailwind shouldn't, but framer-motion
+    // sometimes does for animations).
+    `style-src ${self} https://fonts.googleapis.com ${googleAuthOrigins}`,
+    `font-src ${self} https://fonts.gstatic.com`,
+    `img-src ${self} data: https:`,
+    `connect-src ${self} ${googleAuthOrigins}`,
+    `frame-src ${googleAuthOrigins}`,
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+    "report-uri /api/csp-report",
+  ].join("; ");
+}
+
 function attachSecurityHeaders(res: NextResponse, nonce: string): NextResponse {
   const isDev = process.env.NODE_ENV !== "production";
   res.headers.set("Content-Security-Policy", buildCsp(nonce, isDev));
+  // Iter 177 — sidecar what-if policy. Browsers POST violations to
+  // /api/csp-report without blocking; useful for measuring the
+  // impact of tightening before we commit.
+  if (!isDev) {
+    res.headers.set("Content-Security-Policy-Report-Only", buildReportOnlyCsp(nonce));
+  }
   // Forward the nonce to React Server Components via the response header
   // and the request header (the layout reads it via next/headers).
   res.headers.set("x-nonce", nonce);
