@@ -614,6 +614,14 @@ public class AuthService {
                         userId.toString(), userId.toString(),
                         "refresh-token-reused-all-sessions-revoked"));
             }
+            // Iter 189 — surface reuse-detection in Prometheus too.
+            // Spike on this metric = either an active session-replay
+            // attack OR a client bug (e.g. two tabs both refreshing).
+            // Worth an alert either way.
+            counter(m -> {
+                m.recordLogin(LoginMethod.REFRESH, false);
+                m.recordFailure(LoginMethod.REFRESH, "REUSE_DETECTED");
+            });
             throw new BadCredentialsException("Refresh token revoked or reused");
         }
         refreshStore.revoke(userId, refreshToken);
@@ -623,6 +631,7 @@ public class AuthService {
             audit.log(AuditEvent.success("AUTH_TOKEN_REFRESH",
                     user.getId().toString(), user.getEmail()));
         }
+        counter(m -> m.recordLogin(LoginMethod.REFRESH, true));
         AuthResponse response = issueTokens(user);
         // Update lastUsedAt on the freshly-issued session so the
         // active-sessions screen shows "currently active" instead of
@@ -637,6 +646,7 @@ public class AuthService {
             audit.log(AuditEvent.success("AUTH_LOGOUT", userId.toString(),
                     userId.toString()));
         }
+        counter(m -> m.recordAccountAction("logout", true));
     }
 
     /** Sign the user out of *every* device — useful after password reset. */
@@ -646,6 +656,7 @@ public class AuthService {
             audit.log(AuditEvent.success("AUTH_LOGOUT_ALL", userId.toString(),
                     userId.toString()));
         }
+        counter(m -> m.recordAccountAction("logout_all", true));
     }
 
     /**
@@ -690,6 +701,7 @@ public class AuthService {
                             user.getId().toString(), user.getEmail(),
                             "invalid-password-confirmation"));
                 }
+                counter(m -> m.recordAccountAction("delete_account", false));
                 throw new BadCredentialsException("Invalid credentials");
             }
         }
@@ -725,6 +737,7 @@ public class AuthService {
         events.publish(Topics.USER_DELETED, user.getId().toString(),
                 new DomainEvents.UserDeleted(
                         user.getId(), email, Instant.now()));
+        counter(m -> m.recordAccountAction("delete_account", true));
     }
 
     /**
@@ -754,6 +767,7 @@ public class AuthService {
                         user.getId().toString(), user.getEmail(),
                         "oauth-only-account"));
             }
+            counter(m -> m.recordAccountAction("change_password", false));
             throw new ConflictException(
                     "This account is managed by Google — no password to change.",
                     "error.auth.google.noPassword");
@@ -768,9 +782,11 @@ public class AuthService {
                         user.getId().toString(), user.getEmail(),
                         "invalid-old-password"));
             }
+            counter(m -> m.recordAccountAction("change_password", false));
             throw new BadCredentialsException("Invalid credentials");
         }
         if (passwords.matches(newPassword, user.getPasswordHash())) {
+            counter(m -> m.recordAccountAction("change_password", false));
             throw new UnprocessableEntityException(
                     "New password must differ from the current one",
                     "error.auth.password.reused");
@@ -782,6 +798,7 @@ public class AuthService {
             audit.log(AuditEvent.success("AUTH_PASSWORD_CHANGED",
                     user.getId().toString(), user.getEmail()));
         }
+        counter(m -> m.recordAccountAction("change_password", true));
     }
 
     /**

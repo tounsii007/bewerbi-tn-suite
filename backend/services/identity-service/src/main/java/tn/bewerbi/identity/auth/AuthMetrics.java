@@ -31,6 +31,7 @@ public class AuthMetrics {
     private static final String METRIC_LOGIN_FAILURE = "auth.login.failure.total";
     private static final String METRIC_LOCKOUT = "auth.lockout.total";
     private static final String METRIC_LINK = "auth.link.total";
+    private static final String METRIC_ACCOUNT_ACTION = "auth.account.total";
 
     private final MeterRegistry registry;
 
@@ -83,6 +84,25 @@ public class AuthMetrics {
     public void recordProviderLinkAction(String action, boolean success) {
         Counter.builder(METRIC_LINK)
                 .description("Provider linking actions (link / unlink / set-initial-password)")
+                .tag("action", action)
+                .tag("outcome", success ? "success" : "failure")
+                .register(registry)
+                .increment();
+    }
+
+    /**
+     * Iter 189 — account-level actions: change-password, delete-account,
+     * logout, logout-all. Same shape as recordProviderLinkAction but a
+     * different meter name so dashboards can keep the two concerns apart.
+     *
+     * <p>{@code action} ∈ {@code change_password}, {@code delete_account},
+     * {@code logout}, {@code logout_all}, {@code email_verify},
+     * {@code email_verify_resend}, {@code password_reset_requested},
+     * {@code password_reset_completed}.
+     */
+    public void recordAccountAction(String action, boolean success) {
+        Counter.builder(METRIC_ACCOUNT_ACTION)
+                .description("Account-level actions (change-password, delete, logout, verify-email)")
                 .tag("action", action)
                 .tag("outcome", success ? "success" : "failure")
                 .register(registry)
