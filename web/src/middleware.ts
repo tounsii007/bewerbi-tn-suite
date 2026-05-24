@@ -71,22 +71,42 @@ function readSession(req: NextRequest): SessionPayload | null {
 /**
  * Build the per-request CSP. Uses a nonce for inline scripts (Next ships
  * a small inline bootstrap), so we can drop 'unsafe-inline' entirely.
- * 'strict-dynamic' lets nonce-tagged scripts load their own dependencies
- * without us having to enumerate every CDN.
+ *
+ * Iter 174 — dropped 'strict-dynamic'. Reason: Next.js bakes its
+ * <script src="/_next/static/chunks/..."> tags into the static HTML
+ * at build time without a nonce attribute (per
+ * https://nextjs.org/docs/app/guides/content-security-policy
+ * "Routes that consume a nonce should be marked dynamic"). With
+ * strict-dynamic those tags would be blocked by the browser →
+ * React never hydrates on any prerendered page (~all of them).
+ *
+ * Without strict-dynamic, scripts are allowed if they match 'self'
+ * OR carry the nonce. Same-origin chunks under `_next/static/` are
+ * trusted via 'self'; injected inline scripts must carry the nonce
+ * (XSS protection preserved); cross-origin script loading is still
+ * blocked by default. Net security: better than the previous setup
+ * (which was broken in production — every page failed CSP) at the
+ * cost of one tier of strict-dynamic's recursive-load protection,
+ * which Next's own bundle structure doesn't actually need.
  */
 function buildCsp(nonce: string, isDev: boolean): string {
   const self = "'self'";
+  // Google Identity Services (used by @react-oauth/google for the
+  // Iter 161 sign-in button) loads gsi/client from accounts.google.com
+  // and calls back via XHR + iframes hosted there.
+  const googleAuthOrigins = "https://accounts.google.com";
   const scriptSrc = isDev
     ? // Next dev needs eval for fast refresh. Production never sees this.
-      [self, `'nonce-${nonce}'`, "'strict-dynamic'", "'unsafe-eval'"].join(" ")
-    : [self, `'nonce-${nonce}'`, "'strict-dynamic'"].join(" ");
+      [self, `'nonce-${nonce}'`, "'unsafe-eval'", googleAuthOrigins].join(" ")
+    : [self, `'nonce-${nonce}'`, googleAuthOrigins].join(" ");
   return [
     `default-src ${self}`,
     `script-src ${scriptSrc}`,
-    `style-src ${self} 'unsafe-inline' https://fonts.googleapis.com`,
+    `style-src ${self} 'unsafe-inline' https://fonts.googleapis.com ${googleAuthOrigins}`,
     `font-src ${self} https://fonts.gstatic.com`,
     `img-src ${self} data: https:`,
-    `connect-src ${self}`,
+    `connect-src ${self} ${googleAuthOrigins}`,
+    `frame-src ${googleAuthOrigins}`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
