@@ -365,10 +365,33 @@ public class AuthService {
                     "error.auth.google.linkRequiresPassword");
         }
 
+        // Iter 175 — same JWKS-DoS guard as /auth/google (Iter 165).
+        // link-google verifies an RSA-signed token, so an attacker who
+        // compromises an authenticated session could still abuse this
+        // path to burn server-side cycles. Share the per-IP rate-limit
+        // axis with the password-login flow so the budgets compose.
+        String ip = currentClientIp();
+        String ua = currentUserAgent();
+        if (attempts != null && attempts.isIpLockedOut(ip)) {
+            long retryAfter = attempts.remainingIpLockoutSeconds(ip);
+            if (audit != null) {
+                audit.log(AuditEvent.failure("AUTH_GOOGLE_LINK",
+                        user.getId().toString(), user.getEmail(),
+                        "oauth-ip-locked-out " + ip + " " + retryAfter + "s"));
+            }
+            throw TooManyRequestsException.of(retryAfter);
+        }
+
         GoogleIdTokenVerifier.VerifiedGoogleUser g;
         try {
             g = googleVerifier.verify(req.idToken());
         } catch (GoogleIdTokenVerifier.GoogleTokenException e) {
+            // Token-verify failure burns the per-IP budget exactly like
+            // /auth/google. A compromised session spamming garbage tokens
+            // gets the same lockout treatment as anonymous junk.
+            if (attempts != null) {
+                attempts.recordIpFailure(ip);
+            }
             if (audit != null) {
                 audit.log(AuditEvent.failure("AUTH_GOOGLE_LINK",
                         user.getId().toString(), user.getEmail(),
@@ -405,10 +428,20 @@ public class AuthService {
         }
 
         user.linkGoogle(g.subject());
+        // Iter 175 — successful link resets the per-IP failure budget,
+        // matching the recordGoogleSuccess() pattern from login.
+        if (attempts != null) {
+            attempts.resetIp(ip);
+        }
         if (audit != null) {
             audit.log(AuditEvent.success("AUTH_GOOGLE_LINK",
                     user.getId().toString(), user.getEmail()));
         }
+        // Iter 175 — also write a login_attempts row so the user sees
+        // the link event in their "Letzte Aktivität" panel. Method
+        // GOOGLE + success=true makes it visually consistent with a
+        // login event, with the reason field carrying the action.
+        loginRecorder.recordSuccess(user.getId(), g.email(), LoginMethod.GOOGLE, ip, ua);
     }
 
     /**
