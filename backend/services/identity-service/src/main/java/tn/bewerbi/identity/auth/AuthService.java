@@ -53,6 +53,9 @@ public class AuthService {
     /** Iter 160 — null unless `bewerbi.security.google.client-id` is set. */
     private final GoogleIdTokenVerifier googleVerifier;
     private final LoginAttemptRepository loginAttempts;
+    /** Iter 176 — Micrometer counters for ops dashboards. Null in
+     *  unit tests without a MeterRegistry on the classpath. */
+    private final AuthMetrics metrics;
 
     public AuthService(UserRepository users, ProfileRepository profiles,
                        PasswordEncoder passwords, JwtTokenService tokens,
@@ -63,7 +66,8 @@ public class AuthService {
                        ObjectProvider<AuditLogger> auditProvider,
                        ObjectProvider<BreachedPasswordChecker> breachedProvider,
                        ObjectProvider<KnownDeviceTracker> devicesProvider,
-                       ObjectProvider<GoogleIdTokenVerifier> googleProvider) {
+                       ObjectProvider<GoogleIdTokenVerifier> googleProvider,
+                       ObjectProvider<AuthMetrics> metricsProvider) {
         this.users = users; this.profiles = profiles;
         this.passwords = passwords; this.tokens = tokens;
         this.events = events;
@@ -79,6 +83,12 @@ public class AuthService {
         this.devices = devicesProvider.getIfAvailable();
         // Optional: only present when bewerbi.security.google.client-id is set.
         this.googleVerifier = googleProvider.getIfAvailable();
+        // Optional: Micrometer-only — absent in unit tests without a registry.
+        this.metrics = metricsProvider.getIfAvailable();
+    }
+
+    private void counter(java.util.function.Consumer<AuthMetrics> fn) {
+        if (metrics != null) fn.accept(metrics);
     }
 
     public AuthResponse register(RegisterRequest req) {
@@ -137,6 +147,11 @@ public class AuthService {
             }
             loginRecorder.recordFailure(null, email, LoginMethod.PASSWORD,
                     "RATE_LIMITED_ACCOUNT", ip, ua);
+            counter(m -> {
+                m.recordLogin(LoginMethod.PASSWORD, false);
+                m.recordFailure(LoginMethod.PASSWORD, "RATE_LIMITED_ACCOUNT");
+                m.recordLockout("account");
+            });
             throw TooManyRequestsException.of(retryAfter);
         }
         // Per-IP lockout (Iter 113).
@@ -148,6 +163,11 @@ public class AuthService {
             }
             loginRecorder.recordFailure(null, email, LoginMethod.PASSWORD,
                     "RATE_LIMITED_IP", ip, ua);
+            counter(m -> {
+                m.recordLogin(LoginMethod.PASSWORD, false);
+                m.recordFailure(LoginMethod.PASSWORD, "RATE_LIMITED_IP");
+                m.recordLockout("ip");
+            });
             throw TooManyRequestsException.of(retryAfter);
         }
 
@@ -170,6 +190,10 @@ public class AuthService {
             }
             loginRecorder.recordFailure(user.getId(), email, LoginMethod.PASSWORD,
                     "OAUTH_ACCOUNT_USE_GOOGLE", ip, ua);
+            counter(m -> {
+                m.recordLogin(LoginMethod.PASSWORD, false);
+                m.recordFailure(LoginMethod.PASSWORD, "OAUTH_ACCOUNT_USE_GOOGLE");
+            });
             throw new BadCredentialsException("Invalid credentials");
         }
 
@@ -188,11 +212,16 @@ public class AuthService {
                 audit.log(AuditEvent.failure("AUTH_LOGIN_FAILED", email, email,
                         "invalid-credentials"));
             }
+            String reason = user != null ? "INVALID_PASSWORD" : "USER_NOT_FOUND";
             loginRecorder.recordFailure(
                     user != null ? user.getId() : null, email,
                     LoginMethod.PASSWORD,
-                    user != null ? "INVALID_PASSWORD" : "USER_NOT_FOUND",
+                    reason,
                     ip, ua);
+            counter(m -> {
+                m.recordLogin(LoginMethod.PASSWORD, false);
+                m.recordFailure(LoginMethod.PASSWORD, reason);
+            });
             throw new BadCredentialsException("Invalid credentials");
         }
 
@@ -204,6 +233,7 @@ public class AuthService {
                     user.getId().toString(), email));
         }
         loginRecorder.recordSuccess(user.getId(), email, LoginMethod.PASSWORD, ip, ua);
+        counter(m -> m.recordLogin(LoginMethod.PASSWORD, true));
         user.touchLogin();
         notifyOnNewDevice(user);
         return issueTokens(user);
@@ -248,6 +278,11 @@ public class AuthService {
             }
             loginRecorder.recordFailure(null, "[google]", LoginMethod.GOOGLE,
                     "RATE_LIMITED_IP", ip, ua);
+            counter(m -> {
+                m.recordLogin(LoginMethod.GOOGLE, false);
+                m.recordFailure(LoginMethod.GOOGLE, "RATE_LIMITED_IP");
+                m.recordLockout("ip");
+            });
             throw TooManyRequestsException.of(retryAfter);
         }
 
@@ -267,6 +302,10 @@ public class AuthService {
             }
             loginRecorder.recordFailure(null, "[google]", LoginMethod.GOOGLE,
                     e.code(), ip, ua);
+            counter(m -> {
+                m.recordLogin(LoginMethod.GOOGLE, false);
+                m.recordFailure(LoginMethod.GOOGLE, e.code());
+            });
             throw new BadCredentialsException("Google token rejected: " + e.code());
         }
 
@@ -286,6 +325,10 @@ public class AuthService {
             User u = byEmail.get();
             loginRecorder.recordFailure(u.getId(), g.email(), LoginMethod.GOOGLE,
                     "OAUTH_EMAIL_COLLISION_PASSWORD_USER", ip, ua);
+            counter(m -> {
+                m.recordLogin(LoginMethod.GOOGLE, false);
+                m.recordFailure(LoginMethod.GOOGLE, "OAUTH_EMAIL_COLLISION_PASSWORD_USER");
+            });
             if (audit != null) {
                 audit.log(AuditEvent.failure("AUTH_LOGIN_FAILED",
                         u.getId().toString(), g.email(),
@@ -332,6 +375,7 @@ public class AuthService {
                     user.getId().toString(), email));
         }
         loginRecorder.recordSuccess(user.getId(), email, LoginMethod.GOOGLE, ip, ua);
+        counter(m -> m.recordLogin(LoginMethod.GOOGLE, true));
     }
 
     /**
@@ -442,6 +486,7 @@ public class AuthService {
         // GOOGLE + success=true makes it visually consistent with a
         // login event, with the reason field carrying the action.
         loginRecorder.recordSuccess(user.getId(), g.email(), LoginMethod.GOOGLE, ip, ua);
+        counter(m -> m.recordProviderLinkAction("link", true));
     }
 
     /**
@@ -464,6 +509,7 @@ public class AuthService {
             audit.log(AuditEvent.success("AUTH_GOOGLE_UNLINK",
                     user.getId().toString(), user.getEmail()));
         }
+        counter(m -> m.recordProviderLinkAction("unlink", true));
     }
 
     /**
@@ -492,6 +538,7 @@ public class AuthService {
             audit.log(AuditEvent.success("AUTH_PASSWORD_SET_INITIAL",
                     user.getId().toString(), user.getEmail()));
         }
+        counter(m -> m.recordProviderLinkAction("set_initial_password", true));
     }
 
     /**
