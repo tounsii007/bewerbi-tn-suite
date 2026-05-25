@@ -35,6 +35,20 @@ updates:
       spring-cloud: { patterns: ["org.springframework.cloud*"] }
       resilience4j: { patterns: ["io.github.resilience4j*"] }
       testcontainers: { patterns: ["org.testcontainers*"] }
+    ignore:
+      # Spring Boot 4.x has breaking API changes (HttpHeaders, test packages,
+      # BOM no longer manages testcontainers junit-jupiter/postgresql).
+      - dependency-name: "org.springframework.boot:spring-boot-starter-parent"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.springframework.boot:*"
+        update-types: ["version-update:semver-major"]
+      # Spring Cloud 2025.x bundles Spring Boot 4 — same migration blocker.
+      - dependency-name: "org.springframework.cloud:*"
+        update-types: ["version-update:semver-major"]
+      # Testcontainers "2.x" property in pom referred to a wrong artifact —
+      # auto-bumping broke the BOM. Pin to 1.x.
+      - dependency-name: "org.testcontainers:testcontainers-bom"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
