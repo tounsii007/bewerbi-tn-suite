@@ -58,10 +58,11 @@ android/local.properties
 
 # ───────────────── IDEs ─────────────────
 .idea/
-.vscode/
+.vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
 !.vscode/launch.json
+!.vscode/tasks.json
 *.iml
 *.swp
 *.swo

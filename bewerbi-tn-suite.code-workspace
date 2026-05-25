@@ -1,0 +1,45 @@
+{
+  "folders": [
+    {
+      "name": "🏠 suite",
+      "path": "."
+    },
+    {
+      "name": "🌐 web",
+      "path": "web"
+    },
+    {
+      "name": "📱 mobile",
+      "path": "mobile"
+    },
+    {
+      "name": "🦋 flutter",
+      "path": "flutter"
+    },
+    {
+      "name": "☕ backend",
+      "path": "backend"
+    },
+    {
+      "name": "🔁 shared",
+      "path": "shared"
+    },
+    {
+      "name": "📚 docs",
+      "path": "docs"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "web": true,
+      "mobile": true,
+      "flutter": true,
+      "backend": true,
+      "shared": true,
+      "docs": true
+    }
+  },
+  "extensions": {
+    "recommendations": []
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+
+  // Multi-language workspace — let each language use its preferred formatter
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[dart]": {
+    "editor.defaultFormatter": "Dart-Code.dart-code",
+    "editor.formatOnType": true,
+    "editor.rulers": [100]
+  },
+  "[java]": {
+    "editor.defaultFormatter": "redhat.java",
+    "editor.tabSize": 4
+  },
+  "[xml]": {
+    "editor.defaultFormatter": "redhat.vscode-xml"
+  },
+
+  "dart.lineLength": 100,
+  "dart.runPubGetOnPubspecChanges": "always",
+  "java.format.settings.profile": "GoogleStyle",
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.compile.nullAnalysis.mode": "automatic",
+
+  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [
+    { "pattern": "web" },
+    { "pattern": "mobile" }
+  ],
+
+  // Search/excluded paths so cmd+P stays fast across the monorepo
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/.turbo": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/target": true,
+    "**/.dart_tool": true,
+    "**/coverage": true,
+    "**/package-lock.json": true,
+    "**/pnpm-lock.yaml": true,
+    "**/pubspec.lock": true,
+    "**/.expo": true,
+    "**/ios/Pods": true,
+    "**/android/.gradle": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.git/**": true,
+    "**/target/**": true,
+    "**/.next/**": true,
+    "**/.turbo/**": true,
+    "**/build/**": true,
+    "**/.dart_tool/**": true
+  }
+}
