@@ -1,0 +1,30 @@
+# Gitleaks configuration for bewerbi-tn-suite.
+#
+# Extends the full default ruleset (useDefault = true) so secret detection
+# stays active across the entire repo. It only adds a path-scoped allowlist
+# for three VERIFIED false positives that were failing the "Security scan"
+# job (gitleaks scans full history, so these persist until allowlisted):
+#
+#   1-2. backend/shared/common-api/.../PiiMaskingConverterTest.java (lines 30, 37)
+#        A fake JWT and a fake 32-char hex token that exist precisely so the
+#        test can assert the PII-masking converter redacts them. Not real
+#        credentials (rule: generic-api-key).
+#   3.   docs/API.md (line 68)
+#        An example `Idempotency-Key` — a UUID, not a credential — in the API
+#        documentation (rule: generic-api-key).
+#
+# Scope is path-based, so detection in application/runtime code is unaffected.
+# If a real secret is ever added under these paths, tighten this to line/value
+# allowlists instead of widening it.
+
+title = "bewerbi-tn-suite gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Verified false positives: PII-masking test fixtures and a doc example (no real credentials)."
+paths = [
+  '''backend/shared/common-api/src/test/java/tn/bewerbi/common/api/observability/PiiMaskingConverterTest\.java''',
+  '''docs/API\.md''',
+]
