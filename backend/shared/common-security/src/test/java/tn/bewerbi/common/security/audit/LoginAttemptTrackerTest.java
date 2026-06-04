@@ -145,6 +145,8 @@ class LoginAttemptTrackerTest {
                 @Override public String getAndExpire(String key, java.time.Duration d) { throw nope(); }
                 @Override public String getAndPersist(String key) { throw nope(); }
                 @Override public String getAndSet(String key, String value) { throw nope(); }
+                @Override public String setGet(String k, String v, long t, java.util.concurrent.TimeUnit u) { throw nope(); }
+                @Override public String setGet(String k, String v, java.time.Duration d) { throw nope(); }
                 @Override public java.util.List<String> multiGet(java.util.Collection<String> keys) { throw nope(); }
                 @Override public Long increment(String k, long delta) { throw nope(); }
                 @Override public Double increment(String k, double delta) { throw nope(); }
