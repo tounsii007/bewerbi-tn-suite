@@ -132,17 +132,27 @@ class LoginAttemptTrackerTest {
                 @Override public Boolean setIfAbsent(String k, String v) { throw nope(); }
                 @Override public Boolean setIfAbsent(String k, String v, long t, java.util.concurrent.TimeUnit u) { throw nope(); }
                 @Override public Boolean setIfAbsent(String k, String v, java.time.Duration d) { throw nope(); }
+                @Override public Boolean setIfAbsent(String k, String v, org.springframework.data.redis.core.types.Expiration e) { throw nope(); }
                 @Override public Boolean setIfPresent(String k, String v) { throw nope(); }
                 @Override public Boolean setIfPresent(String k, String v, long t, java.util.concurrent.TimeUnit u) { throw nope(); }
                 @Override public Boolean setIfPresent(String k, String v, java.time.Duration d) { throw nope(); }
+                @Override public Boolean setIfPresent(String k, String v, org.springframework.data.redis.core.types.Expiration e) { throw nope(); }
+                @Override public void set(String k, String v, org.springframework.data.redis.core.types.Expiration e) { throw nope(); }
+                @Override public Boolean set(String k, String v, java.util.function.Consumer<org.springframework.data.redis.core.SetSpec<String, String>> c) { throw nope(); }
+                @Override public String setGet(String k, String v, long t, java.util.concurrent.TimeUnit u) { throw nope(); }
+                @Override public String setGet(String k, String v, java.time.Duration d) { throw nope(); }
+                @Override public String setGet(String k, String v, org.springframework.data.redis.core.types.Expiration e) { throw nope(); }
+                @Override public String setGet(String k, String v, java.util.function.Consumer<org.springframework.data.redis.core.SetSpec<String, String>> c) { throw nope(); }
                 @Override public void set(String k, String v, long offset) { throw nope(); }
                 @Override public void set(String k, String v, long t, java.util.concurrent.TimeUnit u) { throw nope(); }
                 @Override public void multiSet(java.util.Map<? extends String, ? extends String> map) { throw nope(); }
                 @Override public Boolean multiSetIfAbsent(java.util.Map<? extends String, ? extends String> map) { throw nope(); }
+                @Override public Boolean compareAndSet(String k, String expected, String update) { throw nope(); }
                 @Override public String get(Object key) { return store.get((String) key); }
                 @Override public String getAndDelete(String key) { return store.remove(key); }
                 @Override public String getAndExpire(String key, long t, java.util.concurrent.TimeUnit u) { throw nope(); }
                 @Override public String getAndExpire(String key, java.time.Duration d) { throw nope(); }
+                @Override public String getAndExpire(String key, org.springframework.data.redis.core.types.Expiration expiration) { throw nope(); }
                 @Override public String getAndPersist(String key) { throw nope(); }
                 @Override public String getAndSet(String key, String value) { throw nope(); }
                 @Override public java.util.List<String> multiGet(java.util.Collection<String> keys) { throw nope(); }

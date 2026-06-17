@@ -66,10 +66,11 @@ public class SecurityHeadersWebFilter implements WebFilter, Ordered {
     }
 
     /** HttpHeaders lost {@code setIfAbsent} between Spring 6 versions,
-     *  so reimplement on top of {@code containsKey}. Single-value set;
-     *  matches the original semantics — first one in wins. */
+     *  so reimplement on top of {@code containsHeader}. Single-value set;
+     *  matches the original semantics — first one in wins.
+     *  (Spring 7 dropped Map-style {@code containsKey}; use {@code containsHeader}.) */
     private static void setIfAbsent(HttpHeaders headers, String name, String value) {
-        if (!headers.containsKey(name)) {
+        if (!headers.containsHeader(name)) {
             headers.set(name, value);
         }
     }
