@@ -59,7 +59,7 @@ class _CvUploadScreenState extends State<CvUploadScreen> {
     setState(() {
       _error = null;
     });
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
     );

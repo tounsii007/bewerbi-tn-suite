@@ -23,7 +23,11 @@ class TokenStore {
   TokenStore({FlutterSecureStorage? storage})
       : _storage = storage ??
             const FlutterSecureStorage(
-              aOptions: AndroidOptions(encryptedSharedPreferences: true),
+              // flutter_secure_storage v10: EncryptedSharedPreferences is
+              // deprecated (the Jetpack Security lib is EOL); data is
+              // auto-migrated to custom AES ciphers on first access, so the
+              // explicit flag is no longer set.
+              aOptions: AndroidOptions(),
               iOptions: IOSOptions(
                 accessibility: KeychainAccessibility.first_unlock_this_device,
               ),
